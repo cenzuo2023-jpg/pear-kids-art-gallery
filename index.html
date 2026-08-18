@@ -1704,32 +1704,29 @@
           window.galleryCloud.getStickyNotes()
         ]);
 
-        if (cloudArts && cloudArts.length > 0) artworks = cloudArts;
-        if (cloudStudents && cloudStudents.length > 0) studentList = cloudStudents;
-        if (cloudThemes && cloudThemes.length > 0) themeExhibitions = cloudThemes;
-        if (cloudNotes && cloudNotes.length > 0) stickyNotes = cloudNotes;
+        if (Array.isArray(cloudArts)) artworks = cloudArts;
+        if (Array.isArray(cloudStudents)) studentList = cloudStudents;
+        if (Array.isArray(cloudThemes)) themeExhibitions = cloudThemes;
+        if (Array.isArray(cloudNotes)) stickyNotes = cloudNotes;
 
         renderCuratedCarousel();
         renderGallery();
         renderHall();
         renderStickyWall();
+        lucide.createIcons();
+        console.log('🖼️ 前台展厅已同步 Supabase 云端数据: 画作', artworks.length, '件, 小艺术家', studentList.length, '位');
       } catch (err) {
-        console.log('云端数据读取降级为本地预置数据:', err);
+        console.warn('云端数据读取异常:', err);
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       initTheme();
       initBgm();
       initAdminGateway();
-      renderCuratedCarousel();
-      startCarouselTimer();
-      renderGallery();
-      renderHall();
-      renderStickyWall();
       setupLightDismiss();
-      lucide.createIcons();
-      syncDataFromCloud();
+      startCarouselTimer();
+      await syncDataFromCloud();
 
       // 扫码直达画作深链接解析与弹窗展示
       const urlParams = new URLSearchParams(window.location.search);
