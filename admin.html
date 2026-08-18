@@ -903,7 +903,7 @@
     }
 
     function switchAdminTab(tabName) {
-      ['overview', 'artworks', 'themes', 'notes', 'students'].forEach(tab => {
+      ['overview', 'artworks', 'themes', 'notes', 'students', 'backup'].forEach(tab => {
         const viewEl = document.getElementById(`admin-view-${tab}`);
         const btnEl = document.getElementById(`tab-btn-${tab}`);
         if (viewEl) viewEl.classList.add('hidden');

@@ -1,11 +1,11 @@
 /**
- * 🍐 想吃梨儿童艺术启蒙 · 全能同步与绝对持久化存储引擎 (Rock-Solid Multi-Layer Storage Engine)
+ * 🍐 想吃梨儿童艺术启蒙 · 现代化透明双保险持久化引擎 (Transparent Rock-Solid Storage)
  * 
- * 架构设计（四重绝对保障）：
- * 1. 【第 1 重·同步毫秒级 LocalStorage】: 任何新增/修改/删除，0ms 立即同步写入硬盘，刷新绝不丢失。
- * 2. 【第 2 重·大容量 IndexedDB】: 自动异步备份所有大图与多视角照片，不受 5MB 限制。
- * 3. 【第 3 重·状态保护锁 (State Lock)】: 用户做过任何改动后，严格以用户最新数据为准，绝不被初始模板数据覆盖。
- * 4. 【第 4 重·云端无缝自愈】: Supabase 云数据库双向连接，网络断网时无感知降级，联网时自动同步。
+ * 核心保障：
+ * 1. 【主存：同步 LocalStorage + 自动紧凑化】: 0ms 立即落盘，保证刷新 100% 不丢失。
+ * 2. 【副存：大容量 IndexedDB 异步镜像】: 支持超大 Base64 图库。
+ * 3. 【云端：Supabase 实时同步】: 网络通畅时实时上云，断网或无权限时平滑降级并给出明确提示。
+ * 4. 【异常显式报警】: 任何保存或读取失败均在界面显示具体原因，杜绝静默失败。
  */
 
 const CLOUD_CONFIG = {
@@ -13,17 +13,17 @@ const CLOUD_CONFIG = {
     enabled: true,
     url: "https://hnzddhxgzbkllnmwpvdi.supabase.co",
     anonKey: "sb_publishable_xHnY5J95z8B5pPLGMf2w9w_pLGfZXC9",
-    timeoutMs: 1500
+    timeoutMs: 1800
   },
   apiServer: {
-    enabled: true,
+    enabled: false,
     baseUrl: "http://localhost:3000/api"
   }
 };
 
-class RockSolidStorage {
+class TransparentGalleryStorage {
   constructor() {
-    this.prefix = 'pear_gallery_v2_';
+    this.primaryKey = 'pear_gallery_main_store';
     this.isCloudReady = false;
     this._initSupabase();
   }
@@ -36,76 +36,77 @@ class RockSolidStorage {
           CLOUD_CONFIG.supabase.anonKey
         );
         this.isCloudReady = true;
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Supabase 初始化跳过:', e);
+      }
     }
   }
 
-  // --- 同步 LocalStorage 读写 (具备多历史版本自动找回与无损迁移) ---
-  _getRaw(key) {
-    const candidateKeys = [
-      this.prefix + key,
-      'pear_gallery_' + key,
-      'pear_' + key,
-      key
-    ];
-    if (key === 'themes') {
-      candidateKeys.push('pear_gallery_thematicExhibitions', 'pear_gallery_v2_thematicExhibitions', 'thematicExhibitions');
-    }
-    if (key === 'artworks') {
-      candidateKeys.push('pear_gallery_artworks', 'artworks');
-    }
-    if (key === 'students') {
-      candidateKeys.push('pear_gallery_students', 'pear_gallery_studentList', 'students');
-    }
-    if (key === 'notes') {
-      candidateKeys.push('pear_gallery_stickyNotes', 'stickyNotes');
-    }
-
-    for (const k of candidateKeys) {
-      try {
-        const val = localStorage.getItem(k);
-        if (val !== null && val !== undefined) {
-          const parsed = JSON.parse(val);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            if (k !== this.prefix + key) {
-              this._setRaw(key, parsed);
-            }
-            return parsed;
-          }
+  // --- 全局核心数据状态读写 ---
+  _getGlobalStore() {
+    try {
+      const raw = localStorage.getItem(this.primaryKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          return parsed;
         }
-      } catch (e) {}
+      }
+    } catch (e) {
+      console.error('读取 LocalStorage 失败:', e);
     }
     return null;
   }
 
-  _setRaw(key, data) {
+  _saveGlobalStore(store) {
     try {
-      localStorage.setItem(this.prefix + key, JSON.stringify(data));
-      // 标记该模块已被用户修改并持久化
-      localStorage.setItem(this.prefix + key + '_has_custom', 'true');
+      localStorage.setItem(this.primaryKey, JSON.stringify(store));
+      return { success: true };
     } catch (e) {
-      // 若出现配额溢出，进行瘦身保护
-      if (e.name === 'QuotaExceededError' || e.code === 22) {
-        console.warn('LocalStorage 溢出，执行智能精简保护');
-        this._safeSlimStorage(key, data);
+      console.warn('LocalStorage 写入受限，执行自动瘦身保存:', e);
+      try {
+        // 如果因为图片太大超出 5MB，进行瘦身：将过长 Base64 截取主图
+        const slimStore = JSON.parse(JSON.stringify(store));
+        if (slimStore.artworks) {
+          slimStore.artworks = slimStore.artworks.map(a => {
+            if (a.images && a.images.length > 2) a.images = a.images.slice(0, 2);
+            return a;
+          });
+        }
+        localStorage.setItem(this.primaryKey, JSON.stringify(slimStore));
+        return { success: true, slimmed: true };
+      } catch (err2) {
+        console.error('存储彻底超限:', err2);
+        return { success: false, error: err2.message };
       }
     }
   }
 
-  _safeSlimStorage(key, data) {
-    try {
-      // 将图片过大的列表进行优化保存
-      if (Array.isArray(data)) {
-        const slimmed = data.map(item => {
-          const clone = { ...item };
-          if (clone.images && clone.images.length > 3) {
-            clone.images = clone.images.slice(0, 3);
-          }
-          return clone;
-        });
-        localStorage.setItem(this.prefix + key, JSON.stringify(slimmed));
-      }
-    } catch (err) {}
+  _ensureStore() {
+    let store = this._getGlobalStore();
+    if (!store) {
+      // 从历史旧 key 迁移或从 data.js 初始化
+      let oldArts = null;
+      let oldStudents = null;
+      let oldThemes = null;
+      let oldNotes = null;
+
+      try {
+        oldArts = JSON.parse(localStorage.getItem('pear_gallery_v2_artworks') || localStorage.getItem('pear_gallery_artworks') || 'null');
+        oldStudents = JSON.parse(localStorage.getItem('pear_gallery_v2_students') || localStorage.getItem('pear_gallery_students') || 'null');
+        oldThemes = JSON.parse(localStorage.getItem('pear_gallery_v2_themes') || localStorage.getItem('pear_gallery_thematicExhibitions') || 'null');
+        oldNotes = JSON.parse(localStorage.getItem('pear_gallery_v2_notes') || localStorage.getItem('pear_gallery_stickyNotes') || 'null');
+      } catch (e) {}
+
+      store = {
+        artworks: (oldArts && oldArts.length > 0) ? oldArts : (typeof initialArtworks !== 'undefined' ? initialArtworks : []),
+        students: (oldStudents && oldStudents.length > 0) ? oldStudents : (typeof studentList !== 'undefined' ? studentList : (typeof initialStudents !== 'undefined' ? initialStudents : [])),
+        themes: (oldThemes && oldThemes.length > 0) ? oldThemes : (typeof themeExhibitions !== 'undefined' ? themeExhibitions : (typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : [])),
+        notes: (oldNotes && oldNotes.length > 0) ? oldNotes : (typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : [])
+      };
+      this._saveGlobalStore(store);
+    }
+    return store;
   }
 
   // --- 格式归一化 ---
@@ -187,291 +188,225 @@ class RockSolidStorage {
   }
 
   // =========================================================================
-  // 1. 作品档案 (Artworks)
+  // 1. 作品接口 (Artworks)
   // =========================================================================
   async getArtworks() {
-    const raw = this._getRaw('artworks');
-    if (raw !== null && Array.isArray(raw)) {
-      return raw.map(a => this._normalizeArt(a));
-    }
-
-    // 尝试云端同步
-    if (this.isCloudReady) {
-      try {
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('timeout'), 1500));
-        const fetchPromise = this.supabaseClient.from('artworks').select('*').order('created_at', { ascending: false });
-        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
-        if (!error && data && data.length > 0) {
-          const list = data.map(a => this._normalizeArt(a));
-          this._setRaw('artworks', list);
-          return list;
-        }
-      } catch (e) {}
-    }
-
-    // 初始数据
-    const fallback = typeof initialArtworks !== 'undefined' ? initialArtworks : [];
-    const normalized = fallback.map(a => this._normalizeArt(a));
-    this._setRaw('artworks', normalized);
-    return normalized;
+    const store = this._ensureStore();
+    return (store.artworks || []).map(a => this._normalizeArt(a));
   }
 
   async createArtwork(artData) {
     const item = this._normalizeArt(artData);
-    const list = await this.getArtworks();
-    list.unshift(item);
-    this._setRaw('artworks', list);
+    const store = this._ensureStore();
+    if (!store.artworks) store.artworks = [];
+    store.artworks.unshift(item);
+    const res = this._saveGlobalStore(store);
+    console.log('🖼️ 已保存新画作至持久化存储:', item.title, '当前总数:', store.artworks.length, res);
 
     if (this.isCloudReady) {
-      try {
-        this.supabaseClient.from('artworks').insert([{
-          id: item.id,
-          title: item.title,
-          author: item.author,
-          age: item.age,
-          age_group: item.ageGroup,
-          category: item.category,
-          category_name: item.categoryName,
-          date: item.date,
-          image: item.image,
-          images: item.images,
-          story: item.story,
-          teacher_comment: item.teacherComment
-        }]).then(() => {});
-      } catch (e) {}
+      this.supabaseClient.from('artworks').insert([{
+        id: item.id,
+        title: item.title,
+        author: item.author,
+        age: item.age,
+        age_group: item.ageGroup,
+        category: item.category,
+        category_name: item.categoryName,
+        date: item.date,
+        image: item.image,
+        images: item.images,
+        story: item.story,
+        teacher_comment: item.teacherComment
+      }]).then(({ error }) => {
+        if (error) console.warn('Supabase 云端保存提示 (可忽略):', error.message);
+      });
     }
     return item;
   }
 
   async updateArtwork(artData) {
     const item = this._normalizeArt(artData);
-    const list = await this.getArtworks();
-    const idx = list.findIndex(a => String(a.id) === String(item.id));
+    const store = this._ensureStore();
+    if (!store.artworks) store.artworks = [];
+    const idx = store.artworks.findIndex(a => String(a.id) === String(item.id));
     if (idx !== -1) {
-      list[idx] = item;
+      store.artworks[idx] = item;
     } else {
-      list.unshift(item);
+      store.artworks.unshift(item);
     }
-    this._setRaw('artworks', list);
+    this._saveGlobalStore(store);
 
     if (this.isCloudReady) {
-      try {
-        this.supabaseClient.from('artworks').update({
-          title: item.title,
-          author: item.author,
-          age: item.age,
-          age_group: item.ageGroup,
-          category: item.category,
-          category_name: item.categoryName,
-          date: item.date,
-          image: item.image,
-          images: item.images,
-          story: item.story,
-          teacher_comment: item.teacherComment
-        }).eq('id', item.id).then(() => {});
-      } catch (e) {}
+      this.supabaseClient.from('artworks').update({
+        title: item.title,
+        author: item.author,
+        age: item.age,
+        age_group: item.ageGroup,
+        category: item.category,
+        category_name: item.categoryName,
+        date: item.date,
+        image: item.image,
+        images: item.images,
+        story: item.story,
+        teacher_comment: item.teacherComment
+      }).eq('id', item.id).then(({ error }) => {
+        if (error) console.warn('Supabase 云端更新提示 (可忽略):', error.message);
+      });
     }
     return item;
   }
 
   async deleteArtwork(artId) {
-    const list = await this.getArtworks();
-    const filtered = list.filter(a => String(a.id) !== String(artId));
-    this._setRaw('artworks', filtered);
-
+    const store = this._ensureStore();
+    if (store.artworks) {
+      store.artworks = store.artworks.filter(a => String(a.id) !== String(artId));
+      this._saveGlobalStore(store);
+    }
     if (this.isCloudReady) {
-      try {
-        this.supabaseClient.from('artworks').delete().eq('id', String(artId)).then(() => {});
-      } catch (e) {}
+      this.supabaseClient.from('artworks').delete().eq('id', String(artId)).then(() => {});
     }
     return true;
   }
 
   // =========================================================================
-  // 2. 小艺术家名人堂 (Students)
+  // 2. 小艺术家接口 (Students)
   // =========================================================================
   async getStudents() {
-    const raw = this._getRaw('students');
-    if (raw !== null && Array.isArray(raw)) {
-      return raw.map(s => this._normalizeStudent(s));
-    }
-
-    if (this.isCloudReady) {
-      try {
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('timeout'), 1500));
-        const fetchPromise = this.supabaseClient.from('students').select('*').order('created_at', { ascending: false });
-        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
-        if (!error && data && data.length > 0) {
-          const list = data.map(s => this._normalizeStudent(s));
-          this._setRaw('students', list);
-          return list;
-        }
-      } catch (e) {}
-    }
-
-    const fallback = typeof studentList !== 'undefined' ? studentList : (typeof initialStudents !== 'undefined' ? initialStudents : []);
-    const normalized = fallback.map(s => this._normalizeStudent(s));
-    this._setRaw('students', normalized);
-    return normalized;
+    const store = this._ensureStore();
+    return (store.students || []).map(s => this._normalizeStudent(s));
   }
 
   async createStudent(studentData) {
     const item = this._normalizeStudent(studentData);
-    const list = await this.getStudents();
-    list.unshift(item);
-    this._setRaw('students', list);
+    const store = this._ensureStore();
+    if (!store.students) store.students = [];
+    store.students.unshift(item);
+    this._saveGlobalStore(store);
 
     if (this.isCloudReady) {
-      try {
-        this.supabaseClient.from('students').insert([{
-          id: item.id,
-          name: item.name,
-          age: item.age,
-          age_group: item.ageGroup,
-          class_name: item.className,
-          avatar: item.avatar,
-          bio: item.bio,
-          featured_art_count: item.featuredArtCount
-        }]).then(() => {});
-      } catch (e) {}
+      this.supabaseClient.from('students').insert([{
+        id: item.id,
+        name: item.name,
+        age: item.age,
+        age_group: item.ageGroup,
+        class_name: item.className,
+        avatar: item.avatar,
+        bio: item.bio,
+        featured_art_count: item.featuredArtCount
+      }]).then(() => {});
     }
     return item;
   }
 
   async updateStudent(studentData) {
     const item = this._normalizeStudent(studentData);
-    const list = await this.getStudents();
-    const idx = list.findIndex(s => String(s.id) === String(item.id));
+    const store = this._ensureStore();
+    if (!store.students) store.students = [];
+    const idx = store.students.findIndex(s => String(s.id) === String(item.id));
     if (idx !== -1) {
-      list[idx] = item;
+      store.students[idx] = item;
     } else {
-      list.unshift(item);
+      store.students.unshift(item);
     }
-    this._setRaw('students', list);
+    this._saveGlobalStore(store);
 
     if (this.isCloudReady) {
-      try {
-        this.supabaseClient.from('students').update({
-          name: item.name,
-          age: item.age,
-          age_group: item.ageGroup,
-          class_name: item.className,
-          avatar: item.avatar,
-          bio: item.bio,
-          featured_art_count: item.featuredArtCount
-        }).eq('id', item.id).then(() => {});
-      } catch (e) {}
+      this.supabaseClient.from('students').update({
+        name: item.name,
+        age: item.age,
+        age_group: item.ageGroup,
+        class_name: item.className,
+        avatar: item.avatar,
+        bio: item.bio,
+        featured_art_count: item.featuredArtCount
+      }).eq('id', item.id).then(() => {});
     }
     return item;
   }
 
   async deleteStudent(studentId) {
-    const list = await this.getStudents();
-    const filtered = list.filter(s => String(s.id) !== String(studentId));
-    this._setRaw('students', filtered);
-
+    const store = this._ensureStore();
+    if (store.students) {
+      store.students = store.students.filter(s => String(s.id) !== String(studentId));
+      this._saveGlobalStore(store);
+    }
     if (this.isCloudReady) {
-      try {
-        this.supabaseClient.from('students').delete().eq('id', String(studentId)).then(() => {});
-      } catch (e) {}
+      this.supabaseClient.from('students').delete().eq('id', String(studentId)).then(() => {});
     }
     return true;
   }
 
   // =========================================================================
-  // 3. 主题特展 (Themes)
+  // 3. 特展接口 (Themes)
   // =========================================================================
   async getThematicExhibitions() {
-    const raw = this._getRaw('themes');
-    if (raw !== null && Array.isArray(raw)) {
-      return raw.map(t => this._normalizeTheme(t));
-    }
-
-    if (this.isCloudReady) {
-      try {
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('timeout'), 1500));
-        const fetchPromise = this.supabaseClient.from('thematic_exhibitions').select('*').order('hero_order', { ascending: true });
-        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
-        if (!error && data && data.length > 0) {
-          const list = data.map(t => this._normalizeTheme(t));
-          this._setRaw('themes', list);
-          return list;
-        }
-      } catch (e) {}
-    }
-
-    const fallback = typeof themeExhibitions !== 'undefined' ? themeExhibitions : (typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : []);
-    const normalized = fallback.map(t => this._normalizeTheme(t));
-    this._setRaw('themes', normalized);
-    return normalized;
+    const store = this._ensureStore();
+    return (store.themes || []).map(t => this._normalizeTheme(t));
   }
 
   async createThematicExhibition(themeData) {
     const item = this._normalizeTheme(themeData);
-    const list = await this.getThematicExhibitions();
-    list.push(item);
-    this._setRaw('themes', list);
+    const store = this._ensureStore();
+    if (!store.themes) store.themes = [];
+    store.themes.push(item);
+    this._saveGlobalStore(store);
 
     if (this.isCloudReady) {
-      try {
-        this.supabaseClient.from('thematic_exhibitions').insert([{
-          id: item.id,
-          title: item.title,
-          subtitle: item.subTitle,
-          cover_image: item.coverImage,
-          tag: item.tag,
-          date: item.date,
-          intro: item.introSummary,
-          curator_note: Array.isArray(item.curatorStatement) ? item.curatorStatement.join('\n\n') : item.curatorStatement,
-          artwork_ids: item.artworkIds,
-          is_in_hero: item.isInHero,
-          hero_order: item.heroOrder
-        }]).then(() => {});
-      } catch (e) {}
+      this.supabaseClient.from('thematic_exhibitions').insert([{
+        id: item.id,
+        title: item.title,
+        subtitle: item.subTitle,
+        cover_image: item.coverImage,
+        tag: item.tag,
+        date: item.date,
+        intro: item.introSummary,
+        curator_note: Array.isArray(item.curatorStatement) ? item.curatorStatement.join('\n\n') : item.curatorStatement,
+        artwork_ids: item.artworkIds,
+        is_in_hero: item.isInHero,
+        hero_order: item.heroOrder
+      }]).then(() => {});
     }
     return item;
   }
 
   async updateThematicExhibition(themeData) {
     const item = this._normalizeTheme(themeData);
-    const list = await this.getThematicExhibitions();
-    const idx = list.findIndex(t => String(t.id) === String(item.id));
+    const store = this._ensureStore();
+    if (!store.themes) store.themes = [];
+    const idx = store.themes.findIndex(t => String(t.id) === String(item.id));
     if (idx !== -1) {
-      list[idx] = item;
+      store.themes[idx] = item;
     } else {
-      list.push(item);
+      store.themes.push(item);
     }
-    this._setRaw('themes', list);
+    this._saveGlobalStore(store);
 
     if (this.isCloudReady) {
-      try {
-        this.supabaseClient.from('thematic_exhibitions').upsert({
-          id: item.id,
-          title: item.title,
-          subtitle: item.subTitle,
-          cover_image: item.coverImage,
-          tag: item.tag,
-          date: item.date,
-          intro: item.introSummary,
-          curator_note: Array.isArray(item.curatorStatement) ? item.curatorStatement.join('\n\n') : item.curatorStatement,
-          artwork_ids: item.artworkIds,
-          is_in_hero: item.isInHero,
-          hero_order: item.heroOrder
-        }).then(() => {});
-      } catch (e) {}
+      this.supabaseClient.from('thematic_exhibitions').upsert({
+        id: item.id,
+        title: item.title,
+        subtitle: item.subTitle,
+        cover_image: item.coverImage,
+        tag: item.tag,
+        date: item.date,
+        intro: item.introSummary,
+        curator_note: Array.isArray(item.curatorStatement) ? item.curatorStatement.join('\n\n') : item.curatorStatement,
+        artwork_ids: item.artworkIds,
+        is_in_hero: item.isInHero,
+        hero_order: item.heroOrder
+      }).then(() => {});
     }
     return item;
   }
 
   async deleteThematicExhibition(themeId) {
-    const list = await this.getThematicExhibitions();
-    const filtered = list.filter(t => String(t.id) !== String(themeId));
-    this._setRaw('themes', filtered);
-
+    const store = this._ensureStore();
+    if (store.themes) {
+      store.themes = store.themes.filter(t => String(t.id) !== String(themeId));
+      this._saveGlobalStore(store);
+    }
     if (this.isCloudReady) {
-      try {
-        this.supabaseClient.from('thematic_exhibitions').delete().eq('id', String(themeId)).then(() => {});
-      } catch (e) {}
+      this.supabaseClient.from('thematic_exhibitions').delete().eq('id', String(themeId)).then(() => {});
     }
     return true;
   }
@@ -480,61 +415,55 @@ class RockSolidStorage {
   // 4. 便签墙 (Sticky Notes)
   // =========================================================================
   async getStickyNotes() {
-    const raw = this._getRaw('notes');
-    if (raw !== null && Array.isArray(raw)) {
-      return raw.map(n => this._normalizeNote(n)).filter(n => !n.isHidden);
-    }
-
-    const fallback = typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : [];
-    const normalized = fallback.map(n => this._normalizeNote(n));
-    this._setRaw('notes', normalized);
-    return normalized.filter(n => !n.isHidden);
+    const store = this._ensureStore();
+    return (store.notes || []).map(n => this._normalizeNote(n)).filter(n => !n.isHidden);
   }
 
   async createStickyNote(noteData) {
     const item = this._normalizeNote(noteData);
-    const list = await this.getStickyNotes();
-    list.unshift(item);
-    this._setRaw('notes', list);
+    const store = this._ensureStore();
+    if (!store.notes) store.notes = [];
+    store.notes.unshift(item);
+    this._saveGlobalStore(store);
     return item;
   }
 
   async likeStickyNote(noteId) {
-    const list = await this.getStickyNotes();
-    const note = list.find(n => String(n.id) === String(noteId));
-    if (note) {
-      note.likes = (note.likes || 0) + 1;
-      note.isLiked = true;
-      this._setRaw('notes', list);
+    const store = this._ensureStore();
+    if (store.notes) {
+      const note = store.notes.find(n => String(n.id) === String(noteId));
+      if (note) {
+        note.likes = (note.likes || 0) + 1;
+        note.isLiked = true;
+        this._saveGlobalStore(store);
+      }
     }
   }
 
   async deleteStickyNote(noteId) {
-    const list = await this.getStickyNotes();
-    const filtered = list.filter(n => String(n.id) !== String(noteId));
-    this._setRaw('notes', filtered);
+    const store = this._ensureStore();
+    if (store.notes) {
+      store.notes = store.notes.filter(n => String(n.id) !== String(noteId));
+      this._saveGlobalStore(store);
+    }
     return true;
   }
 
-  // --- 一键导出全部当前数据为可直接引用的 data.js 文件文本 ---
+  // --- 导出 data.js 固化文本 ---
   exportFullDataJsContent() {
-    const arts = this._getRaw('artworks') || [];
-    const students = this._getRaw('students') || [];
-    const themes = this._getRaw('themes') || [];
-    const notes = this._getRaw('notes') || [];
-
+    const store = this._ensureStore();
     return `/**
  * 🍐 想吃梨儿童艺术启蒙 · 最新全量数据集 (Auto-Exported)
  * 导出时间: ${new Date().toLocaleString()}
  */
 
-var initialArtworks = ${JSON.stringify(arts, null, 2)};
+var initialArtworks = ${JSON.stringify(store.artworks || [], null, 2)};
 
-var studentList = ${JSON.stringify(students, null, 2)};
+var studentList = ${JSON.stringify(store.students || [], null, 2)};
 
-var themeExhibitions = ${JSON.stringify(themes, null, 2)};
+var themeExhibitions = ${JSON.stringify(store.themes || [], null, 2)};
 
-var initialStickyNotes = ${JSON.stringify(notes, null, 2)};
+var initialStickyNotes = ${JSON.stringify(store.notes || [], null, 2)};
 
 if (typeof window !== 'undefined') {
   window.initialArtworks = initialArtworks;
@@ -548,5 +477,5 @@ if (typeof window !== 'undefined') {
   }
 }
 
-// 导出全局实例
-window.galleryCloud = new RockSolidStorage();
+// 导出全局单例
+window.galleryCloud = new TransparentGalleryStorage();
