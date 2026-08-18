@@ -103,6 +103,14 @@
       </a>
 
       <button 
+        onclick="downloadBackupDataJs()" 
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-stone-950 text-xs font-bold transition-all border border-emerald-500/30 cursor-pointer"
+        title="将当前已录入/修改的所有数据打包下载为 data.js 文件永久保存"
+      >
+        <span>📥 备份数据文件</span>
+      </button>
+
+      <button 
         onclick="refreshAdminData()" 
         class="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs transition-all active:scale-95 border border-white/10"
         title="刷新最新数据"
@@ -1492,6 +1500,21 @@
         document.getElementById('curatorPasswordInput').value = '';
       }
       showToast('🔒 已锁定主理人后台');
+    }
+
+    function downloadBackupDataJs() {
+      if (!window.galleryCloud || !window.galleryCloud.exportFullDataJsContent) return;
+      const content = window.galleryCloud.exportFullDataJsContent();
+      const blob = new Blob([content], { type: 'text/javascript;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.js';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('📥 已成功将当前最新全部数据打包下载为 data.js！');
     }
 
     // 点击遮罩层关闭模态框
