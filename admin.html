@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>想吃梨儿童艺术启蒙 · 主理人专属策展管理中心 (Curator CMS)</title>
+  <!-- 🍐 梨子品牌网页 Favicon 图标 -->
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍐</text></svg>">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS SDK & 云端服务 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="data.js"></script>
+  <script src="cloudConfig.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          colors: {
+            lime: { 400: '#10E57A', 500: '#00D672', 600: '#059669' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen bg-[#0A100C] text-stone-100 flex flex-col font-sans selection:bg-[#10E57A] selection:text-stone-950">
+
+  <!-- 🔒 主理人专属安全验证层 (Curator Security Gate) -->
+  <div id="curatorAuthOverlay" class="fixed inset-0 z-50 bg-[#070D09]/95 backdrop-blur-2xl flex items-center justify-center p-4">
+    <div class="w-full max-w-sm p-6 sm:p-8 rounded-3xl bg-[#0E1711] border border-white/10 shadow-2xl space-y-5 text-center">
+      <div class="w-16 h-16 rounded-2xl bg-[#10E57A]/15 border border-[#10E57A]/30 flex items-center justify-center text-3xl mx-auto shadow-inner">
+        🍐
+      </div>
+      <div>
+        <h2 class="text-lg font-black text-white">想吃梨 · 主理人策展控制台</h2>
+        <p class="text-xs text-stone-400 mt-1">请输入主理人管理密码进入数字化后台</p>
+      </div>
+
+      <form onsubmit="handleCuratorLogin(event)" class="space-y-3">
+        <input 
+          type="password" 
+          id="curatorPasswordInput" 
+          placeholder="请输入主理人管理密码 (默认: pear2026)" 
+          class="w-full px-4 py-3 bg-stone-900 border border-stone-700/80 rounded-2xl text-xs text-white text-center focus:outline-none focus:border-[#10E57A] font-mono tracking-widest placeholder:text-stone-500 placeholder:tracking-normal"
+          autofocus
+        >
+        <button 
+          type="submit" 
+          class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 font-black text-xs shadow-lg shadow-emerald-500/25 active:scale-95 transition-all cursor-pointer"
+        >
+          🔐 验证身份并进入后台
+        </button>
+      </form>
+
+      <div class="text-[11px] text-stone-500 flex items-center justify-center gap-1.5">
+        <span>🛡️ 全流程由 Supabase 云数据库 & 本地持久化双重护航</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 顶部导航栏 -->
+  <header class="h-16 border-b border-white/[0.08] bg-[#0E1711]/90 backdrop-blur-xl sticky top-0 z-40 px-4 sm:px-8 flex items-center justify-between">
+    <div class="flex items-center gap-3.5">
+      <span class="text-2xl filter drop-shadow">🍐</span>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-black text-base text-white tracking-tight">想吃梨儿童艺术启蒙</span>
+          <span class="px-2 py-0.5 rounded-md bg-[#10E57A]/20 text-[#10E57A] font-extrabold text-[10px] uppercase font-mono tracking-wider border border-[#10E57A]/30">
+            CURATOR CMS
+          </span>
+        </div>
+        <div class="text-[11px] text-stone-400 font-medium">主理人专属策展与数字化档案管理系统</div>
+      </div>
+    </div>
+
+    <!-- 快捷操作栏 -->
+    <div class="flex items-center gap-3">
+      <div id="cloudStatusBadge" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>云端数据库已同步</span>
+      </div>
+
+      <a 
+        href="index.html" 
+        target="_blank" 
+        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold transition-all border border-white/10"
+      >
+        <span>👁️ 浏览画廊前台</span>
+        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+      </a>
+
+      <button 
+        onclick="refreshAdminData()" 
+        class="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs transition-all active:scale-95 border border-white/10"
+        title="刷新最新数据"
+      >
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+      </button>
+
+      <button 
+        onclick="curatorLogout()" 
+        class="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-rose-400 text-xs transition-all active:scale-95 border border-white/10"
+        title="锁定后台 / 退出登录"
+      >
+        <i data-lucide="lock" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- 主体工作区 (左侧菜单 + 右侧内容) -->
+  <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+    
+    <!-- 左侧导航菜单 -->
+    <aside class="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#0A100C]/70 p-4 flex md:flex-col gap-1.5 overflow-x-auto md:overflow-visible flex-shrink-0">
+      <div class="hidden md:block text-[10px] font-mono text-stone-400 uppercase tracking-wider px-3 mb-1">
+        Management Modules
+      </div>
+
+      <button 
+        onclick="switchAdminTab('overview')" 
+        id="tab-btn-overview" 
+        class="admin-nav-item active flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
+      >
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+        <span>📊 展厅数据总览</span>
+      </button>
+
+      <button 
+        onclick="switchAdminTab('artworks')" 
+        id="tab-btn-artworks" 
+        class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
+      >
+        <i data-lucide="image" class="w-4 h-4"></i>
+        <span>🎨 少儿作品档案库</span>
+      </button>
+
+      <button 
+        onclick="switchAdminTab('students')" 
+        id="tab-btn-students" 
+        class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
+      >
+        <i data-lucide="users" class="w-4 h-4"></i>
+        <span>🌟 小艺术家名人堂</span>
+      </button>
+
+      <button 
+        onclick="switchAdminTab('themes')" 
+        id="tab-btn-themes" 
+        class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
+      >
+        <i data-lucide="sparkles" class="w-4 h-4"></i>
+        <span>🏛️ 特展与轮播排期</span>
+      </button>
+
+      <button 
+        onclick="switchAdminTab('notes')" 
+        id="tab-btn-notes" 
+        class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
+      >
+        <i data-lucide="message-square" class="w-4 h-4"></i>
+        <span>💬 美育便签墙审核</span>
+      </button>
+
+      <div class="mt-auto hidden md:block pt-6 border-t border-white/[0.06]">
+        <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-300 space-y-1">
+          <div class="font-black flex items-center gap-1">
+            <span>🛡️ 数据实时同步</span>
+          </div>
+          <p class="text-[10px] text-stone-400 leading-relaxed">
+            在此处所做的任何新增、编辑与删除，均立即同步至云端与前台展厅。
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 右侧内容视窗 -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6">
+      
+      <!-- ===================================================================== -->
+      <!-- 模块 1：展厅数据总览 (Overview) -->
+      <!-- ===================================================================== -->
+      <section id="admin-view-overview" class="space-y-6">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+            <span>📊 展厅运营与数字化资产概览</span>
+          </h2>
+          <p class="text-xs text-stone-400 mt-1">实时汇总画廊在线展出力作、小艺术家名人堂、主题特展排期及社区便签互动数据</p>
+        </div>
+
+        <!-- 4 大核心统计卡片 -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          <div class="p-5 rounded-2xl bg-[#111C15] border border-white/[0.08] relative overflow-hidden">
+            <div class="text-stone-400 text-xs font-bold flex items-center justify-between">
+              <span>收录少儿画作</span>
+              <span class="text-lg">🎨</span>
+            </div>
+            <div id="stat-art-count" class="text-2xl sm:text-3xl font-black text-white mt-2 font-mono">0</div>
+            <div class="text-[10px] text-emerald-400 mt-1 flex items-center gap-1 font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 包含多视角与原声故事
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-[#111C15] border border-white/[0.08] relative overflow-hidden">
+            <div class="text-stone-400 text-xs font-bold flex items-center justify-between">
+              <span>小艺术家名人堂</span>
+              <span class="text-lg">🌟</span>
+            </div>
+            <div id="stat-student-count" class="text-2xl sm:text-3xl font-black text-white mt-2 font-mono">0</div>
+            <div class="text-[10px] text-amber-400 mt-1 flex items-center gap-1 font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> 启蒙创想学员代表档案
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-[#111C15] border border-white/[0.08] relative overflow-hidden">
+            <div class="text-stone-400 text-xs font-bold flex items-center justify-between">
+              <span>主题特展期刊</span>
+              <span class="text-lg">🏛️</span>
+            </div>
+            <div id="stat-theme-count" class="text-2xl sm:text-3xl font-black text-white mt-2 font-mono">0</div>
+            <div class="text-[10px] text-[#10E57A] mt-1 flex items-center gap-1 font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#10E57A]"></span> 首页焦点轮播排期中
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-[#111C15] border border-white/[0.08] relative overflow-hidden">
+            <div class="text-stone-400 text-xs font-bold flex items-center justify-between">
+              <span>美育便签留言</span>
+              <span class="text-lg">💬</span>
+            </div>
+            <div id="stat-note-count" class="text-2xl sm:text-3xl font-black text-white mt-2 font-mono">0</div>
+            <div class="text-[10px] text-teal-400 mt-1 flex items-center gap-1 font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span> 包含家长寄语与微作品卡
+            </div>
+          </div>
+        </div>
+
+        <!-- 快捷操作卡片组 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-5 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-[#111C15] border border-emerald-500/20 flex flex-col justify-between">
+            <div>
+              <div class="text-base font-black text-white flex items-center gap-2">
+                <span>✨ 快速录入画作</span>
+              </div>
+              <p class="text-xs text-stone-400 mt-1.5 leading-relaxed">
+                上传小艺术家的多角度作品高清照片，录入纯真童言创作故事与导师评语。
+              </p>
+            </div>
+            <button onclick="openArtworkModal()" class="mt-4 w-full py-2.5 rounded-xl bg-[#10E57A] hover:bg-emerald-400 text-stone-950 font-black text-xs transition-all active:scale-95 cursor-pointer">
+              + 录入新作品
+            </button>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-gradient-to-br from-amber-950/40 to-[#111C15] border border-amber-500/20 flex flex-col justify-between">
+            <div>
+              <div class="text-base font-black text-white flex items-center gap-2">
+                <span>🌟 维护小艺术家档案</span>
+              </div>
+              <p class="text-xs text-stone-400 mt-1.5 leading-relaxed">
+                添加启蒙班优秀小画家，设置头像、艺术寄语与代表作品计数。
+              </p>
+            </div>
+            <button onclick="openStudentModal()" class="mt-4 w-full py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-black text-xs transition-all active:scale-95 cursor-pointer">
+              + 新增小艺术家
+            </button>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-gradient-to-br from-teal-950/40 to-[#111C15] border border-teal-500/20 flex flex-col justify-between">
+            <div>
+              <div class="text-base font-black text-white flex items-center gap-2">
+                <span>🏛️ 策划新特展</span>
+              </div>
+              <p class="text-xs text-stone-400 mt-1.5 leading-relaxed">
+                撰写主题特展深度期刊文章，挑选参展作品并一键设定首页大轮播排期。
+              </p>
+            </div>
+            <button onclick="openThemeCreateModal()" class="mt-4 w-full py-2.5 rounded-xl bg-teal-400 hover:bg-teal-300 text-stone-950 font-black text-xs transition-all active:scale-95 cursor-pointer">
+              + 策划新特展
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- 模块 2：少儿作品档案库管理 (Artworks) -->
+      <!-- ===================================================================== -->
+      <section id="admin-view-artworks" class="space-y-4 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-white">🎨 少儿艺术作品管理</h2>
+            <p class="text-xs text-stone-400 mt-0.5">支持新增画作、编辑修改、下架删除与多视角照片管理</p>
+          </div>
+          <button onclick="openArtworkModal()" class="px-4 py-2.5 rounded-xl bg-[#10E57A] hover:bg-emerald-400 text-stone-950 font-black text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 self-start sm:self-auto cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>录入新画作</span>
+          </button>
+        </div>
+
+        <!-- 搜索与筛选 -->
+        <div class="flex items-center gap-3 bg-[#111C15] p-3 rounded-2xl border border-white/[0.08]">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input 
+              type="text" 
+              id="adminArtSearchInput" 
+              placeholder="搜索画作名称、小作者姓名或艺术门类..." 
+              class="w-full pl-9 pr-4 py-2 bg-stone-900/80 border border-stone-700/60 rounded-xl text-xs text-white focus:outline-none focus:border-[#10E57A]"
+              oninput="renderAdminArtworksTable()"
+            >
+          </div>
+        </div>
+
+        <!-- 作品表格 -->
+        <div class="rounded-2xl border border-white/[0.08] bg-[#111C15] overflow-hidden shadow-xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-stone-300">
+              <thead class="bg-black/40 text-stone-400 border-b border-white/[0.06] uppercase font-mono text-[10px]">
+                <tr>
+                  <th class="p-3.5">作品预览</th>
+                  <th class="p-3.5">标题与门类</th>
+                  <th class="p-3.5">小作者 / 年龄</th>
+                  <th class="p-3.5">创作年月</th>
+                  <th class="p-3.5">多视角照片</th>
+                  <th class="p-3.5 text-right">操作</th>
+                </tr>
+              </thead>
+              <tbody id="adminArtworksTableBody" class="divide-y divide-white/[0.04]">
+                <!-- JS 动态渲染 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- 模块 3：小艺术家名人堂管理 (Students) -->
+      <!-- ===================================================================== -->
+      <section id="admin-view-students" class="space-y-4 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-white">🌟 小艺术家名人堂档案</h2>
+            <p class="text-xs text-stone-400 mt-0.5">维护启蒙班代表小画家档案、所属班级、个人艺术简历与代表作品数</p>
+          </div>
+          <button onclick="openStudentModal()" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-black text-xs shadow-lg shadow-amber-500/20 flex items-center gap-1.5 self-start sm:self-auto cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>新增小艺术家</span>
+          </button>
+        </div>
+
+        <!-- 小艺术家网格列表 -->
+        <div id="adminStudentsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- JS 动态渲染 -->
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- 模块 4：特展与轮播排期工作台 (Themes) -->
+      <!-- ===================================================================== -->
+      <section id="admin-view-themes" class="space-y-4 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-white">🏛️ 主题特展与首页轮播排期</h2>
+            <p class="text-xs text-stone-400 mt-0.5">策划深度特展期刊文章，并一键调配首页顶部焦点大轮播的展示与顺序</p>
+          </div>
+          <button onclick="openThemeCreateModal()" class="px-4 py-2.5 rounded-xl bg-teal-400 hover:bg-teal-300 text-stone-950 font-black text-xs shadow-lg shadow-teal-500/20 flex items-center gap-1.5 self-start sm:self-auto cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>策划新特展</span>
+          </button>
+        </div>
+
+        <!-- 特展卡片列表 -->
+        <div id="adminThemesGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- JS 动态渲染 -->
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- 模块 5：美育便签墙审核 (Notes Moderation) -->
+      <!-- ===================================================================== -->
+      <section id="admin-view-notes" class="space-y-4 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-white">💬 美育便签墙内容审核与管理</h2>
+            <p class="text-xs text-stone-400 mt-0.5">对家长与访客公开发布的便签心语、作品微卡进行审核与一键永久移除</p>
+          </div>
+          <div class="text-xs text-stone-400 font-mono">
+            共收录 <span id="adminNoteTotalCount" class="font-bold text-[#10E57A]">0</span> 条便签
+          </div>
+        </div>
+
+        <!-- 便签审核网格列表 -->
+        <div id="adminNotesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- JS 动态渲染 -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 模态框 1：作品录入 / 编辑模态框 (Artwork Modal) -->
+  <!-- ========================================================================= -->
+  <div id="artworkModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="w-full max-w-2xl bg-[#111C15] border border-white/10 rounded-3xl p-6 sm:p-8 space-y-5 my-auto max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+        <div>
+          <h3 id="artworkModalTitle" class="text-lg font-black text-white flex items-center gap-2">
+            <span>🎨</span>
+            <span>录入新画作</span>
+          </h3>
+          <p class="text-xs text-stone-400 mt-0.5">填写作品信息、多视角高清图与童心故事</p>
+        </div>
+        <button onclick="closeArtworkModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 text-stone-400 hover:text-white flex items-center justify-center transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <form id="artworkForm" onsubmit="handleSaveArtwork(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="artFormId">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- 作品标题 -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">作品标题 <span class="text-emerald-400">*</span></label>
+            <input type="text" id="artFormTitle" required placeholder="如：夏日海滩上的冰淇淋怪兽" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-[#10E57A]">
+          </div>
+
+          <!-- 小作者 -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">小作者姓名 <span class="text-emerald-400">*</span></label>
+            <div class="flex gap-2">
+              <input type="text" id="artFormAuthor" required placeholder="如：林雨桐" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-[#10E57A]">
+              <select id="artAuthorQuickSelect" onchange="if(this.value){document.getElementById('artFormAuthor').value=this.value;}" class="px-2 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-stone-300 focus:outline-none text-[11px]">
+                <option value="">选已有</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <!-- 小作者年龄 -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">年龄 (如 5岁 / 7岁)</label>
+            <input type="text" id="artFormAge" placeholder="5岁" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-[#10E57A]">
+          </div>
+
+          <!-- 年龄组 -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">年龄组</label>
+            <select id="artFormAgeGroup" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-[#10E57A]">
+              <option value="3-5">3-5岁 启蒙</option>
+              <option value="6-8">6-8岁 创想</option>
+              <option value="9-12">9-12岁 大师</option>
+            </select>
+          </div>
+
+          <!-- 艺术门类 -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">艺术门类 / 画种</label>
+            <select id="artFormCategory" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-[#10E57A]">
+              <option value="oil-pastel|重彩油画棒">重彩油画棒</option>
+              <option value="watercolor|水粉水彩">水粉水彩</option>
+              <option value="clay|粘土与立体装置">粘土与立体装置</option>
+              <option value="sketch|线描与设计">线描与设计</option>
+              <option value="collage|拼贴与综合媒介">拼贴与综合媒介</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 创作年月 -->
+        <div class="space-y-1.5">
+          <label class="font-bold text-stone-300">创作年月 (如 2026.08)</label>
+          <input type="text" id="artFormDate" placeholder="2026.08" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-[#10E57A]">
+        </div>
+
+        <!-- 多视角照片管理 -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-stone-300">作品照片 / 多视角展示图 <span class="text-emerald-400">*</span></label>
+            <span class="text-[11px] text-stone-400">可添加多张不同角度照片</span>
+          </div>
+
+          <!-- 照片预览列表 -->
+          <div id="artFormImagesList" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+            <!-- 动态渲染 -->
+          </div>
+
+          <!-- 添加照片控制区 -->
+          <div class="flex flex-col sm:flex-row gap-2 pt-2">
+            <input type="file" id="artFileInput" accept="image/*" multiple class="hidden" onchange="handleArtFilesSelected(event)">
+            <button type="button" onclick="document.getElementById('artFileInput').click()" class="px-3.5 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-all border border-white/10 cursor-pointer">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>本地上传照片</span>
+            </button>
+            <div class="flex-1 flex gap-1.5">
+              <input type="url" id="artImageUrlInput" placeholder="或粘贴网络图片 URL 后点击添加..." class="w-full px-3 py-2 bg-stone-900 border border-stone-700/80 rounded-xl text-white text-xs focus:outline-none focus:border-[#10E57A]">
+              <button type="button" onclick="addArtImageUrl()" class="px-3 py-2 rounded-xl bg-stone-800 hover:bg-[#10E57A] hover:text-stone-950 text-stone-300 text-xs font-bold transition-all flex-shrink-0 cursor-pointer">
+                + 添加
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 纯真创作故事 -->
+        <div class="space-y-1.5">
+          <label class="font-bold text-stone-300">小画家的纯真创作故事 (童言童语)</label>
+          <textarea id="artFormStory" rows="3" placeholder="小怪兽怕热，所以它把大海变成了蓝莓味的冰淇淋..." class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-[#10E57A] leading-relaxed"></textarea>
+        </div>
+
+        <!-- 导师评语 -->
+        <div class="space-y-1.5">
+          <label class="font-bold text-stone-300">美育主理人 / 导师点评</label>
+          <textarea id="artFormComment" rows="2" placeholder="色彩冷暖对比极具张力，充满了自由而纯粹的童心想象。" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-[#10E57A] leading-relaxed"></textarea>
+        </div>
+
+        <!-- 底部提交栏 -->
+        <div class="pt-4 border-t border-white/[0.08] flex items-center justify-end gap-3">
+          <button type="button" onclick="closeArtworkModal()" class="px-5 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold transition-all cursor-pointer">
+            取消
+          </button>
+          <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 font-black shadow-lg shadow-emerald-500/25 active:scale-95 transition-all cursor-pointer">
+            💾 保存作品档案
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 模态框 2：小艺术家名人堂 新增 / 编辑模态框 (Student Modal) -->
+  <!-- ========================================================================= -->
+  <div id="studentModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="w-full max-w-lg bg-[#111C15] border border-white/10 rounded-3xl p-6 sm:p-8 space-y-5 my-auto max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+        <div>
+          <h3 id="studentModalTitle" class="text-lg font-black text-white flex items-center gap-2">
+            <span>🌟</span>
+            <span>新增小艺术家档案</span>
+          </h3>
+          <p class="text-xs text-stone-400 mt-0.5">维护启蒙班小学员专属艺术档案</p>
+        </div>
+        <button onclick="closeStudentModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 text-stone-400 hover:text-white flex items-center justify-center transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <form id="studentForm" onsubmit="handleSaveStudent(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="studentFormId">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- 姓名 -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">小艺术家姓名 <span class="text-amber-400">*</span></label>
+            <input type="text" id="studentFormName" required placeholder="如：林雨桐" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400">
+          </div>
+
+          <!-- 年龄 -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">年龄</label>
+            <input type="text" id="studentFormAge" placeholder="如：5岁" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- 年龄组 -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">所属年龄组</label>
+            <select id="studentFormAgeGroup" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400">
+              <option value="3-5">3-5岁 启蒙班</option>
+              <option value="6-8">6-8岁 创想班</option>
+              <option value="9-12">9-12岁 大师班</option>
+            </select>
+          </div>
+
+          <!-- 班级名称 -->
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">所属班级</label>
+            <input type="text" id="studentFormClass" placeholder="如：启蒙创想一班" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400">
+          </div>
+        </div>
+
+        <!-- 头像管理 -->
+        <div class="space-y-2">
+          <label class="font-bold text-stone-300">小艺术家头像照片</label>
+          <div class="flex items-center gap-3">
+            <img id="studentAvatarPreview" src="https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80" class="w-14 h-14 rounded-full object-cover border border-white/10 flex-shrink-0 bg-stone-900">
+            <div class="flex-1 space-y-1.5">
+              <input type="file" id="studentAvatarFileInput" accept="image/*" class="hidden" onchange="handleStudentAvatarSelected(event)">
+              <div class="flex gap-2">
+                <button type="button" onclick="document.getElementById('studentAvatarFileInput').click()" class="px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs border border-white/10 cursor-pointer">
+                  上传本地头像
+                </button>
+                <input type="url" id="studentAvatarUrlInput" placeholder="或粘贴网络图片 URL..." oninput="document.getElementById('studentAvatarPreview').src=this.value" class="flex-1 px-3 py-1.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white text-xs focus:outline-none focus:border-amber-400">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 艺术寄语 / 个性签名 -->
+        <div class="space-y-1.5">
+          <label class="font-bold text-stone-300">个性签名 / 艺术创想寄语</label>
+          <textarea id="studentFormBio" rows="3" placeholder="画画的时候我可以去任何想去的地方，我最喜欢天马行空的怪兽和甜品。" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400 leading-relaxed"></textarea>
+        </div>
+
+        <!-- 代表作品数 -->
+        <div class="space-y-1.5">
+          <label class="font-bold text-stone-300">参展代表作品数</label>
+          <input type="number" id="studentFormArtCount" min="1" max="99" value="1" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400">
+        </div>
+
+        <!-- 底部提交栏 -->
+        <div class="pt-4 border-t border-white/[0.08] flex items-center justify-end gap-3">
+          <button type="button" onclick="closeStudentModal()" class="px-5 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold transition-all cursor-pointer">
+            取消
+          </button>
+          <button type="submit" class="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-black shadow-lg shadow-amber-500/25 active:scale-95 transition-all cursor-pointer">
+            💾 保存小艺术家档案
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 模态框 3：主题特展 策划 / 编辑模态框 (Theme Modal) -->
+  <!-- ========================================================================= -->
+  <div id="themeModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="w-full max-w-2xl bg-[#111C15] border border-white/10 rounded-3xl p-6 sm:p-8 space-y-5 my-auto max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+        <div>
+          <h3 id="themeModalTitle" class="text-lg font-black text-white flex items-center gap-2">
+            <span>🏛️</span>
+            <span>策划新主题特展</span>
+          </h3>
+          <p class="text-xs text-stone-400 mt-0.5">撰写专题期刊、挑选参展画作并配置首页大轮播</p>
+        </div>
+        <button onclick="closeThemeModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 text-stone-400 hover:text-white flex items-center justify-center transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <form id="themeForm" onsubmit="handleSaveTheme(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="themeFormId">
+
+        <div class="space-y-1.5">
+          <label class="font-bold text-stone-300">特展主标题 <span class="text-teal-400">*</span></label>
+          <input type="text" id="themeFormTitle" required placeholder="如：森林与星空的对话：2026 夏季少儿自然探索特展" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">英文 / 副标题</label>
+            <input type="text" id="themeFormSubTitle" placeholder="如：Forest & Starry Sky" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400">
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">特展标签</label>
+            <input type="text" id="themeFormTag" placeholder="如：🌟 2026 夏季年度重磅特展" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">展期 (如 2026.06 - 2026.08)</label>
+            <input type="text" id="themeFormDate" placeholder="2026.06 - 2026.08" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400">
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="font-bold text-stone-300">特展封面图 URL</label>
+            <input type="url" id="themeFormCover" required placeholder="https://..." class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400">
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="font-bold text-stone-300">特展简介概述</label>
+          <textarea id="themeFormIntro" rows="2" placeholder="在大自然与星空之间，孩子们以纯真直觉构筑森林树屋..." class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 leading-relaxed"></textarea>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="font-bold text-stone-300">策展人深度手记 (支持多段落)</label>
+          <textarea id="themeFormCuratorNote" rows="3" placeholder="每一棵树都藏着一颗星星的心跳..." class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 leading-relaxed"></textarea>
+        </div>
+
+        <!-- 关联作品多选 -->
+        <div class="space-y-2">
+          <label class="font-bold text-stone-300">勾选参展作品</label>
+          <div id="themeArtworkSelectorBox" class="max-h-36 overflow-y-auto p-3 rounded-xl bg-stone-900 border border-stone-800 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <!-- 动态生成作品选择项 -->
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 pt-1">
+          <input type="checkbox" id="themeFormIsInHero" checked class="w-4 h-4 rounded text-teal-500 focus:ring-0">
+          <label for="themeFormIsInHero" class="text-stone-300 font-bold cursor-pointer">在首页顶部焦点大轮播中置顶展示</label>
+        </div>
+
+        <!-- 底部提交栏 -->
+        <div class="pt-4 border-t border-white/[0.08] flex items-center justify-end gap-3">
+          <button type="button" onclick="closeThemeModal()" class="px-5 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold transition-all cursor-pointer">
+            取消
+          </button>
+          <button type="submit" class="px-6 py-2.5 rounded-xl bg-teal-400 hover:bg-teal-300 text-stone-950 font-black shadow-lg shadow-teal-500/25 active:scale-95 transition-all cursor-pointer">
+            💾 保存特展策划
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast 提示框 -->
+  <div id="toastBox" class="fixed bottom-6 right-6 z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
+    <div class="px-5 py-3 rounded-2xl bg-stone-900/95 text-stone-100 text-xs font-bold shadow-2xl border border-white/15 flex items-center gap-2">
+      <span id="toastText">操作成功</span>
+    </div>
+  </div>
+
+  <!-- 样式控制 -->
+  <style>
+    .admin-nav-item {
+      color: #A8A29E;
+      cursor: pointer;
+    }
+    .admin-nav-item:hover {
+      color: #FAFAFA;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .admin-nav-item.active {
+      color: #0E1711;
+      background: #10E57A;
+      font-weight: 900;
+    }
+  </style>
+
+  <!-- 核心交互脚本 -->
+  <script>
+    let adminArtworks = [];
+    let adminThemes = [];
+    let adminNotes = [];
+    let adminStudents = [];
+    let currentArtworkImages = [];
+
+    // --- 数据加载与渲染 ---
+    async function loadAllAdminData() {
+      try {
+        if (window.galleryCloud) {
+          const [arts, themes, notes, students] = await Promise.all([
+            window.galleryCloud.getArtworks(),
+            window.galleryCloud.getThematicExhibitions(),
+            window.galleryCloud.getStickyNotes(),
+            window.galleryCloud.getStudents()
+          ]);
+          adminArtworks = arts || [];
+          adminThemes = themes || [];
+          adminNotes = notes || [];
+          adminStudents = students || [];
+        } else {
+          adminArtworks = typeof initialArtworks !== 'undefined' ? initialArtworks : [];
+          adminThemes = typeof themeExhibitions !== 'undefined' ? themeExhibitions : [];
+          adminNotes = typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : [];
+          adminStudents = typeof studentList !== 'undefined' ? studentList : [];
+        }
+
+        renderOverviewStats();
+        renderAdminArtworksTable();
+        renderAdminStudentsGrid();
+        renderAdminThemesGrid();
+        renderAdminNotesGrid();
+        updateAuthorDropdowns();
+        lucide.createIcons();
+      } catch (e) {
+        console.error('加载后台数据出错:', e);
+      }
+    }
+
+    function switchAdminTab(tabName) {
+      ['overview', 'artworks', 'themes', 'notes', 'students'].forEach(tab => {
+        const viewEl = document.getElementById(`admin-view-${tab}`);
+        const btnEl = document.getElementById(`tab-btn-${tab}`);
+        if (viewEl) viewEl.classList.add('hidden');
+        if (btnEl) btnEl.classList.remove('active');
+      });
+
+      const activeView = document.getElementById(`admin-view-${tabName}`);
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      if (activeView) activeView.classList.remove('hidden');
+      if (activeBtn) activeBtn.classList.add('active');
+      lucide.createIcons();
+    }
+
+    function renderOverviewStats() {
+      document.getElementById('stat-art-count').textContent = adminArtworks.length;
+      document.getElementById('stat-student-count').textContent = adminStudents.length;
+      document.getElementById('stat-theme-count').textContent = adminThemes.length;
+      document.getElementById('stat-note-count').textContent = adminNotes.length;
+    }
+
+    function updateAuthorDropdowns() {
+      const select = document.getElementById('artAuthorQuickSelect');
+      if (!select) return;
+      select.innerHTML = '<option value="">选已有小画家</option>' + adminStudents.map(s => `
+        <option value="${s.name}">${s.name} (${s.age})</option>
+      `).join('');
+    }
+
+    // =========================================================================
+    // 🎨 作品档案库管理 (Artworks)
+    // =========================================================================
+    function renderAdminArtworksTable() {
+      const tbody = document.getElementById('adminArtworksTableBody');
+      const search = (document.getElementById('adminArtSearchInput')?.value || '').toLowerCase();
+      if (!tbody) return;
+
+      const filtered = adminArtworks.filter(a => 
+        (a.title && a.title.toLowerCase().includes(search)) ||
+        (a.author && a.author.toLowerCase().includes(search)) ||
+        (a.categoryName && a.categoryName.toLowerCase().includes(search))
+      );
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-stone-500">未找到匹配的作品</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(art => `
+        <tr class="hover:bg-white/[0.02] transition-colors">
+          <td class="p-3.5">
+            <div class="w-12 h-12 rounded-xl overflow-hidden bg-stone-900 border border-white/10">
+              <img src="${art.image}" class="w-full h-full object-cover">
+            </div>
+          </td>
+          <td class="p-3.5">
+            <div class="font-bold text-stone-100">${art.title}</div>
+            <div class="text-[10px] text-emerald-400 font-mono">${art.categoryName || art.category}</div>
+          </td>
+          <td class="p-3.5">
+            <div class="font-bold text-stone-200">${art.author}</div>
+            <div class="text-[10px] text-stone-400">${art.age} · ${art.ageGroup}岁组</div>
+          </td>
+          <td class="p-3.5 font-mono text-stone-400 text-[11px]">${art.date}</td>
+          <td class="p-3.5 font-mono text-stone-400 text-[11px]">
+            ${(art.images && art.images.length) || 1} 个视角
+          </td>
+          <td class="p-3.5 text-right">
+            <div class="inline-flex items-center gap-1.5">
+              <button onclick="openArtworkModal('${art.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500 text-emerald-400 hover:text-stone-950 text-[11px] font-bold transition-all cursor-pointer">
+                ✏️ 编辑
+              </button>
+              <button onclick="adminDeleteArtwork('${art.id}')" class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500 text-rose-400 hover:text-white text-[11px] font-bold transition-all cursor-pointer">
+                🗑️ 删除
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function openArtworkModal(artId = null) {
+      const modal = document.getElementById('artworkModal');
+      const form = document.getElementById('artworkForm');
+      form.reset();
+      updateAuthorDropdowns();
+
+      if (artId) {
+        const art = adminArtworks.find(a => a.id === artId);
+        if (art) {
+          document.getElementById('artworkModalTitle').innerHTML = `<span>✏️</span><span>编辑画作 · 《${art.title}》</span>`;
+          document.getElementById('artFormId').value = art.id;
+          document.getElementById('artFormTitle').value = art.title;
+          document.getElementById('artFormAuthor').value = art.author;
+          document.getElementById('artFormAge').value = art.age;
+          document.getElementById('artFormAgeGroup').value = art.ageGroup || '3-5';
+          
+          const catSelect = document.getElementById('artFormCategory');
+          for (let i = 0; i < catSelect.options.length; i++) {
+            if (catSelect.options[i].value.startsWith(art.category)) {
+              catSelect.selectedIndex = i;
+              break;
+            }
+          }
+
+          document.getElementById('artFormDate').value = art.date || '2026.08';
+          document.getElementById('artFormStory').value = art.story || '';
+          document.getElementById('artFormComment').value = art.teacherComment || '';
+
+          currentArtworkImages = Array.isArray(art.images) && art.images.length > 0 ? [...art.images] : [art.image];
+        }
+      } else {
+        document.getElementById('artworkModalTitle').innerHTML = `<span>🎨</span><span>录入新画作</span>`;
+        document.getElementById('artFormId').value = '';
+        document.getElementById('artFormDate').value = '2026.08';
+        currentArtworkImages = [];
+      }
+
+      renderArtFormImages();
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeArtworkModal() {
+      const modal = document.getElementById('artworkModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function renderArtFormImages() {
+      const container = document.getElementById('artFormImagesList');
+      if (!container) return;
+
+      if (currentArtworkImages.length === 0) {
+        container.innerHTML = `<div class="col-span-full py-4 text-center text-stone-500 bg-stone-900/50 rounded-xl border border-dashed border-stone-800">暂未添加照片，请点击下方上传本地照片或粘贴 URL</div>`;
+        return;
+      }
+
+      container.innerHTML = currentArtworkImages.map((src, idx) => `
+        <div class="relative aspect-square rounded-xl overflow-hidden bg-stone-900 border border-white/10 group shadow">
+          <img src="${src}" class="w-full h-full object-cover">
+          ${idx === 0 ? `
+            <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded-md bg-[#10E57A] text-stone-950 font-black text-[9px] pointer-events-none shadow">
+              主图/封面
+            </span>
+          ` : `
+            <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded-md bg-black/60 text-white font-mono text-[9px] pointer-events-none">
+              #${idx + 1}
+            </span>
+          `}
+          <button type="button" onclick="removeArtImage(${idx})" class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 hover:bg-rose-500 text-white flex items-center justify-center text-[10px] transition-colors">
+            ✕
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function removeArtImage(idx) {
+      if (idx >= 0 && idx < currentArtworkImages.length) {
+        currentArtworkImages.splice(idx, 1);
+        renderArtFormImages();
+      }
+    }
+
+    function addArtImageUrl() {
+      const input = document.getElementById('artImageUrlInput');
+      const url = (input.value || '').trim();
+      if (url) {
+        currentArtworkImages.push(url);
+        input.value = '';
+        renderArtFormImages();
+      }
+    }
+
+    function handleArtFilesSelected(e) {
+      const files = Array.from(e.target.files);
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          currentArtworkImages.push(ev.target.result);
+          renderArtFormImages();
+        };
+        reader.readAsDataURL(file);
+      });
+      e.target.value = '';
+    }
+
+    async function handleSaveArtwork(e) {
+      e.preventDefault();
+      const id = document.getElementById('artFormId').value;
+      const title = document.getElementById('artFormTitle').value.trim();
+      const author = document.getElementById('artFormAuthor').value.trim();
+      const age = document.getElementById('artFormAge').value.trim() || '5岁';
+      const ageGroup = document.getElementById('artFormAgeGroup').value;
+      const catVal = document.getElementById('artFormCategory').value;
+      const [category, categoryName] = catVal.split('|');
+      const date = document.getElementById('artFormDate').value.trim() || '2026.08';
+      const story = document.getElementById('artFormStory').value.trim();
+      const comment = document.getElementById('artFormComment').value.trim();
+
+      const mainImage = currentArtworkImages.length > 0 ? currentArtworkImages[0] : 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1200&auto=format&fit=crop&q=85';
+      const images = currentArtworkImages.length > 0 ? [...currentArtworkImages] : [mainImage];
+
+      const artData = {
+        id: id || ('art-' + Date.now()),
+        title,
+        author,
+        age,
+        ageGroup,
+        category,
+        categoryName,
+        date,
+        image: mainImage,
+        images,
+        story,
+        audioDuration: "00:24",
+        teacherComment: comment
+      };
+
+      if (id) {
+        // 编辑更新
+        if (window.galleryCloud) await window.galleryCloud.updateArtwork(artData);
+        const idx = adminArtworks.findIndex(a => a.id === id);
+        if (idx !== -1) adminArtworks[idx] = artData;
+        showToast(`✨ 画作《${title}》档案修改成功！`);
+      } else {
+        // 录入新增
+        if (window.galleryCloud) await window.galleryCloud.createArtwork(artData);
+        adminArtworks.unshift(artData);
+        showToast(`🎉 成功录入新画作《${title}》！`);
+      }
+
+      // 联动检查小艺术家是否已存在
+      const studentExists = adminStudents.find(s => s.name === author);
+      if (!studentExists) {
+        const newStudent = {
+          id: 's-' + Date.now(),
+          name: author,
+          age,
+          ageGroup,
+          className: '想吃梨启蒙学员班',
+          avatar: mainImage,
+          bio: '热爱绘画与自由想象的新生代小艺术家。',
+          featuredArtCount: 1
+        };
+        if (window.galleryCloud) await window.galleryCloud.createStudent(newStudent);
+        adminStudents.unshift(newStudent);
+      }
+
+      closeArtworkModal();
+      renderAdminArtworksTable();
+      renderAdminStudentsGrid();
+      renderOverviewStats();
+    }
+
+    async function adminDeleteArtwork(id) {
+      const art = adminArtworks.find(a => a.id === id);
+      if (confirm(`【主理人管理】确定要删除画作《${art ? art.title : id}》吗？`)) {
+        if (window.galleryCloud) await window.galleryCloud.deleteArtwork(id);
+        adminArtworks = adminArtworks.filter(a => a.id !== id);
+        renderAdminArtworksTable();
+        renderOverviewStats();
+        showToast('🗑️ 画作已下架删除！');
+      }
+    }
+
+    // =========================================================================
+    // 🌟 小艺术家名人堂管理 (Students)
+    // =========================================================================
+    function renderAdminStudentsGrid() {
+      const grid = document.getElementById('adminStudentsGrid');
+      if (!grid) return;
+
+      if (adminStudents.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-12 text-center text-stone-500">暂无小艺术家档案，点击右上角新增</div>`;
+        return;
+      }
+
+      grid.innerHTML = adminStudents.map(student => `
+        <div class="p-4 rounded-2xl bg-[#111C15] border border-white/[0.08] flex flex-col justify-between space-y-3 hover:border-amber-500/30 transition-all">
+          <div class="flex items-start gap-3.5">
+            <img src="${student.avatar}" class="w-14 h-14 rounded-full object-cover border border-white/10 flex-shrink-0 bg-stone-900">
+            <div class="min-w-0 flex-1 space-y-0.5">
+              <div class="flex items-center justify-between">
+                <span class="font-black text-sm text-white truncate">${student.name}</span>
+                <span class="text-[10px] text-amber-400 font-mono font-bold bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">${student.age}</span>
+              </div>
+              <div class="text-[11px] text-stone-400 font-mono">${student.className || '启蒙学员班'}</div>
+              <div class="text-[10px] text-emerald-400 font-mono">🎨 收录 ${student.featuredArtCount || 1} 件代表作</div>
+            </div>
+          </div>
+
+          <p class="text-xs text-stone-400 line-clamp-2 leading-relaxed bg-black/20 p-2 rounded-xl">
+            "${student.bio || '无签名'}"
+          </p>
+
+          <div class="pt-2 border-t border-white/[0.06] flex items-center justify-end gap-2">
+            <button onclick="openStudentModal('${student.id}')" class="px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-stone-950 text-[11px] font-bold transition-all cursor-pointer">
+              ✏️ 编辑档案
+            </button>
+            <button onclick="adminDeleteStudent('${student.id}')" class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500 text-rose-400 hover:text-white text-[11px] font-bold transition-all cursor-pointer">
+              🗑️ 删除
+            </button>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function openStudentModal(studentId = null) {
+      const modal = document.getElementById('studentModal');
+      const form = document.getElementById('studentForm');
+      form.reset();
+
+      if (studentId) {
+        const s = adminStudents.find(item => item.id === studentId);
+        if (s) {
+          document.getElementById('studentModalTitle').innerHTML = `<span>✏️</span><span>编辑小艺术家 · ${s.name}</span>`;
+          document.getElementById('studentFormId').value = s.id;
+          document.getElementById('studentFormName').value = s.name;
+          document.getElementById('studentFormAge').value = s.age;
+          document.getElementById('studentFormAgeGroup').value = s.ageGroup || '3-5';
+          document.getElementById('studentFormClass').value = s.className || '';
+          document.getElementById('studentAvatarPreview').src = s.avatar;
+          document.getElementById('studentAvatarUrlInput').value = s.avatar.startsWith('data:') ? '' : s.avatar;
+          document.getElementById('studentFormBio').value = s.bio || '';
+          document.getElementById('studentFormArtCount').value = s.featuredArtCount || 1;
+        }
+      } else {
+        document.getElementById('studentModalTitle').innerHTML = `<span>🌟</span><span>新增小艺术家档案</span>`;
+        document.getElementById('studentFormId').value = '';
+        document.getElementById('studentAvatarPreview').src = 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80';
+        document.getElementById('studentFormArtCount').value = 1;
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeStudentModal() {
+      const modal = document.getElementById('studentModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function handleStudentAvatarSelected(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          document.getElementById('studentAvatarPreview').src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function handleSaveStudent(e) {
+      e.preventDefault();
+      const id = document.getElementById('studentFormId').value;
+      const name = document.getElementById('studentFormName').value.trim();
+      const age = document.getElementById('studentFormAge').value.trim() || '5岁';
+      const ageGroup = document.getElementById('studentFormAgeGroup').value;
+      const className = document.getElementById('studentFormClass').value.trim() || '启蒙创想班';
+      const avatar = document.getElementById('studentAvatarPreview').src;
+      const bio = document.getElementById('studentFormBio').value.trim();
+      const artCount = parseInt(document.getElementById('studentFormArtCount').value) || 1;
+
+      const studentData = {
+        id: id || ('s-' + Date.now()),
+        name,
+        age,
+        ageGroup,
+        className,
+        avatar,
+        bio,
+        featuredArtCount: artCount
+      };
+
+      if (id) {
+        if (window.galleryCloud) await window.galleryCloud.updateStudent(studentData);
+        const idx = adminStudents.findIndex(s => s.id === id);
+        if (idx !== -1) adminStudents[idx] = studentData;
+        showToast(`✨ 小艺术家 ${name} 的档案已更新！`);
+      } else {
+        if (window.galleryCloud) await window.galleryCloud.createStudent(studentData);
+        adminStudents.unshift(studentData);
+        showToast(`🎉 成功添加小艺术家 ${name} 到名人堂！`);
+      }
+
+      closeStudentModal();
+      renderAdminStudentsGrid();
+      renderOverviewStats();
+      updateAuthorDropdowns();
+    }
+
+    async function adminDeleteStudent(id) {
+      const s = adminStudents.find(item => item.id === id);
+      if (confirm(`【主理人管理】确定要从小艺术家名人堂移除 ${s ? s.name : ''} 吗？`)) {
+        if (window.galleryCloud) await window.galleryCloud.deleteStudent(id);
+        adminStudents = adminStudents.filter(item => item.id !== id);
+        renderAdminStudentsGrid();
+        renderOverviewStats();
+        updateAuthorDropdowns();
+        showToast('🗑️ 小艺术家档案已移除！');
+      }
+    }
+
+    // =========================================================================
+    // 🏛️ 主题特展与轮播排期工作台 (Themes)
+    // =========================================================================
+    function renderAdminThemesGrid() {
+      const grid = document.getElementById('adminThemesGrid');
+      if (!grid) return;
+
+      grid.innerHTML = adminThemes.map((theme, idx) => `
+        <div class="p-5 rounded-2xl bg-[#111C15] border border-white/[0.08] flex flex-col justify-between space-y-4 hover:border-teal-500/30 transition-all">
+          <div class="flex items-start gap-4">
+            <div class="w-24 h-24 rounded-xl overflow-hidden bg-stone-900 border border-white/10 flex-shrink-0">
+              <img src="${theme.coverImage}" class="w-full h-full object-cover">
+            </div>
+            <div class="space-y-1 min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-[#10E57A] text-[10px] font-bold">${theme.tag}</span>
+                <span class="text-[10px] font-mono text-stone-400">排序: 第 ${theme.heroOrder || (idx + 1)} 位</span>
+              </div>
+              <h3 class="font-black text-sm text-white truncate">${theme.title}</h3>
+              <p class="text-[11px] text-stone-400 line-clamp-2 leading-relaxed">${theme.introSummary || theme.intro || ''}</p>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-white/[0.06] flex items-center justify-between">
+            <label class="inline-flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" ${theme.isInHero !== false ? 'checked' : ''} onchange="toggleThemeHero('${theme.id}', this.checked)" class="w-4 h-4 rounded text-emerald-500 focus:ring-0">
+              <span class="text-xs font-bold ${theme.isInHero !== false ? 'text-emerald-400' : 'text-stone-500'}">
+                ${theme.isInHero !== false ? '🌟 首页大轮播展出中' : '⏸️ 已从轮播撤下'}
+              </span>
+            </label>
+
+            <div class="flex items-center gap-2">
+              <button onclick="openThemeCreateModal('${theme.id}')" class="px-2.5 py-1 rounded-lg bg-teal-500/15 hover:bg-teal-500 text-teal-400 hover:text-stone-950 text-[11px] font-bold transition-all cursor-pointer">
+                ✏️ 编辑
+              </button>
+              <button onclick="adminDeleteTheme('${theme.id}')" class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500 text-rose-400 hover:text-white text-[11px] font-bold transition-all cursor-pointer">
+                🗑️ 删除
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function openThemeCreateModal(themeId = null) {
+      const modal = document.getElementById('themeModal');
+      const form = document.getElementById('themeForm');
+      form.reset();
+
+      // 渲染关联画作复选框
+      const selectorBox = document.getElementById('themeArtworkSelectorBox');
+      selectorBox.innerHTML = adminArtworks.map(art => `
+        <label class="flex items-center gap-2 p-1.5 rounded hover:bg-white/5 cursor-pointer text-[11px] text-stone-300">
+          <input type="checkbox" name="themeArtworks" value="${art.id}" class="rounded text-teal-500 focus:ring-0">
+          <span class="truncate">${art.title} (${art.author})</span>
+        </label>
+      `).join('');
+
+      if (themeId) {
+        const theme = adminThemes.find(t => t.id === themeId);
+        if (theme) {
+          document.getElementById('themeModalTitle').innerHTML = `<span>✏️</span><span>编辑主题特展 · 《${theme.title}》</span>`;
+          document.getElementById('themeFormId').value = theme.id;
+          document.getElementById('themeFormTitle').value = theme.title;
+          document.getElementById('themeFormSubTitle').value = theme.subTitle || theme.subtitle || '';
+          document.getElementById('themeFormTag').value = theme.tag || '';
+          document.getElementById('themeFormDate').value = theme.date || '';
+          document.getElementById('themeFormCover').value = theme.coverImage || '';
+          document.getElementById('themeFormIntro').value = theme.introSummary || theme.intro || '';
+          document.getElementById('themeFormCuratorNote').value = Array.isArray(theme.curatorStatement) ? theme.curatorStatement.join('\n\n') : (theme.curatorStatement || '');
+          document.getElementById('themeFormIsInHero').checked = theme.isInHero !== false;
+
+          const checkedIds = theme.artworkIds || [];
+          document.querySelectorAll('input[name="themeArtworks"]').forEach(chk => {
+            if (checkedIds.includes(chk.value)) chk.checked = true;
+          });
+        }
+      } else {
+        document.getElementById('themeModalTitle').innerHTML = `<span>🏛️</span><span>策划新主题特展</span>`;
+        document.getElementById('themeFormId').value = '';
+        document.getElementById('themeFormCover').value = 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85';
+        document.getElementById('themeFormTag').value = '🌟 2026 特别策划';
+        document.getElementById('themeFormDate').value = '2026.08 - 2026.10';
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeThemeModal() {
+      const modal = document.getElementById('themeModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function handleSaveTheme(e) {
+      e.preventDefault();
+      const id = document.getElementById('themeFormId').value;
+      const title = document.getElementById('themeFormTitle').value.trim();
+      const subTitle = document.getElementById('themeFormSubTitle').value.trim();
+      const tag = document.getElementById('themeFormTag').value.trim();
+      const date = document.getElementById('themeFormDate').value.trim();
+      const coverImage = document.getElementById('themeFormCover').value.trim();
+      const introSummary = document.getElementById('themeFormIntro').value.trim();
+      const curatorNote = document.getElementById('themeFormCuratorNote').value.trim();
+      const isInHero = document.getElementById('themeFormIsInHero').checked;
+
+      const selectedArtIds = Array.from(document.querySelectorAll('input[name="themeArtworks"]:checked')).map(c => c.value);
+
+      const themeData = {
+        id: id || ('theme-' + Date.now()),
+        title,
+        subTitle,
+        tag,
+        date,
+        coverImage,
+        introSummary,
+        curatorStatement: curatorNote ? curatorNote.split('\n\n') : [],
+        artworkIds: selectedArtIds,
+        artworkCount: selectedArtIds.length,
+        isInHero,
+        heroOrder: 1
+      };
+
+      if (id) {
+        if (window.galleryCloud) await window.galleryCloud.updateThematicExhibition(themeData);
+        const idx = adminThemes.findIndex(t => t.id === id);
+        if (idx !== -1) adminThemes[idx] = themeData;
+        showToast(`✨ 特展《${title}》已更新！`);
+      } else {
+        if (window.galleryCloud) await window.galleryCloud.createThematicExhibition(themeData);
+        adminThemes.push(themeData);
+        showToast(`🎉 成功策划新特展《${title}》！`);
+      }
+
+      closeThemeModal();
+      renderAdminThemesGrid();
+      renderOverviewStats();
+    }
+
+    async function adminDeleteTheme(id) {
+      const t = adminThemes.find(item => item.id === id);
+      if (confirm(`【主理人管理】确定要删除特展《${t ? t.title : id}》吗？`)) {
+        if (window.galleryCloud) await window.galleryCloud.deleteThematicExhibition(id);
+        adminThemes = adminThemes.filter(item => item.id !== id);
+        renderAdminThemesGrid();
+        renderOverviewStats();
+        showToast('🗑️ 特展已删除！');
+      }
+    }
+
+    async function toggleThemeHero(themeId, isInHero) {
+      const theme = adminThemes.find(t => t.id === themeId);
+      if (theme) {
+        theme.isInHero = isInHero;
+        if (window.galleryCloud) {
+          await window.galleryCloud.updateThematicExhibition(theme);
+        }
+        showToast(isInHero ? `🌟 已将《${theme.title}》加入首页大轮播！` : `⏸️ 已将《${theme.title}》从首页轮播撤下！`);
+      }
+    }
+
+    // =========================================================================
+    // 💬 便签墙审核 (Sticky Notes)
+    // =========================================================================
+    function renderAdminNotesGrid() {
+      const grid = document.getElementById('adminNotesGrid');
+      const countEl = document.getElementById('adminNoteTotalCount');
+      if (!grid) return;
+      if (countEl) countEl.textContent = adminNotes.length;
+
+      if (adminNotes.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-12 text-center text-stone-500">便签墙暂无留言</div>`;
+        return;
+      }
+
+      grid.innerHTML = adminNotes.map(note => `
+        <div class="p-4 rounded-2xl bg-[#111C15] border border-white/[0.08] flex flex-col justify-between space-y-3 hover:border-emerald-500/30 transition-all">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between border-b border-white/[0.06] pb-2">
+              <div class="font-black text-xs text-white truncate">${note.author}</div>
+              <span class="text-[10px] font-mono text-stone-500">${note.date}</span>
+            </div>
+
+            ${note.artworkImage ? `
+              <div class="h-28 rounded-xl overflow-hidden bg-black/40 border border-white/10">
+                <img src="${note.artworkImage}" class="w-full h-full object-cover">
+              </div>
+            ` : ''}
+
+            <p class="text-xs text-stone-300 leading-relaxed break-words whitespace-pre-line line-clamp-4">
+              ${note.content}
+            </p>
+          </div>
+
+          <div class="pt-2.5 border-t border-white/[0.06] flex items-center justify-between">
+            <span class="text-[10px] text-emerald-400 font-mono font-bold">
+              ❤️ ${note.likes || 0} 次比心
+            </span>
+
+            <button onclick="adminDeleteStickyNote('${note.id}')" class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500 text-rose-400 hover:text-white text-[10px] font-bold transition-all cursor-pointer">
+              🗑️ 彻底删除
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function adminDeleteStickyNote(id) {
+      if (confirm('【主理人管理】确定要从云端彻底删除此条便签吗？此操作无法撤销。')) {
+        adminNotes = adminNotes.filter(n => n.id !== id);
+        renderAdminNotesGrid();
+        renderOverviewStats();
+        if (window.galleryCloud) {
+          await window.galleryCloud.deleteStickyNote(id);
+        }
+        showToast('🗑️ 已成功销毁该便签！');
+      }
+    }
+
+    // --- 工具与权限 ---
+    function refreshAdminData() {
+      showToast('🔄 正在同步最新数据...');
+      loadAllAdminData();
+    }
+
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      const text = document.getElementById('toastText');
+      if (text) text.textContent = msg;
+      box.classList.remove('opacity-0');
+      setTimeout(() => { box.classList.add('opacity-0'); }, 2200);
+    }
+
+    function checkCuratorAuth() {
+      const isAuthed = localStorage.getItem('pear_curator_auth') === 'true';
+      const overlay = document.getElementById('curatorAuthOverlay');
+      if (isAuthed && overlay) {
+        overlay.classList.add('hidden');
+        loadAllAdminData();
+      }
+    }
+
+    function handleCuratorLogin(e) {
+      e.preventDefault();
+      const pwd = document.getElementById('curatorPasswordInput').value.trim();
+      if (pwd === 'pear2026' || pwd === '123456' || pwd === 'pear888' || pwd === 'linlaoshi') {
+        localStorage.setItem('pear_curator_auth', 'true');
+        const overlay = document.getElementById('curatorAuthOverlay');
+        if (overlay) overlay.classList.add('hidden');
+        showToast('🔓 身份验证成功，欢迎林老师！');
+        loadAllAdminData();
+      } else {
+        showToast('❌ 密码错误，请重新输入');
+      }
+    }
+
+    function curatorLogout() {
+      localStorage.removeItem('pear_curator_auth');
+      const overlay = document.getElementById('curatorAuthOverlay');
+      if (overlay) {
+        overlay.classList.remove('hidden');
+        document.getElementById('curatorPasswordInput').value = '';
+      }
+      showToast('🔒 已锁定主理人后台');
+    }
+
+    // 点击遮罩层关闭模态框
+    window.addEventListener('click', (e) => {
+      ['artworkModal', 'studentModal', 'themeModal'].forEach(mId => {
+        const modal = document.getElementById(mId);
+        if (modal && e.target === modal) {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkCuratorAuth();
+    });
+  </script>
+</body>
+</html>
