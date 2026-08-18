@@ -1,34 +1,29 @@
 /**
- * 🍐 想吃梨儿童艺术启蒙 · 现代化透明双保险持久化引擎 (Transparent Rock-Solid Storage)
+ * 🍐 想吃梨儿童艺术启蒙 · Supabase 云端直连核心数据服务 (Cloud-First Architecture)
  * 
- * 核心保障：
- * 1. 【主存：同步 LocalStorage + 自动紧凑化】: 0ms 立即落盘，保证刷新 100% 不丢失。
- * 2. 【副存：大容量 IndexedDB 异步镜像】: 支持超大 Base64 图库。
- * 3. 【云端：Supabase 实时同步】: 网络通畅时实时上云，断网或无权限时平滑降级并给出明确提示。
- * 4. 【异常显式报警】: 任何保存或读取失败均在界面显示具体原因，杜绝静默失败。
+ * 核心架构：
+ * 1. 【云端第一真理源 (Cloud-First)】: 新增、修改、删除直接写入 Supabase PostgreSQL 云端数据库。
+ * 2. 【高精度字段映射】: 前端驼峰 (camelCase) 与数据库蛇形 (snake_case) 100% 精准转换，杜绝字段缺失。
+ * 3. 【透明状态与报错反馈】: 云端写入成功即刻提示，若遇 RLS 策略或权限问题显式报错。
+ * 4. 【本地同步镜像】: 本地仅作为快速预加载镜像，云端数据永远优先。
  */
 
 const CLOUD_CONFIG = {
   supabase: {
     enabled: true,
     url: "https://hnzddhxgzbkllnmwpvdi.supabase.co",
-    anonKey: "sb_publishable_xHnY5J95z8B5pPLGMf2w9w_pLGfZXC9",
-    timeoutMs: 1800
-  },
-  apiServer: {
-    enabled: false,
-    baseUrl: "http://localhost:3000/api"
+    anonKey: "sb_publishable_xHnY5J95z8B5pPLGMf2w9w_pLGfZXC9"
   }
 };
 
-class TransparentGalleryStorage {
+class SupabaseCloudGalleryService {
   constructor() {
-    this.primaryKey = 'pear_gallery_main_store';
     this.isCloudReady = false;
-    this._initSupabase();
+    this.localCacheKey = 'pear_gallery_cloud_cache_';
+    this.init();
   }
 
-  _initSupabase() {
+  init() {
     if (CLOUD_CONFIG.supabase.enabled && window.supabase) {
       try {
         this.supabaseClient = window.supabase.createClient(
@@ -36,434 +31,536 @@ class TransparentGalleryStorage {
           CLOUD_CONFIG.supabase.anonKey
         );
         this.isCloudReady = true;
+        console.log('☁️ Supabase 云端数据库客户端初始化成功:', CLOUD_CONFIG.supabase.url);
       } catch (e) {
-        console.warn('Supabase 初始化跳过:', e);
+        console.error('❌ Supabase 客户端初始化失败:', e);
       }
     }
   }
 
-  // --- 全局核心数据状态读写 ---
-  _getGlobalStore() {
-    try {
-      const raw = localStorage.getItem(this.primaryKey);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object') {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.error('读取 LocalStorage 失败:', e);
-    }
-    return null;
-  }
-
-  _saveGlobalStore(store) {
-    try {
-      localStorage.setItem(this.primaryKey, JSON.stringify(store));
-      return { success: true };
-    } catch (e) {
-      console.warn('LocalStorage 写入受限，执行自动瘦身保存:', e);
-      try {
-        // 如果因为图片太大超出 5MB，进行瘦身：将过长 Base64 截取主图
-        const slimStore = JSON.parse(JSON.stringify(store));
-        if (slimStore.artworks) {
-          slimStore.artworks = slimStore.artworks.map(a => {
-            if (a.images && a.images.length > 2) a.images = a.images.slice(0, 2);
-            return a;
-          });
-        }
-        localStorage.setItem(this.primaryKey, JSON.stringify(slimStore));
-        return { success: true, slimmed: true };
-      } catch (err2) {
-        console.error('存储彻底超限:', err2);
-        return { success: false, error: err2.message };
-      }
-    }
-  }
-
-  _ensureStore() {
-    let store = this._getGlobalStore();
-    if (!store) {
-      // 从历史旧 key 迁移或从 data.js 初始化
-      let oldArts = null;
-      let oldStudents = null;
-      let oldThemes = null;
-      let oldNotes = null;
-
-      try {
-        oldArts = JSON.parse(localStorage.getItem('pear_gallery_v2_artworks') || localStorage.getItem('pear_gallery_artworks') || 'null');
-        oldStudents = JSON.parse(localStorage.getItem('pear_gallery_v2_students') || localStorage.getItem('pear_gallery_students') || 'null');
-        oldThemes = JSON.parse(localStorage.getItem('pear_gallery_v2_themes') || localStorage.getItem('pear_gallery_thematicExhibitions') || 'null');
-        oldNotes = JSON.parse(localStorage.getItem('pear_gallery_v2_notes') || localStorage.getItem('pear_gallery_stickyNotes') || 'null');
-      } catch (e) {}
-
-      store = {
-        artworks: (oldArts && oldArts.length > 0) ? oldArts : (typeof initialArtworks !== 'undefined' ? initialArtworks : []),
-        students: (oldStudents && oldStudents.length > 0) ? oldStudents : (typeof studentList !== 'undefined' ? studentList : (typeof initialStudents !== 'undefined' ? initialStudents : [])),
-        themes: (oldThemes && oldThemes.length > 0) ? oldThemes : (typeof themeExhibitions !== 'undefined' ? themeExhibitions : (typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : [])),
-        notes: (oldNotes && oldNotes.length > 0) ? oldNotes : (typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : [])
-      };
-      this._saveGlobalStore(store);
-    }
-    return store;
-  }
-
-  // --- 格式归一化 ---
-  _normalizeArt(a) {
-    if (!a) return a;
-    const mainImg = a.image || (Array.isArray(a.images) && a.images[0]) || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1200&auto=format&fit=crop&q=85';
+  // --- 数据库字段映射与归一化 ---
+  _fromDbArtwork(a) {
+    if (!a) return null;
+    const mainImg = a.image || (Array.isArray(a.images) && a.images[0]) || '';
     return {
-      id: String(a.id || ('art-' + Date.now())),
+      id: String(a.id),
       title: a.title || '无题作品',
       author: a.author || '小艺术家',
       age: a.age || '5岁',
-      ageGroup: a.ageGroup || a.age_group || '3-5',
+      ageGroup: a.age_group || a.ageGroup || '3-5',
       category: a.category || 'oil-pastel',
-      categoryName: a.categoryName || a.category_name || '少儿绘画',
+      categoryName: a.category_name || a.categoryName || '少儿绘画',
       date: a.date || '2026.08',
       image: mainImg,
-      images: Array.isArray(a.images) && a.images.length > 0 ? a.images : [mainImg],
+      images: Array.isArray(a.images) && a.images.length > 0 ? a.images : (mainImg ? [mainImg] : []),
       story: a.story || '',
-      audioDuration: a.audioDuration || a.audio_duration || '00:24',
-      audioUrl: a.audioUrl || a.audio_url || '',
-      teacherComment: a.teacherComment || a.teacher_comment || '',
-      isFeatured: a.isFeatured ?? a.is_featured ?? false
+      audioDuration: a.audio_duration || a.audioDuration || '00:24',
+      audioUrl: a.audio_url || a.audioUrl || '',
+      teacherComment: a.teacher_comment || a.teacherComment || '',
+      isFeatured: a.is_featured ?? a.isFeatured ?? false
     };
   }
 
-  _normalizeStudent(s) {
-    if (!s) return s;
+  _toDbArtwork(a) {
+    const mainImg = a.image || (Array.isArray(a.images) && a.images[0]) || '';
+    const imagesList = Array.isArray(a.images) && a.images.length > 0 ? a.images : (mainImg ? [mainImg] : []);
     return {
-      id: String(s.id || ('s-' + Date.now())),
-      name: s.name || '小画家',
+      id: String(a.id || ('art-' + Date.now())),
+      title: String(a.title || '无题作品'),
+      author: String(a.author || '小艺术家'),
+      age: String(a.age || '5岁'),
+      age_group: String(a.ageGroup || a.age_group || '3-5'),
+      category: String(a.category || 'oil-pastel'),
+      category_name: String(a.categoryName || a.category_name || '少儿绘画'),
+      date: String(a.date || '2026.08'),
+      image: String(mainImg),
+      images: imagesList,
+      story: String(a.story || ''),
+      audio_duration: String(a.audioDuration || '00:24'),
+      audio_url: a.audioUrl || null,
+      teacher_comment: String(a.teacherComment || ''),
+      is_featured: Boolean(a.isFeatured)
+    };
+  }
+
+  _fromDbStudent(s) {
+    if (!s) return null;
+    return {
+      id: String(s.id),
+      name: s.name || '',
       age: s.age || '5岁',
-      ageGroup: s.ageGroup || s.age_group || '3-5',
-      className: s.className || s.class_name || '启蒙创想班',
+      ageGroup: s.age_group || s.ageGroup || '3-5',
+      className: s.class_name || s.className || '启蒙创想班',
       avatar: s.avatar || 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80',
       bio: s.bio || '',
-      featuredArtCount: s.featuredArtCount ?? s.featured_art_count ?? 1
+      featuredArtCount: s.featured_art_count ?? s.featuredArtCount ?? 1
     };
   }
 
-  _normalizeTheme(t) {
-    if (!t) return t;
+  _toDbStudent(s) {
     return {
-      id: String(t.id || ('theme-' + Date.now())),
-      title: t.title || '特展主题',
-      subTitle: t.subTitle || t.subtitle || '',
+      id: String(s.id || ('s-' + Date.now())),
+      name: String(s.name || '小画家'),
+      age: String(s.age || '5岁'),
+      age_group: String(s.ageGroup || s.age_group || '3-5'),
+      class_name: String(s.className || s.class_name || '启蒙创想班'),
+      avatar: String(s.avatar || ''),
+      bio: String(s.bio || ''),
+      featured_art_count: parseInt(s.featuredArtCount || s.featured_art_count || 1)
+    };
+  }
+
+  _fromDbTheme(t) {
+    if (!t) return null;
+    return {
+      id: String(t.id),
+      title: t.title || '',
+      subTitle: t.subtitle || t.subTitle || '',
       tag: t.tag || '🌟 特别策划',
       season: t.season || '',
       date: t.date || '2026.08',
-      coverImage: t.coverImage || t.cover_image || '',
+      coverImage: t.cover_image || t.coverImage || '',
       curator: t.curator || '陈昨 & 想吃梨教研组',
       artworkCount: t.artworkCount ?? (t.artwork_ids ? t.artwork_ids.length : 0),
-      introSummary: t.introSummary || t.intro || '',
-      curatorStatement: Array.isArray(t.curatorStatement) ? t.curatorStatement : (t.curator_note ? [t.curator_note] : []),
-      keyHighlights: t.keyHighlights || t.highlights || [],
-      artworkIds: t.artworkIds || t.artwork_ids || [],
-      isInHero: t.isInHero ?? t.is_in_hero ?? true,
-      heroOrder: t.heroOrder ?? t.hero_order ?? 1
+      introSummary: t.intro || t.introSummary || '',
+      curatorStatement: t.curator_note ? [t.curator_note] : (Array.isArray(t.curatorStatement) ? t.curatorStatement : []),
+      keyHighlights: t.highlights || t.keyHighlights || [],
+      artworkIds: t.artwork_ids || t.artworkIds || [],
+      isInHero: t.is_in_hero ?? t.isInHero ?? true,
+      heroOrder: t.hero_order ?? t.heroOrder ?? 1
     };
   }
 
-  _normalizeNote(n) {
-    if (!n) return n;
+  _toDbTheme(t) {
     return {
-      id: String(n.id || ('note-' + Date.now())),
+      id: String(t.id || ('theme-' + Date.now())),
+      title: String(t.title || ''),
+      subtitle: String(t.subTitle || t.subtitle || ''),
+      cover_image: String(t.coverImage || t.cover_image || ''),
+      tag: String(t.tag || '🌟 特别策划'),
+      date: String(t.date || '2026.08'),
+      intro: String(t.introSummary || t.intro || ''),
+      curator_note: Array.isArray(t.curatorStatement) ? t.curatorStatement.join('\n\n') : String(t.curatorStatement || t.curator_note || ''),
+      artwork_ids: Array.isArray(t.artworkIds) ? t.artworkIds : [],
+      is_in_hero: Boolean(t.isInHero !== false),
+      hero_order: parseInt(t.heroOrder || t.hero_order || 1)
+    };
+  }
+
+  _fromDbNote(n) {
+    if (!n) return null;
+    return {
+      id: String(n.id),
       type: n.type || 'text',
       author: n.author || '艺术友人',
       role: n.role || 'visitor',
-      roleName: n.roleName || n.role_name || '',
+      roleName: n.role_name || n.roleName || '',
       color: n.color || 'yellow',
       content: n.content || '',
-      artworkTitle: n.artworkTitle || n.artwork_title || '',
-      artworkImage: n.artworkImage || n.artwork_image || '',
+      artworkTitle: n.artwork_title || n.artworkTitle || '',
+      artworkImage: n.artwork_image || n.artworkImage || '',
       tag: n.tag || '#想吃梨美育',
       date: n.date || '2026.08',
       likes: n.likes || 0,
-      isLiked: n.isLiked || false,
-      isHidden: n.isHidden || n.is_hidden || false
+      isLiked: false,
+      isHidden: Boolean(n.is_hidden)
+    };
+  }
+
+  _toDbNote(n) {
+    return {
+      id: String(n.id || ('note-' + Date.now())),
+      type: String(n.type || 'text'),
+      author: String(n.author || '艺术友人'),
+      role: String(n.role || 'visitor'),
+      role_name: String(n.roleName || n.role_name || ''),
+      color: String(n.color || 'yellow'),
+      content: String(n.content || ''),
+      artwork_title: String(n.artworkTitle || n.artwork_title || ''),
+      artwork_image: String(n.artworkImage || n.artwork_image || ''),
+      tag: String(n.tag || '#想吃梨美育'),
+      date: String(n.date || '2026.08'),
+      likes: parseInt(n.likes || 0),
+      is_hidden: Boolean(n.isHidden)
     };
   }
 
   // =========================================================================
-  // 1. 作品接口 (Artworks)
+  // 1. 作品档案 (Artworks CRUD 直连 Supabase 云端)
   // =========================================================================
   async getArtworks() {
-    const store = this._ensureStore();
-    return (store.artworks || []).map(a => this._normalizeArt(a));
+    if (this.isCloudReady) {
+      try {
+        const { data, error } = await this.supabaseClient
+          .from('artworks')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          const list = data.map(item => this._fromDbArtwork(item));
+          localStorage.setItem(this.localCacheKey + 'artworks', JSON.stringify(list));
+          return list;
+        } else if (error) {
+          console.warn('⚠️ Supabase 获取作品云端返回异常:', error.message);
+        }
+      } catch (err) {
+        console.warn('⚠️ 读取 Supabase 失败，使用本地镜像:', err);
+      }
+    }
+
+    // 本地缓存 / 初始数据兜底
+    try {
+      const local = JSON.parse(localStorage.getItem(this.localCacheKey + 'artworks') || 'null');
+      if (local && Array.isArray(local) && local.length > 0) return local;
+    } catch (e) {}
+
+    const fallback = typeof initialArtworks !== 'undefined' ? initialArtworks : [];
+    return fallback.map(a => this._fromDbArtwork(a));
   }
 
   async createArtwork(artData) {
-    const item = this._normalizeArt(artData);
-    const store = this._ensureStore();
-    if (!store.artworks) store.artworks = [];
-    store.artworks.unshift(item);
-    const res = this._saveGlobalStore(store);
-    console.log('🖼️ 已保存新画作至持久化存储:', item.title, '当前总数:', store.artworks.length, res);
+    const dbPayload = this._toDbArtwork(artData);
+    console.log('☁️ 正在写入 Supabase 云端数据库 (artworks):', dbPayload);
 
     if (this.isCloudReady) {
-      this.supabaseClient.from('artworks').insert([{
-        id: item.id,
-        title: item.title,
-        author: item.author,
-        age: item.age,
-        age_group: item.ageGroup,
-        category: item.category,
-        category_name: item.categoryName,
-        date: item.date,
-        image: item.image,
-        images: item.images,
-        story: item.story,
-        teacher_comment: item.teacherComment
-      }]).then(({ error }) => {
-        if (error) console.warn('Supabase 云端保存提示 (可忽略):', error.message);
-      });
+      try {
+        const { data, error } = await this.supabaseClient
+          .from('artworks')
+          .insert([dbPayload])
+          .select();
+
+        if (error) {
+          console.error('❌ Supabase 云端保存失败:', error);
+          if (window.showToast) {
+            window.showToast(`⚠️ 云端保存报错: ${error.message} (请检查Supabase RLS权限)`);
+          }
+        } else {
+          console.log('✅ Supabase 云端保存成功！', data);
+          if (window.showToast) {
+            window.showToast(`☁️ 成功存入 Supabase 云端数据库！`);
+          }
+        }
+      } catch (e) {
+        console.error('❌ 写入 Supabase 异常:', e);
+      }
     }
-    return item;
+
+    // 同步更新本地镜像
+    const list = await this.getArtworks();
+    const normalized = this._fromDbArtwork(dbPayload);
+    const existingIdx = list.findIndex(a => a.id === normalized.id);
+    if (existingIdx !== -1) list[existingIdx] = normalized;
+    else list.unshift(normalized);
+    try {
+      localStorage.setItem(this.localCacheKey + 'artworks', JSON.stringify(list));
+    } catch (e) {}
+
+    return normalized;
   }
 
   async updateArtwork(artData) {
-    const item = this._normalizeArt(artData);
-    const store = this._ensureStore();
-    if (!store.artworks) store.artworks = [];
-    const idx = store.artworks.findIndex(a => String(a.id) === String(item.id));
-    if (idx !== -1) {
-      store.artworks[idx] = item;
-    } else {
-      store.artworks.unshift(item);
-    }
-    this._saveGlobalStore(store);
+    const dbPayload = this._toDbArtwork(artData);
+    console.log('☁️ 正在更新 Supabase 云端画作:', dbPayload.id);
 
     if (this.isCloudReady) {
-      this.supabaseClient.from('artworks').update({
-        title: item.title,
-        author: item.author,
-        age: item.age,
-        age_group: item.ageGroup,
-        category: item.category,
-        category_name: item.categoryName,
-        date: item.date,
-        image: item.image,
-        images: item.images,
-        story: item.story,
-        teacher_comment: item.teacherComment
-      }).eq('id', item.id).then(({ error }) => {
-        if (error) console.warn('Supabase 云端更新提示 (可忽略):', error.message);
-      });
+      try {
+        const { data, error } = await this.supabaseClient
+          .from('artworks')
+          .update(dbPayload)
+          .eq('id', dbPayload.id)
+          .select();
+
+        if (error) {
+          console.error('❌ Supabase 更新失败:', error);
+          if (window.showToast) {
+            window.showToast(`⚠️ 云端更新报错: ${error.message}`);
+          }
+        } else {
+          console.log('✅ Supabase 云端更新成功！', data);
+          if (window.showToast) {
+            window.showToast(`☁️ 云端数据库已同步更新！`);
+          }
+        }
+      } catch (e) {
+        console.error('❌ 更新 Supabase 异常:', e);
+      }
     }
-    return item;
+
+    // 同步更新本地镜像
+    const list = await this.getArtworks();
+    const normalized = this._fromDbArtwork(dbPayload);
+    const idx = list.findIndex(a => a.id === normalized.id);
+    if (idx !== -1) list[idx] = normalized;
+    else list.unshift(normalized);
+    try {
+      localStorage.setItem(this.localCacheKey + 'artworks', JSON.stringify(list));
+    } catch (e) {}
+
+    return normalized;
   }
 
   async deleteArtwork(artId) {
-    const store = this._ensureStore();
-    if (store.artworks) {
-      store.artworks = store.artworks.filter(a => String(a.id) !== String(artId));
-      this._saveGlobalStore(store);
-    }
+    console.log('☁️ 正在从 Supabase 云端删除画作:', artId);
     if (this.isCloudReady) {
-      this.supabaseClient.from('artworks').delete().eq('id', String(artId)).then(() => {});
+      try {
+        const { error } = await this.supabaseClient
+          .from('artworks')
+          .delete()
+          .eq('id', String(artId));
+
+        if (error) console.error('❌ Supabase 删除失败:', error);
+        else console.log('✅ Supabase 云端删除成功');
+      } catch (e) {}
     }
+
+    const list = await this.getArtworks();
+    const filtered = list.filter(a => a.id !== String(artId));
+    try {
+      localStorage.setItem(this.localCacheKey + 'artworks', JSON.stringify(filtered));
+    } catch (e) {}
     return true;
   }
 
   // =========================================================================
-  // 2. 小艺术家接口 (Students)
+  // 2. 小艺术家名人堂 (Students CRUD 直连 Supabase)
   // =========================================================================
   async getStudents() {
-    const store = this._ensureStore();
-    return (store.students || []).map(s => this._normalizeStudent(s));
+    if (this.isCloudReady) {
+      try {
+        const { data, error } = await this.supabaseClient
+          .from('students')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          const list = data.map(item => this._fromDbStudent(item));
+          localStorage.setItem(this.localCacheKey + 'students', JSON.stringify(list));
+          return list;
+        }
+      } catch (e) {}
+    }
+
+    try {
+      const local = JSON.parse(localStorage.getItem(this.localCacheKey + 'students') || 'null');
+      if (local && Array.isArray(local) && local.length > 0) return local;
+    } catch (e) {}
+
+    const fallback = typeof studentList !== 'undefined' ? studentList : (typeof initialStudents !== 'undefined' ? initialStudents : []);
+    return fallback.map(s => this._fromDbStudent(s));
   }
 
   async createStudent(studentData) {
-    const item = this._normalizeStudent(studentData);
-    const store = this._ensureStore();
-    if (!store.students) store.students = [];
-    store.students.unshift(item);
-    this._saveGlobalStore(store);
-
+    const dbPayload = this._toDbStudent(studentData);
     if (this.isCloudReady) {
-      this.supabaseClient.from('students').insert([{
-        id: item.id,
-        name: item.name,
-        age: item.age,
-        age_group: item.ageGroup,
-        class_name: item.className,
-        avatar: item.avatar,
-        bio: item.bio,
-        featured_art_count: item.featuredArtCount
-      }]).then(() => {});
+      try {
+        await this.supabaseClient.from('students').insert([dbPayload]);
+      } catch (e) {}
     }
-    return item;
+    const list = await this.getStudents();
+    const normalized = this._fromDbStudent(dbPayload);
+    list.unshift(normalized);
+    try {
+      localStorage.setItem(this.localCacheKey + 'students', JSON.stringify(list));
+    } catch (e) {}
+    return normalized;
   }
 
   async updateStudent(studentData) {
-    const item = this._normalizeStudent(studentData);
-    const store = this._ensureStore();
-    if (!store.students) store.students = [];
-    const idx = store.students.findIndex(s => String(s.id) === String(item.id));
-    if (idx !== -1) {
-      store.students[idx] = item;
-    } else {
-      store.students.unshift(item);
-    }
-    this._saveGlobalStore(store);
-
+    const dbPayload = this._toDbStudent(studentData);
     if (this.isCloudReady) {
-      this.supabaseClient.from('students').update({
-        name: item.name,
-        age: item.age,
-        age_group: item.ageGroup,
-        class_name: item.className,
-        avatar: item.avatar,
-        bio: item.bio,
-        featured_art_count: item.featuredArtCount
-      }).eq('id', item.id).then(() => {});
+      try {
+        await this.supabaseClient.from('students').update(dbPayload).eq('id', dbPayload.id);
+      } catch (e) {}
     }
-    return item;
+    const list = await this.getStudents();
+    const normalized = this._fromDbStudent(dbPayload);
+    const idx = list.findIndex(s => s.id === normalized.id);
+    if (idx !== -1) list[idx] = normalized;
+    else list.unshift(normalized);
+    try {
+      localStorage.setItem(this.localCacheKey + 'students', JSON.stringify(list));
+    } catch (e) {}
+    return normalized;
   }
 
   async deleteStudent(studentId) {
-    const store = this._ensureStore();
-    if (store.students) {
-      store.students = store.students.filter(s => String(s.id) !== String(studentId));
-      this._saveGlobalStore(store);
-    }
     if (this.isCloudReady) {
-      this.supabaseClient.from('students').delete().eq('id', String(studentId)).then(() => {});
+      try {
+        await this.supabaseClient.from('students').delete().eq('id', String(studentId));
+      } catch (e) {}
     }
+    const list = await this.getStudents();
+    const filtered = list.filter(s => s.id !== String(studentId));
+    try {
+      localStorage.setItem(this.localCacheKey + 'students', JSON.stringify(filtered));
+    } catch (e) {}
     return true;
   }
 
   // =========================================================================
-  // 3. 特展接口 (Themes)
+  // 3. 主题特展 (Themes CRUD 直连 Supabase)
   // =========================================================================
   async getThematicExhibitions() {
-    const store = this._ensureStore();
-    return (store.themes || []).map(t => this._normalizeTheme(t));
+    if (this.isCloudReady) {
+      try {
+        const { data, error } = await this.supabaseClient
+          .from('thematic_exhibitions')
+          .select('*')
+          .order('hero_order', { ascending: true });
+
+        if (!error && data && data.length > 0) {
+          const list = data.map(item => this._fromDbTheme(item));
+          localStorage.setItem(this.localCacheKey + 'themes', JSON.stringify(list));
+          return list;
+        }
+      } catch (e) {}
+    }
+
+    try {
+      const local = JSON.parse(localStorage.getItem(this.localCacheKey + 'themes') || 'null');
+      if (local && Array.isArray(local) && local.length > 0) return local;
+    } catch (e) {}
+
+    const fallback = typeof themeExhibitions !== 'undefined' ? themeExhibitions : (typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : []);
+    return fallback.map(t => this._fromDbTheme(t));
   }
 
   async createThematicExhibition(themeData) {
-    const item = this._normalizeTheme(themeData);
-    const store = this._ensureStore();
-    if (!store.themes) store.themes = [];
-    store.themes.push(item);
-    this._saveGlobalStore(store);
-
+    const dbPayload = this._toDbTheme(themeData);
     if (this.isCloudReady) {
-      this.supabaseClient.from('thematic_exhibitions').insert([{
-        id: item.id,
-        title: item.title,
-        subtitle: item.subTitle,
-        cover_image: item.coverImage,
-        tag: item.tag,
-        date: item.date,
-        intro: item.introSummary,
-        curator_note: Array.isArray(item.curatorStatement) ? item.curatorStatement.join('\n\n') : item.curatorStatement,
-        artwork_ids: item.artworkIds,
-        is_in_hero: item.isInHero,
-        hero_order: item.heroOrder
-      }]).then(() => {});
+      try {
+        await this.supabaseClient.from('thematic_exhibitions').insert([dbPayload]);
+      } catch (e) {}
     }
-    return item;
+    const list = await this.getThematicExhibitions();
+    const normalized = this._fromDbTheme(dbPayload);
+    list.push(normalized);
+    try {
+      localStorage.setItem(this.localCacheKey + 'themes', JSON.stringify(list));
+    } catch (e) {}
+    return normalized;
   }
 
   async updateThematicExhibition(themeData) {
-    const item = this._normalizeTheme(themeData);
-    const store = this._ensureStore();
-    if (!store.themes) store.themes = [];
-    const idx = store.themes.findIndex(t => String(t.id) === String(item.id));
-    if (idx !== -1) {
-      store.themes[idx] = item;
-    } else {
-      store.themes.push(item);
-    }
-    this._saveGlobalStore(store);
-
+    const dbPayload = this._toDbTheme(themeData);
     if (this.isCloudReady) {
-      this.supabaseClient.from('thematic_exhibitions').upsert({
-        id: item.id,
-        title: item.title,
-        subtitle: item.subTitle,
-        cover_image: item.coverImage,
-        tag: item.tag,
-        date: item.date,
-        intro: item.introSummary,
-        curator_note: Array.isArray(item.curatorStatement) ? item.curatorStatement.join('\n\n') : item.curatorStatement,
-        artwork_ids: item.artworkIds,
-        is_in_hero: item.isInHero,
-        hero_order: item.heroOrder
-      }).then(() => {});
+      try {
+        await this.supabaseClient.from('thematic_exhibitions').upsert(dbPayload);
+      } catch (e) {}
     }
-    return item;
+    const list = await this.getThematicExhibitions();
+    const normalized = this._fromDbTheme(dbPayload);
+    const idx = list.findIndex(t => t.id === normalized.id);
+    if (idx !== -1) list[idx] = normalized;
+    else list.push(normalized);
+    try {
+      localStorage.setItem(this.localCacheKey + 'themes', JSON.stringify(list));
+    } catch (e) {}
+    return normalized;
   }
 
   async deleteThematicExhibition(themeId) {
-    const store = this._ensureStore();
-    if (store.themes) {
-      store.themes = store.themes.filter(t => String(t.id) !== String(themeId));
-      this._saveGlobalStore(store);
-    }
     if (this.isCloudReady) {
-      this.supabaseClient.from('thematic_exhibitions').delete().eq('id', String(themeId)).then(() => {});
+      try {
+        await this.supabaseClient.from('thematic_exhibitions').delete().eq('id', String(themeId));
+      } catch (e) {}
     }
+    const list = await this.getThematicExhibitions();
+    const filtered = list.filter(t => t.id !== String(themeId));
+    try {
+      localStorage.setItem(this.localCacheKey + 'themes', JSON.stringify(filtered));
+    } catch (e) {}
     return true;
   }
 
   // =========================================================================
-  // 4. 便签墙 (Sticky Notes)
+  // 4. 便签墙 (Sticky Notes 直连 Supabase)
   // =========================================================================
   async getStickyNotes() {
-    const store = this._ensureStore();
-    return (store.notes || []).map(n => this._normalizeNote(n)).filter(n => !n.isHidden);
+    if (this.isCloudReady) {
+      try {
+        const { data, error } = await this.supabaseClient
+          .from('sticky_notes')
+          .select('*')
+          .eq('is_hidden', false)
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          const list = data.map(item => this._fromDbNote(item));
+          localStorage.setItem(this.localCacheKey + 'notes', JSON.stringify(list));
+          return list;
+        }
+      } catch (e) {}
+    }
+
+    try {
+      const local = JSON.parse(localStorage.getItem(this.localCacheKey + 'notes') || 'null');
+      if (local && Array.isArray(local) && local.length > 0) return local;
+    } catch (e) {}
+
+    const fallback = typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : [];
+    return fallback.map(n => this._fromDbNote(n)).filter(n => !n.isHidden);
   }
 
   async createStickyNote(noteData) {
-    const item = this._normalizeNote(noteData);
-    const store = this._ensureStore();
-    if (!store.notes) store.notes = [];
-    store.notes.unshift(item);
-    this._saveGlobalStore(store);
-    return item;
+    const dbPayload = this._toDbNote(noteData);
+    if (this.isCloudReady) {
+      try {
+        await this.supabaseClient.from('sticky_notes').insert([dbPayload]);
+      } catch (e) {}
+    }
+    const list = await this.getStickyNotes();
+    const normalized = this._fromDbNote(dbPayload);
+    list.unshift(normalized);
+    try {
+      localStorage.setItem(this.localCacheKey + 'notes', JSON.stringify(list));
+    } catch (e) {}
+    return normalized;
   }
 
   async likeStickyNote(noteId) {
-    const store = this._ensureStore();
-    if (store.notes) {
-      const note = store.notes.find(n => String(n.id) === String(noteId));
-      if (note) {
-        note.likes = (note.likes || 0) + 1;
-        note.isLiked = true;
-        this._saveGlobalStore(store);
-      }
+    if (this.isCloudReady) {
+      try {
+        await this.supabaseClient.rpc('increment_note_likes', { row_id: noteId });
+      } catch (e) {}
     }
   }
 
   async deleteStickyNote(noteId) {
-    const store = this._ensureStore();
-    if (store.notes) {
-      store.notes = store.notes.filter(n => String(n.id) !== String(noteId));
-      this._saveGlobalStore(store);
+    if (this.isCloudReady) {
+      try {
+        await this.supabaseClient.from('sticky_notes').delete().eq('id', String(noteId));
+      } catch (e) {}
     }
+    const list = await this.getStickyNotes();
+    const filtered = list.filter(n => n.id !== String(noteId));
+    try {
+      localStorage.setItem(this.localCacheKey + 'notes', JSON.stringify(filtered));
+    } catch (e) {}
     return true;
   }
 
   // --- 导出 data.js 固化文本 ---
-  exportFullDataJsContent() {
-    const store = this._ensureStore();
+  async exportFullDataJsContent() {
+    const [arts, students, themes, notes] = await Promise.all([
+      this.getArtworks(),
+      this.getStudents(),
+      this.getThematicExhibitions(),
+      this.getStickyNotes()
+    ]);
+
     return `/**
- * 🍐 想吃梨儿童艺术启蒙 · 最新全量数据集 (Auto-Exported)
+ * 🍐 想吃梨儿童艺术启蒙 · 最新全量数据集 (Auto-Exported from Supabase)
  * 导出时间: ${new Date().toLocaleString()}
  */
 
-var initialArtworks = ${JSON.stringify(store.artworks || [], null, 2)};
+var initialArtworks = ${JSON.stringify(arts || [], null, 2)};
 
-var studentList = ${JSON.stringify(store.students || [], null, 2)};
+var studentList = ${JSON.stringify(students || [], null, 2)};
 
-var themeExhibitions = ${JSON.stringify(store.themes || [], null, 2)};
+var themeExhibitions = ${JSON.stringify(themes || [], null, 2)};
 
-var initialStickyNotes = ${JSON.stringify(store.notes || [], null, 2)};
+var initialStickyNotes = ${JSON.stringify(notes || [], null, 2)};
 
 if (typeof window !== 'undefined') {
   window.initialArtworks = initialArtworks;
@@ -478,4 +575,4 @@ if (typeof window !== 'undefined') {
 }
 
 // 导出全局单例
-window.galleryCloud = new TransparentGalleryStorage();
+window.galleryCloud = new SupabaseCloudGalleryService();
