@@ -1727,7 +1727,14 @@
       initAdminGateway();
       setupLightDismiss();
       startCarouselTimer();
-      await syncDataFromCloud();
+      lucide.createIcons();
+
+      try {
+        await syncDataFromCloud();
+      } catch (e) {
+        console.error('前台同步云端数据异常:', e);
+      }
+      lucide.createIcons();
 
       // 扫码直达画作深链接解析与弹窗展示
       const urlParams = new URLSearchParams(window.location.search);
@@ -1757,7 +1764,8 @@
     // 🌟 首页顶部：主题特展焦点大轮播 (Thematic Exhibition Carousel)
     // ==========================================
     function getFeaturedThemes() {
-      return themeExhibitions.filter(t => t.isInHero !== false);
+      if (!Array.isArray(themeExhibitions)) return [];
+      return themeExhibitions.filter(t => t && t.isInHero !== false);
     }
 
     function renderCuratedCarousel() {
@@ -1769,15 +1777,19 @@
 
       if (activeThemes.length === 0) {
         box.innerHTML = `
-          <div class="carousel-slide active flex items-center justify-center bg-stone-900 text-stone-300">
-            <div class="text-center p-6">
-              <div class="text-4xl mb-2">🏛️</div>
-              <h3 class="font-black text-lg text-white">当前暂无正在展出的主题特展</h3>
-              <p class="text-xs text-stone-400 mt-1">主理人可随时通过【管理首页特展排期】上线或策划新特展</p>
+          <div class="carousel-slide active flex items-center justify-center bg-gradient-to-br from-stone-950 via-[#0F1E14] to-stone-950 text-stone-300 w-full h-full">
+            <div class="text-center p-6 max-w-lg">
+              <div class="text-4xl mb-3 animate-bounce">🍐</div>
+              <h3 class="font-black text-xl sm:text-2xl text-white tracking-tight">想吃梨儿童艺术启蒙 · 线上美育展厅</h3>
+              <p class="text-xs sm:text-sm text-stone-400 mt-2 leading-relaxed">让每一个孩子的自由想象与童心笔触，在专属的数字艺术殿堂中永久珍藏</p>
+              <div class="mt-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#10E57A]/15 border border-[#10E57A]/30 text-[#10E57A] text-xs font-bold">
+                <span>🎨 正在展出 ${artworks.length} 件少儿力作</span>
+              </div>
             </div>
           </div>
         `;
         indBox.innerHTML = '';
+        lucide.createIcons();
         return;
       }
 
@@ -2704,12 +2716,14 @@
       const empty = document.getElementById('emptyState');
       
       let filtered = artworks.filter(item => {
-        const matchAge = currentAgeFilter === 'all' || item.ageGroup === currentAgeFilter;
-        const matchSearch = !currentSearchTerm || 
-          item.title.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-          item.author.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-          item.teacherComment.toLowerCase().includes(currentSearchTerm.toLowerCase());
-        return matchAge && matchSearch;
+        if (!item) return false;
+        const matchAge = currentAgeFilter === 'all' || (item.ageGroup || '') === currentAgeFilter;
+        const sTerm = (currentSearchTerm || '').toLowerCase().trim();
+        if (!sTerm) return matchAge;
+        const titleMatch = (item.title || '').toLowerCase().includes(sTerm);
+        const authorMatch = (item.author || '').toLowerCase().includes(sTerm);
+        const commentMatch = (item.teacherComment || '').toLowerCase().includes(sTerm);
+        return matchAge && (titleMatch || authorMatch || commentMatch);
       });
 
       if (filtered.length === 0) {
@@ -2794,13 +2808,16 @@
       const grid = document.getElementById('hallGrid');
       
       let filtered = studentList.filter(s => {
-        return !currentHallSearch || 
-          s.name.toLowerCase().includes(currentHallSearch.toLowerCase()) ||
-          s.className.toLowerCase().includes(currentHallSearch.toLowerCase());
+        if (!s) return false;
+        const sTerm = (currentHallSearch || '').toLowerCase().trim();
+        if (!sTerm) return true;
+        const nameMatch = (s.name || '').toLowerCase().includes(sTerm);
+        const classMatch = (s.className || '').toLowerCase().includes(sTerm);
+        return nameMatch || classMatch;
       });
 
       filtered.forEach(s => {
-        const count = artworks.filter(a => a.author === s.name).length;
+        const count = artworks.filter(a => a && a.author === s.name).length;
         s.actualCount = count;
       });
 
