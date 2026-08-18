@@ -1492,8 +1492,10 @@
   <script src="data.js?v=20260818"></script>
   <script src="cloudConfig.js?v=20260818"></script>
   <script>
-    let artworks = [...initialArtworks];
-    let stickyNotes = typeof initialStickyNotes !== 'undefined' ? [...initialStickyNotes] : [];
+    let artworks = [];
+    let studentList = [];
+    let themeExhibitions = [];
+    let stickyNotes = [];
     let currentView = 'gallery';
     let currentAgeFilter = 'all';
     let currentSearchTerm = '';
@@ -1509,7 +1511,6 @@
     // 轮播状态
     let currentCarouselIndex = 0;
     let carouselInterval = null;
-    const featuredThemes = [...themeExhibitions];
 
     function initTheme() {
       const savedTheme = localStorage.getItem('art_gallery_theme');

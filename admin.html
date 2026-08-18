@@ -1174,13 +1174,10 @@
       if (id) {
         // 编辑更新
         if (window.galleryCloud) await window.galleryCloud.updateArtwork(artData);
-        const idx = adminArtworks.findIndex(a => a.id === id);
-        if (idx !== -1) adminArtworks[idx] = artData;
         showToast(`✨ 画作《${title}》档案修改成功！`);
       } else {
         // 录入新增
         if (window.galleryCloud) await window.galleryCloud.createArtwork(artData);
-        adminArtworks.unshift(artData);
         showToast(`🎉 成功录入新画作《${title}》！`);
       }
 
@@ -1198,23 +1195,18 @@
           featuredArtCount: 1
         };
         if (window.galleryCloud) await window.galleryCloud.createStudent(newStudent);
-        adminStudents.unshift(newStudent);
       }
 
       closeArtworkModal();
-      renderAdminArtworksTable();
-      renderAdminStudentsGrid();
-      renderOverviewStats();
+      await loadAllAdminData();
     }
 
     async function adminDeleteArtwork(id) {
       const art = adminArtworks.find(a => a.id === id);
       if (confirm(`【主理人管理】确定要删除画作《${art ? art.title : id}》吗？`)) {
         if (window.galleryCloud) await window.galleryCloud.deleteArtwork(id);
-        adminArtworks = adminArtworks.filter(a => a.id !== id);
-        renderAdminArtworksTable();
-        renderOverviewStats();
         showToast('🗑️ 画作已下架删除！');
+        await loadAllAdminData();
       }
     }
 
