@@ -1482,14 +1482,7 @@
     <source src="https://assets.mixkit.co/music/preview/mixkit-gentle-piano-love-story-554.mp3" type="audio/mpeg">
   </audio>
 
-  <!-- 引入Supabase云SDK、基础数据集与云服务网关 (官方 CDN + unpkg 双容灾) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    if (!window.supabase) {
-      document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
-    }
-  </script>
-  <script src="data.js?v=20260818"></script>
+  <!-- 🍐 纯原生零依赖 Supabase 云数据库直连引擎 -->
   <script src="cloudConfig.js?v=20260818"></script>
   <script>
     let artworks = [];
