@@ -14,8 +14,13 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Supabase JS SDK & 云端服务 -->
+  <!-- Supabase JS SDK 官方 CDN + unpkg 双容灾 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    if (!window.supabase) {
+      document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
+    }
+  </script>
   <script src="data.js?v=20260818"></script>
   <script src="cloudConfig.js?v=20260818"></script>
   <link rel="stylesheet" href="style.css?v=20260818">

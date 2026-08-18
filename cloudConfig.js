@@ -24,17 +24,36 @@ class SupabaseCloudGalleryService {
   }
 
   init() {
-    if (CLOUD_CONFIG.supabase.enabled && window.supabase) {
-      try {
-        this.supabaseClient = window.supabase.createClient(
-          CLOUD_CONFIG.supabase.url,
-          CLOUD_CONFIG.supabase.anonKey
-        );
-        this.isCloudReady = true;
-        console.log('☁️ Supabase 云端数据库客户端初始化成功:', CLOUD_CONFIG.supabase.url);
-      } catch (e) {
-        console.error('❌ Supabase 客户端初始化失败:', e);
+    const doConnect = () => {
+      if (CLOUD_CONFIG.supabase.enabled && window.supabase) {
+        try {
+          this.supabaseClient = window.supabase.createClient(
+            CLOUD_CONFIG.supabase.url,
+            CLOUD_CONFIG.supabase.anonKey
+          );
+          this.isCloudReady = true;
+          console.log('☁️ Supabase 云端数据库客户端连接就绪:', CLOUD_CONFIG.supabase.url);
+          const badge = document.getElementById('cloudStatusBadge');
+          if (badge) {
+            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-[#10E57A] animate-pulse"></span><span>Supabase 云数据库已连接</span>`;
+            badge.classList.remove('hidden');
+          }
+          return true;
+        } catch (e) {
+          console.error('❌ Supabase 客户端初始化失败:', e);
+        }
       }
+      return false;
+    };
+
+    if (!doConnect()) {
+      let attempts = 0;
+      const timer = setInterval(() => {
+        attempts++;
+        if (doConnect() || attempts > 20) {
+          clearInterval(timer);
+        }
+      }, 150);
     }
   }
 
