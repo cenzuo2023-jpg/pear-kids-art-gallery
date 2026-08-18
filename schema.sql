@@ -117,3 +117,9 @@ GRANT ALL ON ALL ROUTINES IN SCHEMA public TO anon, authenticated, service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated, service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON ROUTINES TO anon, authenticated, service_role;
+
+-- 彻底解除 Supabase 行级安全策略 (RLS)，允许前端管理中心直接匿名读写
+ALTER TABLE IF EXISTS artworks DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS students DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS thematic_exhibitions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS sticky_notes DISABLE ROW LEVEL SECURITY;
