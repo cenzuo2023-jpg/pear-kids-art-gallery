@@ -182,6 +182,15 @@
         <span>💬 美育便签墙审核</span>
       </button>
 
+      <button 
+        onclick="switchAdminTab('backup')" 
+        id="tab-btn-backup" 
+        class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap text-emerald-400"
+      >
+        <i data-lucide="shield-check" class="w-4 h-4 text-[#10E57A]"></i>
+        <span class="text-emerald-300 font-black">🛡️ 数据固化与安全</span>
+      </button>
+
       <div class="mt-auto hidden md:block pt-6 border-t border-white/[0.06]">
         <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-300 space-y-1">
           <div class="font-black flex items-center gap-1">
@@ -411,6 +420,107 @@
         <!-- 便签审核网格列表 -->
         <div id="adminNotesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <!-- JS 动态渲染 -->
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- 模块 6：🛡️ 数据固化与安全中心 (Data Freeze & Backup Center) -->
+      <!-- ===================================================================== -->
+      <section id="admin-view-backup" class="space-y-6 hidden">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+            <span>🛡️ 数据安全与永久固化中心</span>
+          </h2>
+          <p class="text-xs text-stone-400 mt-1">
+            将你在后台录入编辑好的所有作品、小艺术家、特展排期永久固化锁定，彻底杜绝数据丢失或被覆盖
+          </p>
+        </div>
+
+        <!-- 实时数据资产卡片 -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="p-4 rounded-2xl bg-stone-900/80 border border-white/10">
+            <div class="text-xs text-stone-400 font-mono mb-1">已收录画作</div>
+            <div id="backupStatArtCount" class="text-2xl font-black text-[#10E57A]">0</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-stone-900/80 border border-white/10">
+            <div class="text-xs text-stone-400 font-mono mb-1">小艺术家</div>
+            <div id="backupStatStudentCount" class="text-2xl font-black text-amber-400">0</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-stone-900/80 border border-white/10">
+            <div class="text-xs text-stone-400 font-mono mb-1">主题特展</div>
+            <div id="backupStatThemeCount" class="text-2xl font-black text-teal-400">0</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-stone-900/80 border border-white/10">
+            <div class="text-xs text-stone-400 font-mono mb-1">社区便签</div>
+            <div id="backupStatNoteCount" class="text-2xl font-black text-purple-400">0</div>
+          </div>
+        </div>
+
+        <!-- 方案 1：源码级永久固化 (最推荐) -->
+        <div class="p-6 rounded-3xl bg-gradient-to-br from-emerald-500/10 via-[#10E57A]/5 to-transparent border border-emerald-500/30 space-y-4">
+          <div class="flex items-start justify-between gap-4">
+            <div class="space-y-1">
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-[#10E57A] font-black text-[11px] font-mono">
+                ⭐ 推荐方案 · 永久锁定数据
+              </div>
+              <h3 class="text-lg font-black text-white">方案一：固化锁定到 GitHub 项目源码中</h3>
+              <p class="text-xs text-stone-300 leading-relaxed">
+                将当前后台的所有最新数据直接打包固化为标准 <code class="px-1.5 py-0.5 rounded bg-black/40 text-emerald-300">data.js</code> 文件。替换到代码库后，无论以后网站重新部署 100 次、还是在全世界任何电脑/手机打开，展示的都是这套锁定的数据！
+              </p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <button 
+              onclick="copyDataJsCode()" 
+              class="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 font-black text-xs shadow-lg shadow-emerald-500/25 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <span>📋 复制最新固化数据代码</span>
+            </button>
+
+            <button 
+              onclick="downloadBackupDataJs()" 
+              class="px-5 py-3 rounded-2xl bg-stone-800 hover:bg-stone-700 text-stone-100 font-bold text-xs border border-white/10 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <span>📥 下载固化 data.js 文件</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 方案 2：本地 JSON 档案文件备份与导入恢复 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 导出 JSON -->
+          <div class="p-5 rounded-2xl bg-stone-900/90 border border-white/10 space-y-3">
+            <h4 class="font-black text-sm text-white flex items-center gap-2">
+              <span>💾 本地 JSON 档案备份</span>
+            </h4>
+            <p class="text-xs text-stone-400 leading-relaxed">
+              将画廊目前所有录入的作品与学员档案一键保存为 JSON 备份文件存放在你自己的电脑上。
+            </p>
+            <button 
+              onclick="exportFullJsonBackup()" 
+              class="w-full py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold transition-all border border-white/10 cursor-pointer"
+            >
+              📤 导出全量 JSON 备份文件
+            </button>
+          </div>
+
+          <!-- 导入 JSON -->
+          <div class="p-5 rounded-2xl bg-stone-900/90 border border-white/10 space-y-3">
+            <h4 class="font-black text-sm text-white flex items-center gap-2">
+              <span>📥 导入 JSON 档案恢复</span>
+            </h4>
+            <p class="text-xs text-stone-400 leading-relaxed">
+              如果你在其他电脑上做过备份，可选择本地的 JSON 备份文件，一键恢复所有数据。
+            </p>
+            <input type="file" id="jsonImportInput" accept=".json" class="hidden" onchange="importJsonBackup(event)">
+            <button 
+              onclick="document.getElementById('jsonImportInput').click()" 
+              class="w-full py-2.5 rounded-xl bg-stone-800 hover:bg-amber-500 hover:text-stone-950 text-stone-200 text-xs font-bold transition-all border border-white/10 cursor-pointer"
+            >
+              📥 选择 JSON 备份文件一键恢复
+            </button>
+          </div>
         </div>
       </section>
 
@@ -812,6 +922,15 @@
       document.getElementById('stat-student-count').textContent = adminStudents.length;
       document.getElementById('stat-theme-count').textContent = adminThemes.length;
       document.getElementById('stat-note-count').textContent = adminNotes.length;
+
+      const bArt = document.getElementById('backupStatArtCount');
+      if (bArt) bArt.textContent = adminArtworks.length;
+      const bStu = document.getElementById('backupStatStudentCount');
+      if (bStu) bStu.textContent = adminStudents.length;
+      const bTheme = document.getElementById('backupStatThemeCount');
+      if (bTheme) bTheme.textContent = adminThemes.length;
+      const bNote = document.getElementById('backupStatNoteCount');
+      if (bNote) bNote.textContent = adminNotes.length;
     }
 
     function updateAuthorDropdowns() {
@@ -1500,6 +1619,70 @@
         document.getElementById('curatorPasswordInput').value = '';
       }
       showToast('🔒 已锁定主理人后台');
+    }
+
+    function copyDataJsCode() {
+      if (!window.galleryCloud || !window.galleryCloud.exportFullDataJsContent) return;
+      const content = window.galleryCloud.exportFullDataJsContent();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(content).then(() => {
+          showToast('📋 已复制最新 data.js 固化代码！可发给助理一键推送到 GitHub');
+        }).catch(() => {
+          downloadBackupDataJs();
+        });
+      } else {
+        downloadBackupDataJs();
+      }
+    }
+
+    function exportFullJsonBackup() {
+      const backupData = {
+        version: '2.0',
+        exportedAt: new Date().toISOString(),
+        artworks: adminArtworks,
+        students: adminStudents,
+        themes: adminThemes,
+        notes: adminNotes
+      };
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pear-gallery-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('📤 已成功导出全量 JSON 备份到电脑！');
+    }
+
+    function importJsonBackup(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          if (parsed.artworks && Array.isArray(parsed.artworks)) {
+            localStorage.setItem('pear_gallery_v2_artworks', JSON.stringify(parsed.artworks));
+          }
+          if (parsed.students && Array.isArray(parsed.students)) {
+            localStorage.setItem('pear_gallery_v2_students', JSON.stringify(parsed.students));
+          }
+          if (parsed.themes && Array.isArray(parsed.themes)) {
+            localStorage.setItem('pear_gallery_v2_themes', JSON.stringify(parsed.themes));
+          }
+          if (parsed.notes && Array.isArray(parsed.notes)) {
+            localStorage.setItem('pear_gallery_v2_notes', JSON.stringify(parsed.notes));
+          }
+          showToast('🎉 成功导入备份数据，正在刷新展厅...');
+          await loadAllAdminData();
+        } catch (err) {
+          showToast('❌ 导入失败，文件格式有误');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
     }
 
     function downloadBackupDataJs() {

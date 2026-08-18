@@ -40,15 +40,40 @@ class RockSolidStorage {
     }
   }
 
-  // --- 同步 LocalStorage 读写 (零延时、刷新即在) ---
+  // --- 同步 LocalStorage 读写 (具备多历史版本自动找回与无损迁移) ---
   _getRaw(key) {
-    try {
-      const val = localStorage.getItem(this.prefix + key);
-      if (val !== null && val !== undefined) {
-        return JSON.parse(val);
-      }
-    } catch (e) {
-      console.warn('LocalStorage 读取异常:', e);
+    const candidateKeys = [
+      this.prefix + key,
+      'pear_gallery_' + key,
+      'pear_' + key,
+      key
+    ];
+    if (key === 'themes') {
+      candidateKeys.push('pear_gallery_thematicExhibitions', 'pear_gallery_v2_thematicExhibitions', 'thematicExhibitions');
+    }
+    if (key === 'artworks') {
+      candidateKeys.push('pear_gallery_artworks', 'artworks');
+    }
+    if (key === 'students') {
+      candidateKeys.push('pear_gallery_students', 'pear_gallery_studentList', 'students');
+    }
+    if (key === 'notes') {
+      candidateKeys.push('pear_gallery_stickyNotes', 'stickyNotes');
+    }
+
+    for (const k of candidateKeys) {
+      try {
+        const val = localStorage.getItem(k);
+        if (val !== null && val !== undefined) {
+          const parsed = JSON.parse(val);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            if (k !== this.prefix + key) {
+              this._setRaw(key, parsed);
+            }
+            return parsed;
+          }
+        }
+      } catch (e) {}
     }
     return null;
   }
