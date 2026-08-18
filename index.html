@@ -7,6 +7,9 @@
   <!-- 🍐 梨子品牌网页 Favicon 图标 -->
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍐</text></svg>">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -14,7 +17,7 @@
   <!-- html2canvas 用于保存高清小画家海报卡片 -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <!-- 活力青柠与少儿美育设计语言样式表 -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20260818">
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -396,7 +399,7 @@
               <div class="avatar-spinner-ring"></div>
               <div class="avatar-inner-box">
                 <img 
-                  src="images/teacher.png" 
+                  src="images/teacher.png?v=20260818" 
                   alt="陈昨" 
                   class="avatar-inner-img group-hover:scale-105 transition-transform duration-500"
                 />
@@ -1481,8 +1484,8 @@
 
   <!-- 引入Supabase云SDK、基础数据集与云服务网关 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="data.js"></script>
-  <script src="cloudConfig.js"></script>
+  <script src="data.js?v=20260818"></script>
+  <script src="cloudConfig.js?v=20260818"></script>
   <script>
     let artworks = [...initialArtworks];
     let stickyNotes = typeof initialStickyNotes !== 'undefined' ? [...initialStickyNotes] : [];
