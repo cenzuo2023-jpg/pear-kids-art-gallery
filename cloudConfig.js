@@ -46,15 +46,22 @@ class SupabaseCloudGalleryService {
       return false;
     };
 
-    if (!doConnect()) {
+  async ensureReady() {
+    if (this.isCloudReady && this.supabaseClient) return true;
+    return new Promise((resolve) => {
       let attempts = 0;
-      const timer = setInterval(() => {
+      const check = () => {
         attempts++;
-        if (doConnect() || attempts > 20) {
-          clearInterval(timer);
+        if (this.isCloudReady && this.supabaseClient) {
+          resolve(true);
+        } else if (attempts > 30) {
+          resolve(false);
+        } else {
+          setTimeout(check, 80);
         }
-      }, 150);
-    }
+      };
+      check();
+    });
   }
 
   // --- 数据库字段映射与归一化 ---
@@ -208,16 +215,18 @@ class SupabaseCloudGalleryService {
   // 1. 作品档案 (Artworks CRUD 直连 Supabase 云端)
   // =========================================================================
   async getArtworks() {
-    if (this.isCloudReady) {
+    await this.ensureReady();
+    if (this.isCloudReady && this.supabaseClient) {
       try {
         const { data, error } = await this.supabaseClient
           .from('artworks')
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (!error && data && data.length > 0) {
+        if (!error && Array.isArray(data)) {
           const list = data.map(item => this._fromDbArtwork(item));
           localStorage.setItem(this.localCacheKey + 'artworks', JSON.stringify(list));
+          console.log('☁️ 前台从 Supabase 获取画作成功，实时总数:', list.length);
           return list;
         } else if (error) {
           console.warn('⚠️ Supabase 获取作品云端返回异常:', error.message);
@@ -344,16 +353,18 @@ class SupabaseCloudGalleryService {
   // 2. 小艺术家名人堂 (Students CRUD 直连 Supabase)
   // =========================================================================
   async getStudents() {
-    if (this.isCloudReady) {
+    await this.ensureReady();
+    if (this.isCloudReady && this.supabaseClient) {
       try {
         const { data, error } = await this.supabaseClient
           .from('students')
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (!error && data && data.length > 0) {
+        if (!error && Array.isArray(data)) {
           const list = data.map(item => this._fromDbStudent(item));
           localStorage.setItem(this.localCacheKey + 'students', JSON.stringify(list));
+          console.log('☁️ 前台从 Supabase 获取小艺术家成功，实时总数:', list.length);
           return list;
         }
       } catch (e) {}
@@ -420,16 +431,18 @@ class SupabaseCloudGalleryService {
   // 3. 主题特展 (Themes CRUD 直连 Supabase)
   // =========================================================================
   async getThematicExhibitions() {
-    if (this.isCloudReady) {
+    await this.ensureReady();
+    if (this.isCloudReady && this.supabaseClient) {
       try {
         const { data, error } = await this.supabaseClient
           .from('thematic_exhibitions')
           .select('*')
           .order('hero_order', { ascending: true });
 
-        if (!error && data && data.length > 0) {
+        if (!error && Array.isArray(data)) {
           const list = data.map(item => this._fromDbTheme(item));
           localStorage.setItem(this.localCacheKey + 'themes', JSON.stringify(list));
+          console.log('☁️ 前台从 Supabase 获取特展成功，实时总数:', list.length);
           return list;
         }
       } catch (e) {}
