@@ -961,16 +961,49 @@
       }
     }
 
-    function handleArtFilesSelected(e) {
-      const files = Array.from(e.target.files);
-      files.forEach(file => {
+    function compressImageFile(file, maxWidth = 1200, quality = 0.85) {
+      return new Promise((resolve) => {
         const reader = new FileReader();
-        reader.onload = (ev) => {
-          currentArtworkImages.push(ev.target.result);
-          renderArtFormImages();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width;
+            let h = img.height;
+            if (w > maxWidth || h > maxWidth) {
+              if (w > h) {
+                h = Math.round((h * maxWidth) / w);
+                w = maxWidth;
+              } else {
+                w = Math.round((w * maxWidth) / h);
+                h = maxWidth;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = () => resolve(e.target.result);
+          img.src = e.target.result;
         };
+        reader.onerror = () => resolve(null);
         reader.readAsDataURL(file);
       });
+    }
+
+    async function handleArtFilesSelected(e) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      showToast(`📸 正在处理 ${files.length} 张照片...`);
+      for (const file of files) {
+        const base64 = await compressImageFile(file);
+        if (base64) {
+          currentArtworkImages.push(base64);
+        }
+      }
+      renderArtFormImages();
       e.target.value = '';
     }
 
@@ -1132,14 +1165,13 @@
       modal.classList.remove('flex');
     }
 
-    function handleStudentAvatarSelected(e) {
+    async function handleStudentAvatarSelected(e) {
       const file = e.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          document.getElementById('studentAvatarPreview').src = ev.target.result;
-        };
-        reader.readAsDataURL(file);
+        const base64 = await compressImageFile(file, 600, 0.85);
+        if (base64) {
+          document.getElementById('studentAvatarPreview').src = base64;
+        }
       }
     }
 
