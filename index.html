@@ -1709,11 +1709,11 @@
 
 
   <script>
-    let artworks = (typeof window !== 'undefined' && Array.isArray(window.initialArtworks)) ? [...window.initialArtworks] : [];
-    let studentList = (typeof window !== 'undefined' && Array.isArray(window.initialStudents)) ? [...window.initialStudents] : ((typeof window !== 'undefined' && Array.isArray(window.studentList)) ? [...window.studentList] : []);
-    let themeExhibitions = (typeof window !== 'undefined' && Array.isArray(window.initialThematicExhibitions)) ? [...window.initialThematicExhibitions] : ((typeof window !== 'undefined' && Array.isArray(window.themeExhibitions)) ? [...window.themeExhibitions] : []);
-    let stickyNotes = (typeof window !== 'undefined' && Array.isArray(window.initialStickyNotes)) ? [...window.initialStickyNotes] : [];
-    let courseAlbums = (typeof window !== 'undefined' && Array.isArray(window.initialCourseAlbums)) ? [...window.initialCourseAlbums] : [];
+        let artworks = (typeof initialArtworks !== 'undefined' && Array.isArray(initialArtworks)) ? [...initialArtworks] : [];
+    let studentList = (typeof initialStudents !== 'undefined' && Array.isArray(initialStudents)) ? [...initialStudents] : [];
+    let themeExhibitions = (typeof initialThematicExhibitions !== 'undefined' && Array.isArray(initialThematicExhibitions)) ? [...initialThematicExhibitions] : [];
+    let stickyNotes = (typeof initialStickyNotes !== 'undefined' && Array.isArray(initialStickyNotes)) ? [...initialStickyNotes] : [];
+    let courseAlbums = (typeof initialCourseAlbums !== 'undefined' && Array.isArray(initialCourseAlbums)) ? [...initialCourseAlbums] : [];
     let currentView = 'gallery';
     let currentAgeFilter = 'all';
     let currentSearchTerm = '';

@@ -1297,9 +1297,9 @@ button:focus:not(:focus-visible),
           adminAlbums = albums && albums.length > 0 ? albums : (typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : []);
         } else {
           adminArtworks = typeof initialArtworks !== 'undefined' ? initialArtworks : [];
-          adminThemes = typeof themeExhibitions !== 'undefined' ? themeExhibitions : [];
+          adminThemes = typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : [];
           adminNotes = typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : [];
-          adminStudents = typeof studentList !== 'undefined' ? studentList : [];
+          adminStudents = typeof initialStudents !== 'undefined' ? initialStudents : [];
         }
 
         renderOverviewStats();

@@ -184,7 +184,7 @@ var initialArtworks = [
 ];
 
 // 小艺术家名人堂数据列表（每个小艺术家包含圆形头像、个性签名、班级和参展作品数）
-var studentList = [
+var initialStudents = [
   {
     id: "s-1",
     name: "林雨桐",
@@ -251,7 +251,7 @@ var studentList = [
  * 🌟 主题特展与专题策展文章数据集 (Thematic Curated Exhibitions)
  * 供首页焦点大轮播及独立专题文章页面使用
  */
-var themeExhibitions = [
+var initialThematicExhibitions = [
   {
     id: "theme-summer-nature",
     title: "森林与星空的对话：2026 夏季少儿自然探索特展",
@@ -652,27 +652,11 @@ var initialCourseAlbums = [
   }
 ];
 
-// 全局别名兼容
-if (typeof window !== 'undefined') {
-  window.initialArtworks = initialArtworks;
-  window.studentList = studentList;
-  window.initialStudents = studentList;
-  window.themeExhibitions = themeExhibitions;
-  window.initialThematicExhibitions = themeExhibitions;
-  window.initialStickyNotes = initialStickyNotes;
-  window.initialCourseAlbums = initialCourseAlbums;
-  window.courseAlbums = initialCourseAlbums;
-}
-
 // Global Window Aliases for Universal Front-End & Admin Access
 if (typeof window !== 'undefined') {
   window.initialArtworks = typeof initialArtworks !== 'undefined' ? initialArtworks : [];
-  window.initialStudents = typeof initialStudents !== 'undefined' ? initialStudents : (typeof studentList !== 'undefined' ? studentList : []);
-  window.studentList = window.initialStudents;
-  window.initialThematicExhibitions = typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : (typeof themeExhibitions !== 'undefined' ? themeExhibitions : []);
-  window.themeExhibitions = window.initialThematicExhibitions;
+  window.initialStudents = typeof initialStudents !== 'undefined' ? initialStudents : [];
+  window.initialThematicExhibitions = typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : [];
   window.initialStickyNotes = typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : [];
-  window.stickyNotes = window.initialStickyNotes;
   window.initialCourseAlbums = typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : [];
-  window.courseAlbums = window.initialCourseAlbums;
 }
