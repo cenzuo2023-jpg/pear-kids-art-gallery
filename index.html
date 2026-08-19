@@ -2529,6 +2529,22 @@
 
       if (!box || !indBox) return;
 
+      if (activeThemes.length === 0 && !cloudSnapshotReady) {
+        box.innerHTML = `
+          <div class="carousel-slide active w-full h-full overflow-hidden bg-gradient-to-br from-stone-950 via-[#0F1E14] to-stone-950" data-carousel-loading="true" aria-label="正在加载云端展览">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(16,229,122,0.09),transparent_42%)]"></div>
+            <div class="relative w-full h-full flex flex-col items-center justify-center gap-5 px-8 animate-pulse" aria-hidden="true">
+              <div class="w-12 h-12 rounded-2xl bg-white/[0.07]"></div>
+              <div class="h-6 sm:h-8 w-56 sm:w-72 rounded-full bg-white/[0.08]"></div>
+              <div class="h-3 w-72 max-w-[75%] rounded-full bg-white/[0.05]"></div>
+              <div class="h-9 w-40 rounded-full border border-[#10E57A]/20 bg-[#10E57A]/[0.06]"></div>
+            </div>
+          </div>
+        `;
+        indBox.innerHTML = '';
+        return;
+      }
+
       if (activeThemes.length === 0) {
         box.innerHTML = `
           <div class="carousel-slide active flex items-center justify-center bg-gradient-to-br from-stone-950 via-[#0F1E14] to-stone-950 text-stone-300 w-full h-full">
