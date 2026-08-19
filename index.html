@@ -792,32 +792,29 @@
           </p>
         </div>
 
-        <!-- 右侧：个人微信/美育咨询二维码占位服务 -->
-        <div class="flex items-center gap-4 bg-white/90 dark:bg-white/[0.06] p-4 sm:p-5 rounded-2xl shadow-sm backdrop-blur-md flex-shrink-0 max-w-sm">
-          <!-- 二维码占位图 (可替换为您个人的微信二维码图片) -->
+        <!-- 右侧：个人微信/美育咨询二维码 (沉浸式自然排版，无卡片框) -->
+        <div class="flex items-center gap-4.5 flex-shrink-0">
+          <!-- 纯净二维码 -->
           <div 
-            class="relative w-24 h-24 sm:w-28 sm:h-28 bg-white p-2 rounded-xl shadow-inner flex items-center justify-center flex-shrink-0 group cursor-pointer" 
-            onclick="showToast('点击此处可替换为您个人的微信二维码 (kids-art-gallery/images/qrcode.png)')"
-            title="点击提示：可替换为个人微信二维码"
+            class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shadow-sm flex items-center justify-center flex-shrink-0 bg-white p-1.5 cursor-pointer"
+            onclick="showToast('此处为想吃梨老师微信咨询二维码')"
+            title="微信扫码咨询"
           >
             <img 
               id="teacherQrCodeImg"
               src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://example.com/pear-kids-art&color=0b130e&bgcolor=ffffff" 
               alt="微信美育咨询二维码" 
-              class="w-full h-full object-contain rounded-lg"
+              class="w-full h-full object-contain rounded-xl"
             />
-            <div class="absolute inset-0 bg-emerald-950/75 text-white rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-[10px] font-bold p-1 text-center">
-              <span>📷 可替换</span>
-              <span>个人微信码</span>
-            </div>
           </div>
 
-          <div class="flex flex-col justify-center">
-            <span class="text-xs font-mono font-bold text-emerald-700 dark:text-[#10E57A] flex items-center gap-1 mb-1">
+          <!-- 沉浸式说明文字 -->
+          <div class="space-y-1">
+            <div class="text-[11px] font-mono font-bold text-emerald-700 dark:text-[#10E57A] flex items-center gap-1">
               <span>💬 微信美育咨询</span>
-            </span>
-            <h4 class="font-black text-sm text-stone-900 dark:text-stone-100 mb-1">扫码添加陈昨</h4>
-            <p class="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed">
+            </div>
+            <h4 class="font-black text-sm sm:text-base text-stone-950 dark:text-stone-100">扫码添加老师</h4>
+            <p class="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
               预约线下艺术探访<br/>少儿成长画廊档案咨询
             </p>
           </div>
