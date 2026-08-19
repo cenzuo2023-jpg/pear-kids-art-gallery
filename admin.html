@@ -754,14 +754,10 @@
               </div>
             </div>
 
-            <!-- 博客编辑器：只保留写作与预览两个清晰状态 -->
-            <div class="flex items-center gap-1 p-1 bg-stone-900/90 rounded-xl border border-white/10 text-xs">
-              <button type="button" id="adminThemeTabVisual" onclick="switchAdminThemeEditorMode('visual')" class="px-3 py-1.5 rounded-lg font-bold transition-all bg-teal-500/20 text-teal-300 border border-teal-500/30 shadow-sm">
-                编辑
-              </button>
-              <button type="button" id="adminThemeTabPreview" onclick="switchAdminThemeEditorMode('preview')" class="px-3 py-1.5 rounded-lg font-bold transition-all bg-transparent text-stone-400 hover:text-white">
-                预览
-              </button>
+            <!-- 简单博客编辑器 -->
+            <div class="flex items-center gap-2 text-xs font-bold text-stone-300">
+              <i data-lucide="file-pen-line" class="w-4 h-4 text-teal-400"></i>
+              <span>博客正文编辑器</span>
             </div>
 
             <!-- 右侧：保存发布 -->
@@ -2542,8 +2538,7 @@ button:focus:not(:focus-visible),
         showToast('📸 正在处理图片...');
         const base64 = await compressImageFile(file, 1400, 0.85);
         if (base64) {
-          const caption = prompt('请输入图片说明/图注（可选，可直接回车）：', file.name.replace(/\.[^/.]+$/, '')) || '';
-          insertVisualImageBlock(base64, caption);
+          insertVisualImageBlock(base64);
           showToast('🎉 图片已实时渲染插入！');
         }
       }
@@ -2553,37 +2548,64 @@ button:focus:not(:focus-visible),
     function insertAdminThemeWebImagePrompt() {
       const url = prompt('请输入网络图片的 URL 链接 (如 https://...):');
       if (url && url.trim()) {
-        const caption = prompt('请输入图片说明/图注（可选）：', '') || '';
-        insertVisualImageBlock(url.trim(), caption);
+        insertVisualImageBlock(url.trim());
         showToast('🌐 网络图片已插入！');
       }
     }
 
-    function insertVisualImageBlock(imgSrc, caption = '') {
+    function insertVisualImageBlock(imgSrc) {
       const imageHtml = `
-        <figure class="my-6 rounded-2xl overflow-hidden shadow-xl border border-white/15 bg-stone-950 text-center relative group select-none" contenteditable="false" data-figure="true">
-          <div class="relative max-h-[560px] flex items-center justify-center p-3 sm:p-4 bg-stone-950/90">
-            <img src="${imgSrc}" class="max-w-full max-h-[500px] object-contain rounded-xl shadow-md" alt="${caption}" />
+        <figure class="my-6 relative group select-none" contenteditable="false" data-figure="true">
+          <div class="relative flex items-center justify-center">
+            <img src="${imgSrc}" class="block max-w-full h-auto object-contain" alt="" />
             <div class="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <button type="button" onclick="this.closest('figure').remove(); syncCanvasToMarkdown();" class="px-2.5 py-1 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-black shadow-lg cursor-pointer flex items-center gap-1">
                 <span>🗑️</span><span>删除</span>
               </button>
             </div>
           </div>
-          <figcaption class="px-4 py-2.5 text-center text-xs text-teal-300 font-bold bg-[#111C15] border-t border-white/10 flex items-center justify-center gap-1.5">
-            <span>📷</span>
-            <span contenteditable="true" onblur="syncCanvasToMarkdown()" class="outline-none hover:underline focus:underline cursor-text">${caption || '点击编辑图片说明'}</span>
-          </figcaption>
         </figure>
         <p><br></p>
       `;
       if (adminThemeEditorCurrentMode === 'visual') {
-        insertHtmlAtVisualCursor(imageHtml);
+        const canvas = document.getElementById('themeVisualCanvas');
+        if (!canvas) return;
+
+        const holder = document.createElement('div');
+        holder.innerHTML = imageHtml;
+        const fragment = document.createDocumentFragment();
+        let child;
+        let lastInsertedNode = null;
+        while ((child = holder.firstChild)) {
+          lastInsertedNode = fragment.appendChild(child);
+        }
+
+        const selection = window.getSelection();
+        const range = selection && selection.rangeCount ? selection.getRangeAt(0) : null;
+        let anchor = range ? range.commonAncestorContainer : null;
+        if (anchor && anchor.nodeType === Node.TEXT_NODE) anchor = anchor.parentNode;
+        while (anchor && anchor !== canvas && anchor.parentNode !== canvas) {
+          anchor = anchor.parentNode;
+        }
+
+        if (anchor && anchor !== canvas && anchor.parentNode === canvas) {
+          canvas.insertBefore(fragment, anchor.nextSibling);
+        } else {
+          canvas.appendChild(fragment);
+        }
+
+        if (selection && lastInsertedNode) {
+          const caret = document.createRange();
+          caret.selectNodeContents(lastInsertedNode);
+          caret.collapse(false);
+          selection.removeAllRanges();
+          selection.addRange(caret);
+        }
+        syncCanvasToMarkdown();
       } else {
-        insertAdminThemeText(`\n\n![${caption}](${imgSrc})\n\n`);
+        insertAdminThemeText(`\n\n![](${imgSrc})\n\n`);
       }
     }
-
     function formatAdminThemeBlock(tagName) {
       formatAdminThemeCommand('formatBlock', tagName || 'p');
     }
@@ -2727,33 +2749,30 @@ button:focus:not(:focus-visible),
 
     // 🌟 将视觉画布 DOM 序列化为干净的标准 Markdown
     function syncCanvasToMarkdown() {
-      if (isSyncingCanvas) return;
+      if (isSyncingCanvas) return document.getElementById('themeFormCuratorNote')?.value || '';
       isSyncingCanvas = true;
       const canvas = document.getElementById('themeVisualCanvas');
       const textarea = document.getElementById('themeFormCuratorNote');
       if (!canvas || !textarea) {
         isSyncingCanvas = false;
-        return;
+        return '';
       }
 
       let markdown = '';
-      const children = Array.from(canvas.childNodes);
+      try {
+        Array.from(canvas.childNodes).forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent.trim();
+            if (text) markdown += `${text}\n\n`;
+            return;
+          }
+          if (node.nodeType !== Node.ELEMENT_NODE) return;
 
-      children.forEach(node => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const t = node.textContent.trim();
-          if (t) markdown += `${t}\n\n`;
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
           const tag = node.tagName.toLowerCase();
           if (tag === 'figure' || node.dataset.figure === 'true') {
-            const img = node.querySelector('img');
-            const figcap = node.querySelector('figcaption');
-            const src = img ? img.src : '';
-            const cap = figcap ? figcap.textContent.replace('📷', '').trim() : '';
-            if (src) markdown += `![${cap}](${src})\n\n`;
+            const src = node.querySelector('img')?.src || '';
+            if (src) markdown += `![](${src})\n\n`;
           } else if (tag === 'h1' || tag === 'h2') {
-            htmlContent = htmlContent.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
-            htmlContent = htmlContent.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
             markdown += `## ${node.textContent.replace('✦', '').trim()}\n\n`;
           } else if (tag === 'h3' || tag === 'h4') {
             markdown += `### ${node.textContent.replace('▸', '').trim()}\n\n`;
@@ -2765,29 +2784,31 @@ button:focus:not(:focus-visible),
             });
             markdown += '\n';
           } else if (tag === 'ol') {
-            Array.from(node.querySelectorAll('li')).forEach((li, i) => {
-              markdown += `${i + 1}. ${li.textContent.trim()}\n`;
+            Array.from(node.querySelectorAll('li')).forEach((li, index) => {
+              markdown += `${index + 1}. ${li.textContent.trim()}\n`;
             });
             markdown += '\n';
           } else if (tag === 'hr') {
             markdown += '---\n\n';
           } else {
-            // 常规段落 (处理内嵌超链接与加粗)
             let htmlContent = node.innerHTML;
             htmlContent = htmlContent.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
             htmlContent = htmlContent.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**');
+            htmlContent = htmlContent.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
+            htmlContent = htmlContent.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
             htmlContent = htmlContent.replace(/<a[^>]*href=["'](.*?)["'][^>]*>(.*?)<\/a>/gi, '[$2]($1)');
             htmlContent = htmlContent.replace(/<br\s*\/?>/gi, '\n');
             const plain = htmlContent.replace(/<[^>]+>/g, '').trim();
             if (plain) markdown += `${plain}\n\n`;
           }
-        }
-      });
+        });
 
-      textarea.value = markdown.trim();
-      isSyncingCanvas = false;
+        textarea.value = markdown.trim();
+        return textarea.value;
+      } finally {
+        isSyncingCanvas = false;
+      }
     }
-
     // 🌟 将 Markdown 转换为视觉画布的富文本 HTML
     function syncMarkdownToCanvas() {
       const canvas = document.getElementById('themeVisualCanvas');
@@ -2815,19 +2836,15 @@ button:focus:not(:focus-visible),
           const cap = imgMatch[1] || '';
           const src = imgMatch[2];
           html += `
-            <figure class="my-6 rounded-2xl overflow-hidden shadow-xl border border-white/15 bg-stone-950 text-center relative group select-none" contenteditable="false" data-figure="true">
-              <div class="relative max-h-[560px] flex items-center justify-center p-3 sm:p-4 bg-stone-950/90">
-                <img src="${src}" class="max-w-full max-h-[500px] object-contain rounded-xl shadow-md" alt="${cap}" />
+            <figure class="my-6 relative group select-none" contenteditable="false" data-figure="true">
+              <div class="relative flex items-center justify-center">
+                <img src="${src}" class="block max-w-full h-auto object-contain" alt="" />
                 <div class="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <button type="button" onclick="this.closest('figure').remove(); syncCanvasToMarkdown();" class="px-2.5 py-1 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-black shadow-lg cursor-pointer flex items-center gap-1">
                     <span>🗑️</span><span>删除</span>
                   </button>
                 </div>
               </div>
-              <figcaption class="px-4 py-2.5 text-center text-xs text-teal-300 font-bold bg-[#111C15] border-t border-white/10 flex items-center justify-center gap-1.5">
-                <span>📷</span>
-                <span contenteditable="true" onblur="syncCanvasToMarkdown()" class="outline-none hover:underline focus:underline cursor-text">${cap || '点击编辑图片说明'}</span>
-              </figcaption>
             </figure>
           `;
           return;
@@ -2906,14 +2923,10 @@ button:focus:not(:focus-visible),
             return `<h4 class="text-lg font-bold text-stone-200 mt-5 mb-2 flex items-center gap-1.5"><span>▸</span><span>${text}</span></h4>`;
           }
         };
-        renderer.image = function({ href, title, text }) {
-          const caption = text || title || '';
+        renderer.image = function({ href }) {
           return `
-            <figure class="my-6 rounded-2xl overflow-hidden bg-stone-900 border border-stone-800 text-center shadow-xl">
-              <div class="p-3 bg-stone-950 flex items-center justify-center">
-                <img src="${href}" alt="${caption}" class="max-w-full max-h-[520px] mx-auto object-contain rounded-xl shadow-md" onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80'" />
-              </div>
-              ${caption ? `<figcaption class="p-2 text-center text-xs text-teal-300 font-bold bg-[#111C15] border-t border-stone-800">📷 ${caption}</figcaption>` : ''}
+            <figure class="my-6">
+              <img src="${href}" alt="" class="block w-full h-auto object-contain" />
             </figure>
           `;
         };
@@ -2947,6 +2960,10 @@ button:focus:not(:focus-visible),
       try {
         if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
 
+      if (adminThemeEditorCurrentMode === 'visual') {
+        syncCanvasToMarkdown();
+      }
+
       const id = document.getElementById('themeFormId').value;
       const title = document.getElementById('themeFormTitle').value.trim();
       const subTitle = document.getElementById('themeFormSubTitle').value.trim();
@@ -2957,6 +2974,12 @@ button:focus:not(:focus-visible),
       const introSummary = document.getElementById('themeFormIntro').value.trim();
       const curatorNote = document.getElementById('themeFormCuratorNote').value.trim();
       const isInHero = document.getElementById('themeFormIsInHero').checked;
+
+      if (!curatorNote) {
+        showToast('❌ 请先填写文章正文，再保存发布');
+        document.getElementById('themeVisualCanvas')?.focus();
+        return;
+      }
 
       const themeData = {
         id: id || ('theme-' + Date.now()),
