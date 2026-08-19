@@ -362,6 +362,169 @@
       </section>
 
       <!-- ===================================================================== -->
+      <!-- 模块：课程作品集管理 (Course Albums List View) -->
+      <!-- ===================================================================== -->
+      <section id="admin-view-albums" class="space-y-4 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-white flex items-center gap-2">
+              <span>📚 课程作品集画册库</span>
+              <span class="text-xs font-normal text-stone-400">（一堂课为一个探索单元，批量上传共创画作）</span>
+            </h2>
+            <p class="text-xs text-stone-400 mt-0.5">收录完整美育课题记录，包含教学导语、现场观察及全班学员作品</p>
+          </div>
+          <button onclick="openAlbumStudio()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-[#10E57A] text-stone-950 font-black text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 self-start sm:self-auto cursor-pointer hover:opacity-90 active:scale-95 transition-all">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>+ 批量录入新作品集</span>
+          </button>
+        </div>
+
+        <!-- 作品集卡片网格 -->
+        <div id="adminAlbumsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- JS 动态渲染 -->
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- 模块：课程作品集批量录入工作台 (Album Batch Studio View) -->
+      <!-- ===================================================================== -->
+      <section id="admin-view-album-studio" class="space-y-6 hidden">
+        <form id="albumForm" onsubmit="handleSaveAlbum(event)" class="space-y-6">
+          <input type="hidden" id="albumFormId">
+
+          <!-- 顶部控制条 -->
+          <div class="sticky top-0 z-30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-[#111D15]/95 backdrop-blur-xl border border-white/15 shadow-xl">
+            <div class="flex items-center gap-3">
+              <button 
+                type="button" 
+                onclick="switchAdminTab('albums')" 
+                class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-stone-300 hover:text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer border border-white/10 active:scale-95"
+              >
+                <span>←</span>
+                <span>返回作品集列表</span>
+              </button>
+              <div class="h-4 w-[1px] bg-white/10 hidden sm:block"></div>
+              <div class="flex items-center gap-2">
+                <span class="text-lg">📚</span>
+                <span class="font-black text-sm text-white" id="albumStudioTitle">批量录入课程作品集</span>
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              class="px-5 sm:px-6 py-2 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-[#10E57A] text-stone-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer ml-auto"
+            >
+              <span>💾</span>
+              <span>保存并发布作品集</span>
+            </button>
+          </div>
+
+          <!-- 作品集基础信息 -->
+          <div class="max-w-4xl mx-auto w-full space-y-6">
+            <div class="p-6 rounded-3xl bg-[#111D15] border border-white/10 space-y-5">
+              <div class="text-sm font-black text-teal-300 flex items-center gap-1.5">
+                <span>📌</span><span>1. 课程主题与美育导语</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div class="space-y-1.5 sm:col-span-2">
+                  <label class="font-bold text-stone-300">课程课题主标题 *</label>
+                  <input type="text" id="albumFormTitle" required placeholder="如：在莫奈的花园里：水粉光影与色彩实验" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-sm font-bold">
+                </div>
+
+                <div class="space-y-1.5 sm:col-span-2">
+                  <label class="font-bold text-stone-300">英文副标题 / 引语</label>
+                  <input type="text" id="albumFormSubTitle" placeholder="如：Monet's Garden Color & Light Workshop" class="w-full px-3.5 py-2 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs">
+                </div>
+
+                <div class="space-y-1.5">
+                  <label class="font-bold text-stone-300">课题标签 / 班级分类</label>
+                  <input type="text" id="albumFormTag" placeholder="如：🎨 创想班 · 周末主题工坊" class="w-full px-3.5 py-2 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs">
+                </div>
+
+                <div class="space-y-1.5">
+                  <label class="font-bold text-stone-300">上课日期</label>
+                  <input type="text" id="albumFormDate" placeholder="如：2026.08.16" class="w-full px-3.5 py-2 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs">
+                </div>
+
+                <div class="space-y-1.5">
+                  <label class="font-bold text-stone-300">对应年龄组 *</label>
+                  <select id="albumFormAgeGroup" class="w-full px-3.5 py-2 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs cursor-pointer">
+                    <option value="3-5">🐣 3-5岁 · 启蒙探索组</option>
+                    <option value="6-8" selected>🚀 6-8岁 · 创想实验组</option>
+                    <option value="9-12">🎨 9-12岁 · 创作研究组</option>
+                  </select>
+                </div>
+
+                <div class="space-y-1.5">
+                  <label class="font-bold text-stone-300">班级名称</label>
+                  <input type="text" id="albumFormClassName" placeholder="如：创想B班" class="w-full px-3.5 py-2 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs">
+                </div>
+
+                <!-- 封面图 -->
+                <div class="space-y-1.5 sm:col-span-2 pt-2 border-t border-white/10">
+                  <label class="font-bold text-stone-300 flex items-center justify-between">
+                    <span>🖼️ 作品集封面主图 *</span>
+                    <span class="text-[10px] text-teal-400 font-normal">（可点击上传或自动使用第一张画作）</span>
+                  </label>
+                  <div class="flex items-center gap-3">
+                    <img id="albumCoverPreview" src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80" class="w-24 h-16 rounded-xl object-cover border border-white/10 bg-stone-900 flex-shrink-0" />
+                    <input type="file" id="albumCoverFileInput" accept="image/*" class="hidden" onchange="handleAlbumCoverSelected(event)">
+                    <input type="hidden" id="albumFormCover" required value="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80">
+                    <button type="button" onclick="document.getElementById('albumCoverFileInput').click()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-all cursor-pointer">
+                      更换封面
+                    </button>
+                  </div>
+                </div>
+
+                <div class="space-y-1.5 sm:col-span-2">
+                  <label class="font-bold text-stone-300">课题美育导语与教学目标</label>
+                  <textarea id="albumFormIntro" rows="3" placeholder="在此写下本期课题的探索目标（如：带领孩子们走进吉维尼小镇，感受光影与色彩跳跃...）" class="w-full px-3.5 py-2 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs leading-relaxed"></textarea>
+                </div>
+
+                <div class="space-y-1.5 sm:col-span-2">
+                  <label class="font-bold text-stone-300">导师课后观察手记（可选）</label>
+                  <textarea id="albumFormNotes" rows="2" placeholder="在此记录课后观察复盘..." class="w-full px-3.5 py-2 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs leading-relaxed"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. ⚡ 多图批量拖拽上传与学员画作矩阵 -->
+            <div class="p-6 rounded-3xl bg-[#111D15] border border-teal-500/30 space-y-5 shadow-xl">
+              <div class="flex items-center justify-between">
+                <div class="text-sm font-black text-teal-300 flex items-center gap-1.5">
+                  <span>⚡</span><span>2. 批量上传整堂课共创画作</span>
+                  <span id="albumBatchCountBadge" class="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] font-bold">已添加 0 幅</span>
+                </div>
+                <button type="button" onclick="document.getElementById('albumBatchImagesInput').click()" class="px-3 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-stone-950 font-black text-xs transition-all cursor-pointer shadow-md flex items-center gap-1">
+                  <span>+ 选择多张画作照片</span>
+                </button>
+              </div>
+
+              <!-- 拖拽上传区域 -->
+              <div 
+                onclick="document.getElementById('albumBatchImagesInput').click()"
+                ondragover="event.preventDefault(); this.classList.add('border-teal-400', 'bg-teal-500/10')"
+                ondragleave="this.classList.remove('border-teal-400', 'bg-teal-500/10')"
+                ondrop="handleAlbumBatchDrop(event)"
+                class="p-8 rounded-2xl border-2 border-dashed border-white/20 hover:border-teal-400 bg-stone-950/60 hover:bg-teal-500/5 transition-all text-center cursor-pointer space-y-2 select-none"
+              >
+                <div class="text-3xl">📸</div>
+                <div class="font-bold text-sm text-stone-200">点击或拖拽整堂课的 10~20 张画作照片至此处</div>
+                <div class="text-xs text-stone-400">支持批量选择 JPG / PNG / WebP 格式图片，自动智能压缩与高清画作入库</div>
+                <input type="file" id="albumBatchImagesInput" multiple accept="image/*" class="hidden" onchange="handleAlbumBatchImagesSelected(event)">
+              </div>
+
+              <!-- 动态学员画作列表卡片 -->
+              <div id="albumStudioArtworksList" class="space-y-3 pt-2">
+                <!-- JS 动态渲染每一张画作的卡片条目 -->
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- ===================================================================== -->
       <!-- 模块 3：小艺术家名人堂管理 (Students) -->
       <!-- ===================================================================== -->
       <section id="admin-view-students" class="space-y-4 hidden">
@@ -1102,6 +1265,7 @@ button:focus:not(:focus-visible),
         renderOverviewStats();
         renderAdminArtworksTable();
         renderAdminStudentsGrid();
+        renderAdminAlbumsGrid();
         renderAdminThemesGrid();
         renderAdminNotesGrid();
         updateAuthorDropdowns();
@@ -1112,7 +1276,7 @@ button:focus:not(:focus-visible),
     }
 
     function switchAdminTab(tabName) {
-      const allTabs = ['overview', 'artworks', 'themes', 'notes', 'students', 'backup', 'theme-studio'];
+      const allTabs = ['overview', 'artworks', 'albums', 'album-studio', 'themes', 'notes', 'students', 'backup', 'theme-studio'];
       allTabs.forEach(tab => {
         const viewEl = document.getElementById(`admin-view-${tab}`);
         const btnEl = document.getElementById(`tab-btn-${tab}`);
@@ -1128,7 +1292,7 @@ button:focus:not(:focus-visible),
       // 如果进入策展工作台，隐藏左侧边栏提供 100% 全宽沉浸式画布
       const sidebar = document.getElementById('adminSidebar');
       if (sidebar) {
-        if (tabName === 'theme-studio') {
+        if (tabName === 'theme-studio' || tabName === 'album-studio') {
           sidebar.classList.add('hidden');
         } else {
           sidebar.classList.remove('hidden');

@@ -511,3 +511,81 @@ dialog[open]::backdrop {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+
+/* =========================================================================
+   📚 课程作品集 · 风琴折页画册 (Accordion Artbook Styles)
+   ========================================================================= */
+
+/* 风琴画册卡片立体外框 */
+.accordion-book-card {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, border-color 0.3s ease;
+}
+
+.accordion-book-card:hover {
+  transform: translateY(-6px);
+}
+
+/* 扇形微展开风琴内页预览层 */
+.accordion-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  box-shadow: -4px 6px 20px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.accordion-layer-1 {
+  z-index: 1;
+  transform: rotate(0deg) translate(0, 0) scale(1);
+  opacity: 0;
+}
+
+.accordion-layer-2 {
+  z-index: 0;
+  transform: rotate(0deg) translate(0, 0) scale(1);
+  opacity: 0;
+}
+
+.accordion-book-card:hover .accordion-layer-1 {
+  opacity: 0.9;
+  transform: rotate(3deg) translate(8px, -4px) scale(0.96);
+}
+
+.accordion-book-card:hover .accordion-layer-2 {
+  opacity: 0.75;
+  transform: rotate(6deg) translate(16px, -8px) scale(0.92);
+}
+
+/* 沉浸式横向风琴翻折连环画廊 (Horizontal Accordion Gallery) */
+.accordion-stream-track {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding: 1rem 0.5rem 2rem 0.5rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.accordion-stream-item {
+  flex: 0 0 320px;
+  scroll-snap-align: start;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+@media (min-width: 640px) {
+  .accordion-stream-item {
+    flex: 0 0 360px;
+  }
+}
+
+.accordion-stream-item:hover {
+  transform: translateY(-4px) scale(1.02);
+}

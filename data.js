@@ -464,6 +464,194 @@ var initialStickyNotes = [
   }
 ];
 
+
+// ==========================================
+// 📚 课程作品集 (Course Albums / Thematic Collections)
+// ==========================================
+var initialCourseAlbums = [
+  {
+    id: "album-1",
+    title: "在莫奈的花园里：水粉光影与色彩实验",
+    subTitle: "Monet's Garden Color & Light Workshop",
+    tag: "🎨 创想班 · 周末主题工坊",
+    date: "2026.08.16",
+    ageGroup: "6-8",
+    className: "创想B班",
+    coverImage: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1200&auto=format&fit=crop&q=85",
+    introSummary: "在这一堂课上，我们带着孩子们一起走进法国吉维尼小镇的莫奈花园。孩子们观察睡莲在不同光线下的跳跃，用大笔触的色彩并置感受印象派的呼吸与诗意。",
+    teacherNotes: "本期学员对冷暖色调的过渡有了极具个性的直觉表达，每幅作品都呈现出了属于孩子自己独特的‘睡莲池塘’。",
+    artworkCount: 6,
+    artworks: [
+      {
+        id: "art-alb-1-1",
+        title: "睡莲池塘的黄昏倒影",
+        author: "陈安安",
+        ageGroup: "6-8",
+        image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1000&auto=format&fit=crop&q=80",
+        comment: "橙红与钴蓝的冷暖对撞大胆而生动。"
+      },
+      {
+        id: "art-alb-1-2",
+        title: "微风吹过的日本桥",
+        author: "林雨晴",
+        ageGroup: "6-8",
+        image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1000&auto=format&fit=crop&q=80",
+        comment: "桥身倒影与浮萍的笔触很有节奏感。"
+      },
+      {
+        id: "art-alb-1-3",
+        title: "发光的小睡莲与蜻蜓",
+        author: "苏小澈",
+        ageGroup: "6-8",
+        image: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=1000&auto=format&fit=crop&q=80",
+        comment: "点彩手法的运用极具灵气。"
+      },
+      {
+        id: "art-alb-1-4",
+        title: "清晨水雾中的调色盘",
+        author: "陆子昂",
+        ageGroup: "6-8",
+        image: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=1000&auto=format&fit=crop&q=80",
+        comment: "大面积淡绿与浅粉的渲染层次丰富。"
+      },
+      {
+        id: "art-alb-1-5",
+        title: "莫奈花园里的秘密捉迷藏",
+        author: "张可儿",
+        ageGroup: "6-8",
+        image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1000&auto=format&fit=crop&q=80",
+        comment: "充满了童话般的叙事感与想象力。"
+      },
+      {
+        id: "art-alb-1-6",
+        title: "星光落进池塘里",
+        author: "周子辰",
+        ageGroup: "6-8",
+        image: "https://images.unsplash.com/photo-1563089145-599997674d42?w=1000&auto=format&fit=crop&q=80",
+        comment: "夜色与水面星光的构图很有张力。"
+      }
+    ]
+  },
+  {
+    id: "album-2",
+    title: "秋天的拓印旅行：大自然打翻了调色盘",
+    subTitle: "Autumn Leaves Monotype & Color Workshop",
+    tag: "🐣 启蒙班 · 触觉与肌理探索",
+    date: "2026.08.10",
+    ageGroup: "3-5",
+    className: "启蒙A班",
+    coverImage: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1200&auto=format&fit=crop&q=85",
+    introSummary: "孩子们收集了银杏叶、枫叶与松果，在画纸上涂抹厚重油画棒与水粉，双手轻轻按压，感受大自然留下的细腻叶脉与金色秋意。",
+    teacherNotes: "低年龄段孩子通过触觉与拓印动作，直观体验了‘形状与纹理’的艺术魔法，课堂气氛极其热烈。",
+    artworkCount: 5,
+    artworks: [
+      {
+        id: "art-alb-2-1",
+        title: "银杏叶变成小金鱼游走了",
+        author: "林雨晴",
+        ageGroup: "3-5",
+        image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1000&auto=format&fit=crop&q=80",
+        comment: "叶片形状联想极富童趣。"
+      },
+      {
+        id: "art-alb-2-2",
+        title: "红枫树林里的大狮子",
+        author: "陈安安",
+        ageGroup: "3-5",
+        image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1000&auto=format&fit=crop&q=80",
+        comment: "红色与赭黄的拓印层次浓烈热烈。"
+      },
+      {
+        id: "art-alb-2-3",
+        title: "松果小刺猬的秋天果园",
+        author: "苏小澈",
+        ageGroup: "3-5",
+        image: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=1000&auto=format&fit=crop&q=80",
+        comment: "点线结合，生动活泼。"
+      },
+      {
+        id: "art-alb-2-4",
+        title: "金黄色的落叶雨",
+        author: "陆子昂",
+        ageGroup: "3-5",
+        image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1000&auto=format&fit=crop&q=80",
+        comment: "动感十足的泼洒与拓印结合。"
+      },
+      {
+        id: "art-alb-2-5",
+        title: "秋风呼呼吹过大树梢",
+        author: "张可儿",
+        ageGroup: "3-5",
+        image: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=1000&auto=format&fit=crop&q=80",
+        comment: "纯真率真的直觉笔触。"
+      }
+    ]
+  },
+  {
+    id: "album-3",
+    title: "未来深海基地与发光水母：立体综合材料创作",
+    subTitle: "Deep Sea Laboratory & Bioluminescent Life",
+    tag: "🚀 创作班 · 空间架构与综合材质",
+    date: "2026.08.02",
+    ageGroup: "9-12",
+    className: "创作A班",
+    coverImage: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=1200&auto=format&fit=crop&q=85",
+    introSummary: "结合荧光水粉、立体剪构与刮刀技法，大年龄段孩子们构想了 2100 年人类在万米马里亚纳海沟建立的发光科考空间站。",
+    teacherNotes: "9-12岁孩子们在空间透视、明暗对比与科幻故事设定上展现出了极高的综合素养与沉浸感。",
+    artworkCount: 6,
+    artworks: [
+      {
+        id: "art-alb-3-1",
+        title: "深渊7号水下能量枢纽",
+        author: "陆子昂",
+        ageGroup: "9-12",
+        image: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=1000&auto=format&fit=crop&q=80",
+        comment: "机械透视与发光水母的生物感结合得天衣无缝。"
+      },
+      {
+        id: "art-alb-3-2",
+        title: "荧光巨型发光水母群",
+        author: "周子辰",
+        ageGroup: "9-12",
+        image: "https://images.unsplash.com/photo-1563089145-599997674d42?w=1000&auto=format&fit=crop&q=80",
+        comment: "渐变荧光蓝与深黑背景形成了震撼的深海视觉。"
+      },
+      {
+        id: "art-alb-3-3",
+        title: "珊瑚礁里的海底植物园",
+        author: "陈安安",
+        ageGroup: "9-12",
+        image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1000&auto=format&fit=crop&q=80",
+        comment: "复杂的有机曲线与点阵色彩极其耐看。"
+      },
+      {
+        id: "art-alb-3-4",
+        title: "深潜号与远古海洋生物",
+        author: "苏小澈",
+        ageGroup: "9-12",
+        image: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=1000&auto=format&fit=crop&q=80",
+        comment: "构图具有很强的故事张力与电影感。"
+      },
+      {
+        id: "art-alb-3-5",
+        title: "海底水晶矿脉的夜光探测",
+        author: "林雨晴",
+        ageGroup: "9-12",
+        image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1000&auto=format&fit=crop&q=80",
+        comment: "刮刀几何切面与水彩晕染的肌理对撞非常出彩。"
+      },
+      {
+        id: "art-alb-3-6",
+        title: "跨越星海的海底传送门",
+        author: "张可儿",
+        ageGroup: "9-12",
+        image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1000&auto=format&fit=crop&q=80",
+        comment: "色彩迷幻瑰丽，空间感极佳。"
+      }
+    ]
+  }
+];
+
 // 全局别名兼容
 if (typeof window !== 'undefined') {
   window.initialArtworks = initialArtworks;
@@ -472,4 +660,6 @@ if (typeof window !== 'undefined') {
   window.themeExhibitions = themeExhibitions;
   window.initialThematicExhibitions = themeExhibitions;
   window.initialStickyNotes = initialStickyNotes;
+  window.initialCourseAlbums = initialCourseAlbums;
+  window.courseAlbums = initialCourseAlbums;
 }

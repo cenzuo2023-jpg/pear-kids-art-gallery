@@ -386,7 +386,109 @@ class NativeSupabaseService {
     });
     return res.ok;
   }
+
+  // =========================================================================
+  // 5. 课程作品集 (Course Albums / Portfolios REST API)
+  // =========================================================================
+  async getCourseAlbums() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/course_albums?select=*&order=created_at.desc`, {
+        method: 'GET',
+        headers: REST_HEADERS
+      });
+      if (!res.ok) {
+        return typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : [];
+      }
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        return typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : [];
+      }
+      return data.map(item => this._fromDbAlbum(item)).filter(Boolean);
+    } catch (e) {
+      return typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : [];
+    }
+  }
+
+  async createCourseAlbum(albumData) {
+    const payload = this._toDbAlbum(albumData);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/course_albums`, {
+        method: 'POST',
+        headers: REST_HEADERS,
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return this._fromDbAlbum(Array.isArray(data) ? data[0] : data);
+      }
+    } catch (e) {}
+    return albumData;
+  }
+
+  async updateCourseAlbum(albumData) {
+    const payload = this._toDbAlbum(albumData);
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/course_albums?id=eq.${encodeURIComponent(payload.id)}`, {
+        method: 'PATCH',
+        headers: REST_HEADERS,
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return this._fromDbAlbum(Array.isArray(data) ? data[0] : data);
+      }
+    } catch (e) {}
+    return albumData;
+  }
+
+  async deleteCourseAlbum(albumId) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/course_albums?id=eq.${encodeURIComponent(albumId)}`, {
+        method: 'DELETE',
+        headers: REST_HEADERS
+      });
+      return res.ok;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  _toDbAlbum(a) {
+    return {
+      id: a.id,
+      title: a.title,
+      sub_title: a.subTitle || a.subtitle || '',
+      tag: a.tag || '',
+      date: a.date || '',
+      age_group: a.ageGroup || '3-5',
+      class_name: a.className || '',
+      cover_image: a.coverImage || a.cover_image || '',
+      intro_summary: a.introSummary || a.intro_summary || '',
+      teacher_notes: a.teacherNotes || a.teacher_notes || '',
+      artworks: a.artworks || [],
+      artwork_count: Array.isArray(a.artworks) ? a.artworks.length : (a.artworkCount || 0)
+    };
+  }
+
+  _fromDbAlbum(row) {
+    if (!row) return null;
+    return {
+      id: row.id,
+      title: row.title,
+      subTitle: row.sub_title || row.subtitle || '',
+      tag: row.tag || '',
+      date: row.date || '',
+      ageGroup: row.age_group || '3-5',
+      className: row.class_name || '',
+      coverImage: row.cover_image || '',
+      introSummary: row.intro_summary || '',
+      teacherNotes: row.teacher_notes || '',
+      artworks: row.artworks || [],
+      artworkCount: row.artwork_count || (Array.isArray(row.artworks) ? row.artworks.length : 0)
+    };
+  }
+
 }
 
-// 导出全局单例
+// 全局单例
 window.galleryCloud = new NativeSupabaseService();
