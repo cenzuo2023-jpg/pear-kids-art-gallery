@@ -1714,11 +1714,37 @@
 
 
   <script>
-        let artworks = (typeof initialArtworks !== 'undefined' && Array.isArray(initialArtworks)) ? [...initialArtworks] : [];
-    let studentList = (typeof initialStudents !== 'undefined' && Array.isArray(initialStudents)) ? [...initialStudents] : [];
-    let themeExhibitions = (typeof initialThematicExhibitions !== 'undefined' && Array.isArray(initialThematicExhibitions)) ? [...initialThematicExhibitions] : [];
-    let stickyNotes = (typeof initialStickyNotes !== 'undefined' && Array.isArray(initialStickyNotes)) ? [...initialStickyNotes] : [];
-    let courseAlbums = (typeof initialCourseAlbums !== 'undefined' && Array.isArray(initialCourseAlbums)) ? [...initialCourseAlbums] : [];
+        // =========================================================================
+    // 🌟 本地优先零闪烁缓存引擎 (Local-First Zero-Flicker Cache Engine)
+    // 页面刷新 0 毫秒直接加载用户真实数据库缓存，彻底告别模板数据闪跳！
+    // =========================================================================
+    function loadCachedData(key, fallback) {
+      try {
+        const cached = localStorage.getItem('art_gallery_cache_' + key);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return Array.isArray(fallback) ? [...fallback] : [];
+    }
+
+    function saveCachedData(key, data) {
+      try {
+        if (Array.isArray(data)) {
+          localStorage.setItem('art_gallery_cache_' + key, JSON.stringify(data));
+        }
+      } catch (e) {}
+    }
+
+    let artworks = loadCachedData('artworks', typeof initialArtworks !== 'undefined' ? initialArtworks : []);
+    let studentList = loadCachedData('students', typeof initialStudents !== 'undefined' ? initialStudents : []);
+    let themeExhibitions = loadCachedData('themes', typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : []);
+    let stickyNotes = loadCachedData('notes', typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : []);
+    let courseAlbums = loadCachedData('albums', typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : []);
+
     let currentView = 'gallery';
     let currentAgeFilter = 'all';
     let currentSearchTerm = '';
@@ -2268,33 +2294,56 @@
           window.galleryCloud.getCourseAlbums ? window.galleryCloud.getCourseAlbums() : Promise.resolve([])
         ]);
 
-        if (Array.isArray(cloudArts) && cloudArts.length > 0) artworks = cloudArts;
-        if (Array.isArray(cloudStudents) && cloudStudents.length > 0) studentList = cloudStudents;
-        if (Array.isArray(cloudThemes) && cloudThemes.length > 0) themeExhibitions = cloudThemes;
-        if (Array.isArray(cloudNotes) && cloudNotes.length > 0) stickyNotes = cloudNotes;
-        if (Array.isArray(cloudAlbums) && cloudAlbums.length > 0) courseAlbums = cloudAlbums;
+        if (Array.isArray(cloudArts) && cloudArts.length > 0) {
+          artworks = cloudArts;
+          saveCachedData('artworks', cloudArts);
+        }
+        if (Array.isArray(cloudStudents) && cloudStudents.length > 0) {
+          studentList = cloudStudents;
+          saveCachedData('students', cloudStudents);
+        }
+        if (Array.isArray(cloudThemes) && cloudThemes.length > 0) {
+          themeExhibitions = cloudThemes;
+          saveCachedData('themes', cloudThemes);
+        }
+        if (Array.isArray(cloudNotes) && cloudNotes.length > 0) {
+          stickyNotes = cloudNotes;
+          saveCachedData('notes', cloudNotes);
+        }
+        if (Array.isArray(cloudAlbums) && cloudAlbums.length > 0) {
+          courseAlbums = cloudAlbums;
+          saveCachedData('albums', cloudAlbums);
+        }
 
+        // 重新渲染全部视图
         renderCuratedCarousel();
         renderThemesArchive();
         renderGallery();
         renderAlbums();
         renderHall();
         renderStickyWall();
+
+        // 🌟 如果当前正处在某个独立页面（如画册详情/学生主页），同步静默刷新其内容
+        const { view, param } = getHashRoute();
+        if (view && view !== 'gallery') {
+          navigateTo(view, param, false);
+        }
+
         lucide.createIcons();
-        console.log('🖼️ 前台展厅已同步最新数据: 画作', artworks.length, '件, 小艺术家', studentList.length, '位, 作品集', courseAlbums.length, '套');
+        console.log('🖼️ 展厅数据同步完毕: 画作', artworks.length, '件, 小艺术家', studentList.length, '位, 作品集', courseAlbums.length, '套');
       } catch (err) {
         console.warn('云端数据读取异常:', err);
       }
     }
 
-    document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', async () => {
       initTheme();
       initBgm();
       initAdminGateway();
       setupLightDismiss();
       startCarouselTimer();
 
-      // 🌟 1. 0毫秒极速瞬时同步渲染全部页面与板块（确保页面打开立即可见，无需等待网络）
+      // 🌟 1. 0毫秒极速秒开（从本地持久化缓存瞬间全量渲染，0模板数据闪烁！）
       renderCuratedCarousel();
       renderGallery();
       renderAlbums();
@@ -2303,7 +2352,12 @@
       renderStickyWall();
       lucide.createIcons();
 
-      // 🌟 2. 异步拉取云端最新数据并无缝重绘
+      // 🌟 2. 激活浏览器路由监听，并在开屏时精准恢复用户上次所在的页面与网址
+      window.addEventListener('hashchange', handleHashRoute);
+      window.addEventListener('popstate', handleHashRoute);
+      handleHashRoute();
+
+      // 🌟 3. 异步拉取云端最新数据并无缝重绘
       try {
         await syncDataFromCloud();
       } catch (e) {
@@ -2311,7 +2365,8 @@
       }
       lucide.createIcons();
 
-      // 初始化便签墙扫码直达二维码
+
+            // 初始化便签墙扫码直达二维码
       initStickyQrCode();
 
       // 扫码直达深链接解析 (画作详情 / 扫码贴便签)
@@ -3211,10 +3266,68 @@
       });
     }
 
-    function navigateTo(viewName, paramData = null) {
+    // =========================================================================
+    // 🌐 全功能 URL Hash 路由与浏览器前进后退历史管理器 (Browser History & Hash Router)
+    // =========================================================================
+    function getHashRoute() {
+      const rawHash = (window.location.hash || '').replace(/^#\/?/, '').trim();
+      if (!rawHash || rawHash === 'gallery') return { view: 'gallery', param: null };
+      if (rawHash === 'albums') return { view: 'albums', param: null };
+      if (rawHash === 'themes') return { view: 'themes', param: null };
+      if (rawHash === 'hall') return { view: 'hall', param: null };
+      if (rawHash === 'notes') return { view: 'notes', param: null };
+      if (rawHash === 'teacher') return { view: 'teacher', param: null };
+
+      // 子路由深度解析: #/album/:id, #/student/:id, #/theme/:id
+      const parts = rawHash.split('/');
+      const prefix = parts[0];
+      const paramVal = decodeURIComponent(parts.slice(1).join('/'));
+
+      if (prefix === 'album' || prefix === 'album-detail') {
+        const album = (courseAlbums || []).find(a => String(a.id) === String(paramVal)) || (initialCourseAlbums || []).find(a => String(a.id) === String(paramVal));
+        return { view: 'album-detail', param: album || paramVal };
+      }
+      if (prefix === 'student') {
+        const student = (studentList || []).find(s => String(s.id) === String(paramVal) || s.name === paramVal) || (initialStudents || []).find(s => String(s.id) === String(paramVal) || s.name === paramVal);
+        return { view: 'student', param: student || paramVal };
+      }
+      if (prefix === 'theme') {
+        const theme = (themeExhibitions || []).find(t => String(t.id) === String(paramVal)) || (initialThematicExhibitions || []).find(t => String(t.id) === String(paramVal));
+        return { view: 'theme', param: theme || paramVal };
+      }
+
+      return { view: 'gallery', param: null };
+    }
+
+    function handleHashRoute() {
+      const { view, param } = getHashRoute();
+      navigateTo(view, param, false);
+    }
+
+    function navigateTo(viewName, paramData = null, updateHash = true) {
       currentView = viewName;
       document.querySelectorAll('.view-page').forEach(el => el.classList.add('hidden'));
       updateNavTabState(viewName);
+
+      // 🌟 同步更新浏览器 URL Hash，完整支持独立网址分享、页面刷新保持与前进/后退！
+      if (updateHash) {
+        let hashStr = `#/${viewName}`;
+        if (viewName === 'album-detail' && paramData) {
+          const id = typeof paramData === 'object' ? paramData.id : paramData;
+          hashStr = `#/album/${encodeURIComponent(id)}`;
+        } else if (viewName === 'student' && paramData) {
+          const id = typeof paramData === 'object' ? (paramData.id || paramData.name) : paramData;
+          hashStr = `#/student/${encodeURIComponent(id)}`;
+        } else if (viewName === 'theme' && paramData) {
+          const id = typeof paramData === 'object' ? paramData.id : paramData;
+          hashStr = `#/theme/${encodeURIComponent(id)}`;
+        } else if (viewName === 'gallery') {
+          hashStr = '#/gallery';
+        }
+        if (window.location.hash !== hashStr) {
+          history.pushState(null, '', hashStr);
+        }
+      }
 
       if (viewName === 'gallery') {
         document.getElementById('view-gallery').classList.remove('hidden');
@@ -3228,17 +3341,47 @@
       } else if (viewName === 'album-detail' && paramData) {
         pauseCarousel();
         document.getElementById('view-album-detail').classList.remove('hidden');
-        renderAlbumDetail(paramData);
+        let albumObj = paramData;
+        if (typeof paramData !== 'object') {
+          albumObj = (courseAlbums || []).find(a => String(a.id) === String(paramData)) || (initialCourseAlbums || []).find(a => String(a.id) === String(paramData));
+        }
+        renderAlbumDetail(albumObj);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'themes') {
         pauseCarousel();
         document.getElementById('view-themes').classList.remove('hidden');
         renderThemesArchive();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (viewName === 'theme' && paramData) {
+        pauseCarousel();
+        document.getElementById('view-theme').classList.remove('hidden');
+        let themeObj = paramData;
+        if (typeof paramData !== 'object') {
+          themeObj = (themeExhibitions || []).find(t => String(t.id) === String(paramData)) || (initialThematicExhibitions || []).find(t => String(t.id) === String(paramData));
+        }
+        renderThemeExhibition(themeObj);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'hall') {
         pauseCarousel();
         document.getElementById('view-hall').classList.remove('hidden');
         renderHall();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (viewName === 'student' && paramData) {
+        pauseCarousel();
+        document.getElementById('view-student').classList.remove('hidden');
+        let studentObj = paramData;
+        if (typeof paramData !== 'object') {
+          studentObj = (studentList || []).find(s => String(s.id) === String(paramData) || s.name === paramData) || (initialStudents || []).find(s => String(s.id) === String(paramData) || s.name === paramData);
+          if (!studentObj) {
+            studentObj = {
+              id: paramData,
+              name: paramData,
+              ageGroup: '6-8',
+              bio: '用心灵感知色彩，用童真描绘世界。'
+            };
+          }
+        }
+        renderStudentProfile(studentObj);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'notes') {
         pauseCarousel();
@@ -3249,21 +3392,10 @@
         pauseCarousel();
         document.getElementById('view-teacher').classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (viewName === 'student' && paramData) {
-        pauseCarousel();
-        document.getElementById('view-student').classList.remove('hidden');
-        renderStudentProfile(paramData);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (viewName === 'theme' && paramData) {
-        pauseCarousel();
-        document.getElementById('view-theme').classList.remove('hidden');
-        renderThemeExhibition(paramData);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
 
-    // ==========================================
-    function getRoleAvatar(role) {
+        function getRoleAvatar(role) {
       if (role === 'parent') return '👩‍👧';
       if (role === 'student') return '🎨';
       if (role === 'teacher') return '👩‍🏫';

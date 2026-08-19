@@ -187,6 +187,7 @@ class NativeSupabaseService {
       }
       const data = await res.json();
       const list = (data || []).map(item => this._fromDbArtwork(item)).filter(Boolean);
+      try { localStorage.setItem('art_gallery_cache_artworks', JSON.stringify(list)); } catch (e) {}
       console.log('🖼️ 成功直连 Supabase 拉取画作:', list.length, '件');
       return list;
     } catch (e) {
@@ -252,6 +253,7 @@ class NativeSupabaseService {
       if (!res.ok) return [];
       const data = await res.json();
       const list = (data || []).map(item => this._fromDbStudent(item)).filter(Boolean);
+      try { localStorage.setItem('art_gallery_cache_students', JSON.stringify(list)); } catch (e) {}
       console.log('👑 成功直连 Supabase 拉取小艺术家:', list.length, '位');
       return list;
     } catch (e) {
