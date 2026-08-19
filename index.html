@@ -11,6 +11,24 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <!-- Tailwind CSS CDN -->
+  <!-- Start cloud reads before third-party UI libraries so refresh data is ready sooner. -->
+  <script src="data.js?v=20260819_v3"></script>
+  <script src="cloudConfig.js?v=20260819_loading_v2"></script>
+  <script>
+    (() => {
+      const cloud = window.galleryCloud;
+      if (!cloud) return;
+      const prefetch = {
+        artworks: cloud.getArtworks ? cloud.getArtworks() : Promise.resolve([]),
+        students: cloud.getStudentSummaries ? cloud.getStudentSummaries() : (cloud.getStudents ? cloud.getStudents() : Promise.resolve([])),
+        articles: cloud.getThematicExhibitionSummaries ? cloud.getThematicExhibitionSummaries() : (cloud.getThematicExhibitions ? cloud.getThematicExhibitions() : Promise.resolve([])),
+        notes: cloud.getStickyNotes ? cloud.getStickyNotes() : Promise.resolve([]),
+        albums: cloud.getCourseAlbums ? cloud.getCourseAlbums() : Promise.resolve([])
+      };
+      Object.values(prefetch).forEach(request => request.catch(() => {}));
+      window.galleryCloudPrefetch = prefetch;
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <!-- Lucide Icons -->
@@ -39,10 +57,6 @@
       }
     }
   </script>
-  <!-- 🍐 默认本地基础数据集 (含全部画作、学员、特展及课程作品集) -->
-  <script src="data.js?v=20260819_v3"></script>
-  <!-- 🍐 纯原生零依赖 Supabase 云数据库直连引擎 -->
-  <script src="cloudConfig.js?v=20260819_cloud_authority_v1"></script>
 </head>
 <body class="min-h-screen antialiased flex flex-col selection:bg-[#10E57A] selection:text-stone-950">
 
@@ -1702,10 +1716,38 @@
       return Array.isArray(fallback) ? [...fallback] : [];
     }
 
+    function compactCachedData(key, data) {
+      const source = Array.isArray(data) ? data : [];
+      if (key === 'artworks') {
+        return source.map(item => ({ ...item, images: item.image ? [item.image] : [] }));
+      }
+      if (key === 'students') {
+        return source.map(item => ({
+          ...item,
+          avatar: String(item.avatar || '').startsWith('data:image/')
+            ? 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80'
+            : item.avatar,
+          avatarLoaded: false
+        }));
+      }
+      if (key === 'themes') {
+        return source.map(item => ({ ...item, curatorStatement: [], contentLoaded: false }));
+      }
+      if (key === 'albums') {
+        return source.map(item => ({
+          ...item,
+          artworkCount: Array.isArray(item.artworks) ? item.artworks.length : (item.artworkCount || 0),
+          artworks: []
+        }));
+      }
+      return source;
+    }
+
     function saveCachedData(key, data) {
       try {
         if (Array.isArray(data)) {
-          localStorage.setItem('art_gallery_cache_' + key, JSON.stringify(data));
+          if (key === 'albums') localStorage.removeItem('pear_course_albums');
+          localStorage.setItem('art_gallery_cache_' + key, JSON.stringify(compactCachedData(key, data)));
         }
       } catch (e) {}
     }
@@ -2359,71 +2401,173 @@
     }
 
     let cloudSyncInFlight = false;
+    let studentAvatarSyncInFlight = null;
+    const themeContentRequests = new Map();
+
+    function renderCurrentCloudDetail() {
+      const { view, param } = getHashRoute();
+      if (!param || typeof param !== 'object') return;
+      if (view === 'album-detail') renderAlbumDetail(param);
+      if (view === 'student') renderStudentProfile(param);
+      if (view === 'theme') renderThemeExhibition(param);
+    }
+
+    async function ensureThemeContentLoaded(themeId) {
+      const id = String(themeId || '');
+      const existing = themeExhibitions.find(theme => String(theme.id) === id);
+      if (!existing || existing.contentLoaded !== false || !window.galleryCloud?.getThematicExhibitionById) {
+        return existing;
+      }
+      if (themeContentRequests.has(id)) return themeContentRequests.get(id);
+
+      const request = window.galleryCloud.getThematicExhibitionById(id)
+        .then(fullTheme => {
+          const index = themeExhibitions.findIndex(theme => String(theme.id) === id);
+          if (index === -1 || !fullTheme) return fullTheme;
+          themeExhibitions[index] = { ...themeExhibitions[index], ...fullTheme, contentLoaded: true };
+          const route = getHashRoute();
+          if (route.view === 'theme' && route.param && String(route.param.id) === id) {
+            renderThemeExhibition(themeExhibitions[index]);
+          }
+          return themeExhibitions[index];
+        })
+        .catch(error => {
+          console.error('Article body load failed:', error);
+          return existing;
+        })
+        .finally(() => themeContentRequests.delete(id));
+
+      themeContentRequests.set(id, request);
+      return request;
+    }
+
+    function hydrateStudentAvatars() {
+      if (studentAvatarSyncInFlight || !window.galleryCloud?.getStudentAvatars) return studentAvatarSyncInFlight;
+      studentAvatarSyncInFlight = window.galleryCloud.getStudentAvatars()
+        .then(items => {
+          const avatarMap = new Map((items || []).map(item => [String(item.id), item.avatar]));
+          studentList = (studentList || []).map(student => {
+            const avatar = avatarMap.get(String(student.id));
+            return avatar ? { ...student, avatar, avatarLoaded: true } : student;
+          });
+          renderHall();
+          const route = getHashRoute();
+          if (route.view === 'student' && route.param && typeof route.param === 'object') {
+            const latest = studentList.find(student => String(student.id) === String(route.param.id));
+            if (latest) renderStudentProfile(latest);
+          }
+        })
+        .catch(error => console.warn('Student avatar load failed:', error))
+        .finally(() => { studentAvatarSyncInFlight = null; });
+      return studentAvatarSyncInFlight;
+    }
 
     async function syncDataFromCloud() {
       if (cloudSyncInFlight) return;
-      if (!window.galleryCloud) {
-        throw new Error('云端数据服务尚未加载');
-      }
+      if (!window.galleryCloud) throw new Error('Cloud data service is not ready');
       cloudSyncInFlight = true;
-      try {
-        const [cloudArts, cloudStudents, cloudThemes, cloudNotes, cloudAlbums] = await Promise.all([
-          window.galleryCloud.getArtworks ? window.galleryCloud.getArtworks() : Promise.resolve([]),
-          window.galleryCloud.getStudents ? window.galleryCloud.getStudents() : Promise.resolve([]),
-          window.galleryCloud.getThematicExhibitions ? window.galleryCloud.getThematicExhibitions() : Promise.resolve([]),
-          window.galleryCloud.getStickyNotes ? window.galleryCloud.getStickyNotes() : Promise.resolve([]),
-          window.galleryCloud.getCourseAlbums ? window.galleryCloud.getCourseAlbums() : Promise.resolve([])
-        ]);
+      const prefetched = window.galleryCloudPrefetch || null;
 
-        if (Array.isArray(cloudArts)) {
-          artworks = cloudArts;
-          saveCachedData('artworks', cloudArts);
+      const jobs = [
+        {
+          label: 'artworks',
+          load: () => prefetched?.artworks || (window.galleryCloud.getArtworks ? window.galleryCloud.getArtworks() : Promise.resolve([])),
+          apply: data => {
+            artworks = data;
+            saveCachedData('artworks', data);
+            renderGallery();
+          }
+        },
+        {
+          label: 'students',
+          load: () => prefetched?.students || (window.galleryCloud.getStudentSummaries
+            ? window.galleryCloud.getStudentSummaries()
+            : (window.galleryCloud.getStudents ? window.galleryCloud.getStudents() : Promise.resolve([]))),
+          apply: data => {
+            studentList = data;
+            saveCachedData('students', data);
+            renderHall();
+          }
+        },
+        {
+          label: 'articles',
+          load: () => prefetched?.articles || (window.galleryCloud.getThematicExhibitionSummaries
+            ? window.galleryCloud.getThematicExhibitionSummaries()
+            : (window.galleryCloud.getThematicExhibitions ? window.galleryCloud.getThematicExhibitions() : Promise.resolve([]))),
+          apply: data => {
+            themeExhibitions = data;
+            saveCachedData('themes', data);
+            renderCuratedCarousel();
+            renderThemesArchive();
+            const route = getHashRoute();
+            if (route.view === 'theme' && route.param && typeof route.param === 'object') {
+              renderThemeExhibition(route.param);
+            }
+          }
+        },
+        {
+          label: 'notes',
+          load: () => prefetched?.notes || (window.galleryCloud.getStickyNotes ? window.galleryCloud.getStickyNotes() : Promise.resolve([])),
+          apply: data => {
+            stickyNotes = data;
+            saveCachedData('notes', data);
+            renderStickyWall();
+          }
+        },
+        {
+          label: 'albums',
+          load: () => prefetched?.albums || (window.galleryCloud.getCourseAlbums ? window.galleryCloud.getCourseAlbums() : Promise.resolve([])),
+          apply: data => {
+            courseAlbums = data;
+            saveCachedData('albums', data);
+            renderAlbums();
+          }
         }
-        if (Array.isArray(cloudStudents)) {
-          studentList = cloudStudents;
-          saveCachedData('students', cloudStudents);
-        }
-        if (Array.isArray(cloudThemes)) {
-          themeExhibitions = cloudThemes;
-          saveCachedData('themes', cloudThemes);
-        }
-        if (Array.isArray(cloudNotes)) {
-          stickyNotes = cloudNotes;
-          saveCachedData('notes', cloudNotes);
-        }
-        if (Array.isArray(cloudAlbums)) {
-          courseAlbums = cloudAlbums;
-          saveCachedData('albums', cloudAlbums);
-        }
+      ];
+
+      try {
+        const results = await Promise.allSettled(jobs.map(job => Promise.resolve()
+          .then(job.load)
+          .then(data => {
+            if (!Array.isArray(data)) throw new Error(`${job.label} returned invalid data`);
+            job.apply(data);
+            return data.length;
+          })));
 
         cloudSnapshotReady = true;
-        // 重新渲染全部视图
         renderCuratedCarousel();
         renderThemesArchive();
         renderGallery();
         renderAlbums();
         renderHall();
         renderStickyWall();
-
-        // 当前详情页只刷新内容，不重新执行路由，避免隐藏/重建页面导致阅读位置回到顶部。
-        const { view, param } = getHashRoute();
-        if (param && typeof param === 'object') {
-          if (view === 'album-detail') renderAlbumDetail(param);
-          if (view === 'student') renderStudentProfile(param);
-          if (view === 'theme') renderThemeExhibition(param);
-        }
-
+        renderCurrentCloudDetail();
         lucide.createIcons();
-        console.log('🖼️ 展厅数据同步完毕: 画作', artworks.length, '件, 小艺术家', studentList.length, '位, 作品集', courseAlbums.length, '套');
+
+        const failures = results
+          .map((result, index) => result.status === 'rejected' ? { label: jobs[index].label, error: result.reason } : null)
+          .filter(Boolean);
+        failures.forEach(item => console.warn(`${item.label} load failed:`, item.error));
+        if (failures.length === jobs.length) throw failures[0].error;
+
+        hydrateStudentAvatars();
+        console.log('Cloud first-paint data ready:', artworks.length, studentList.length, courseAlbums.length);
       } catch (err) {
-        console.error('云端数据读取异常:', err);
-        showToast('⚠️ 云端数据暂时无法加载，请检查网络后刷新');
+        cloudSnapshotReady = true;
+        renderCuratedCarousel();
+        renderThemesArchive();
+        renderGallery();
+        renderAlbums();
+        renderHall();
+        renderStickyWall();
+        console.error('Cloud data load failed:', err);
+        showToast('\u26a0\ufe0f \u4e91\u7aef\u6570\u636e\u6682\u65f6\u65e0\u6cd5\u52a0\u8f7d\uff0c\u8bf7\u68c0\u67e5\u7f51\u7edc\u540e\u5237\u65b0');
         throw err;
       } finally {
+        if (window.galleryCloudPrefetch === prefetched) window.galleryCloudPrefetch = null;
         cloudSyncInFlight = false;
       }
     }
-
         document.addEventListener('DOMContentLoaded', async () => {
       initTheme();
       initBgm();
@@ -2648,8 +2792,13 @@
       }
 
       if (!Array.isArray(themeExhibitions) || themeExhibitions.length === 0) {
-        if (grid) grid.innerHTML = '';
-        if (empty) empty.classList.remove('hidden');
+        if (!cloudSnapshotReady) {
+          if (grid) grid.innerHTML = renderCloudLoadingCards(3);
+          if (empty) empty.classList.add('hidden');
+        } else {
+          if (grid) grid.innerHTML = '';
+          if (empty) empty.classList.remove('hidden');
+        }
         return;
       }
       if (empty) empty.classList.add('hidden');
@@ -2885,9 +3034,21 @@
 
 
       // 渲染文章正文
+      // The list response contains summaries; load this article body only on detail pages.
       const paragraphsBox = document.getElementById('themeArticleParagraphs');
       if (paragraphsBox) {
-        paragraphsBox.innerHTML = parseRichCuratorArticle(theme.curatorStatement || theme.curator_note);
+        if (theme.contentLoaded === false) {
+          paragraphsBox.innerHTML = `
+            <div class="py-8 space-y-5 animate-pulse" aria-label="Loading article">
+              <div class="h-5 w-3/4 rounded bg-stone-200 dark:bg-white/[0.08]"></div>
+              <div class="h-4 w-full rounded bg-stone-100 dark:bg-white/[0.05]"></div>
+              <div class="h-4 w-11/12 rounded bg-stone-100 dark:bg-white/[0.05]"></div>
+              <div class="h-4 w-4/5 rounded bg-stone-100 dark:bg-white/[0.05]"></div>
+            </div>`;
+          ensureThemeContentLoaded(theme.id);
+        } else {
+          paragraphsBox.innerHTML = parseRichCuratorArticle(theme.curatorStatement || theme.curator_note);
+        }
       }
       lucide.createIcons();
     }
@@ -3547,8 +3708,13 @@
       if (!grid) return;
 
       if (!stickyNotes || stickyNotes.length === 0) {
-        grid.innerHTML = '';
-        if (emptyState) emptyState.classList.remove('hidden');
+        if (!cloudSnapshotReady) {
+          grid.innerHTML = renderCloudLoadingCards(6);
+          if (emptyState) emptyState.classList.add('hidden');
+        } else {
+          grid.innerHTML = '';
+          if (emptyState) emptyState.classList.remove('hidden');
+        }
         return;
       }
 
@@ -3950,7 +4116,11 @@
       });
 
       if (filtered.length === 0) {
-        grid.innerHTML = `<div class="col-span-full py-16 text-center text-xs text-stone-400">暂无符合条件的小艺术家</div>`;
+        if (!cloudSnapshotReady && (!studentList || studentList.length === 0)) {
+          grid.innerHTML = renderCloudLoadingCards(6);
+        } else {
+          grid.innerHTML = `<div class="col-span-full py-16 text-center text-xs text-stone-400">\u6682\u65e0\u7b26\u5408\u6761\u4ef6\u7684\u5c0f\u827a\u672f\u5bb6</div>`;
+        }
         return;
       }
 

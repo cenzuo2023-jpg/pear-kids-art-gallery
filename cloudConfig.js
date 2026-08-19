@@ -63,9 +63,36 @@ class NativeSupabaseService {
     }
   }
 
+  _compactCacheList(key, list) {
+    const source = Array.isArray(list) ? list : [];
+    if (key === 'artworks') {
+      return source.map(item => ({ ...item, images: item.image ? [item.image] : [] }));
+    }
+    if (key === 'students') {
+      return source.map(item => ({
+        ...item,
+        avatar: String(item.avatar || '').startsWith('data:image/')
+          ? 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80'
+          : item.avatar,
+        avatarLoaded: false
+      }));
+    }
+    if (key === 'themes') {
+      return source.map(item => ({ ...item, curatorStatement: [], contentLoaded: false }));
+    }
+    if (key === 'albums') {
+      return source.map(item => ({
+        ...item,
+        artworkCount: Array.isArray(item.artworks) ? item.artworks.length : (item.artworkCount || 0),
+        artworks: []
+      }));
+    }
+    return source;
+  }
+
   _writeCache(key, list) {
     try {
-      localStorage.setItem(`art_gallery_cache_${key}`, JSON.stringify(Array.isArray(list) ? list : []));
+      localStorage.setItem(`art_gallery_cache_${key}`, JSON.stringify(this._compactCacheList(key, list)));
     } catch (e) {}
   }
 
@@ -131,6 +158,7 @@ class NativeSupabaseService {
       ageGroup: s.age_group || '3-5',
       className: s.class_name || '启蒙创想班',
       avatar: s.avatar || 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80',
+      avatarLoaded: Object.prototype.hasOwnProperty.call(s, 'avatar'),
       bio: s.bio || '',
       featuredArtCount: parseInt(s.featured_art_count || 1)
     };
@@ -168,7 +196,8 @@ class NativeSupabaseService {
       artworkIds: rawIds,
       artwork_ids: rawIds,
       isInHero: Boolean(t.is_in_hero !== false),
-      heroOrder: parseInt(t.hero_order || 1)
+      heroOrder: parseInt(t.hero_order || 1),
+      contentLoaded: Object.prototype.hasOwnProperty.call(t, 'curator_note')
     };
   }
 
@@ -359,6 +388,29 @@ class NativeSupabaseService {
     return list;
   }
 
+  // Frontend first paint omits the large Base64 avatar payload.
+  // Avatars are hydrated separately; the admin still uses getStudents().
+  async getStudentSummaries() {
+    const data = await this._request(
+      '/rest/v1/students?select=id,name,age,age_group,class_name,bio,featured_art_count,created_at&order=created_at.desc',
+      { method: 'GET' },
+      'Load student summaries'
+    );
+    return (data || []).map(item => this._fromDbStudent(item)).filter(Boolean);
+  }
+
+  async getStudentAvatars() {
+    const data = await this._request(
+      '/rest/v1/students?select=id,avatar&order=created_at.desc',
+      { method: 'GET' },
+      'Load student avatars'
+    );
+    return (data || []).map(item => ({
+      id: String(item.id || ''),
+      avatar: item.avatar || ''
+    })).filter(item => item.id);
+  }
+
   async createStudent(studentData) {
     const payload = this._toDbStudent(studentData);
     const data = await this._request(
@@ -431,6 +483,25 @@ class NativeSupabaseService {
       .filter(Boolean);
     this._writeCache('themes', list);
     return list;
+  }
+
+  // Lists omit full article bodies; a detail page fetches only its own body.
+  async getThematicExhibitionSummaries() {
+    const data = await this._request(
+      '/rest/v1/thematic_exhibitions?select=id,title,subtitle,cover_image,tag,date,intro,sections,artwork_ids,is_in_hero,hero_order,created_at&id=not.like.album-*&order=created_at.desc',
+      { method: 'GET' },
+      'Load article summaries'
+    );
+    return (data || []).map(item => this._fromDbTheme(item)).filter(Boolean);
+  }
+
+  async getThematicExhibitionById(themeId) {
+    const data = await this._request(
+      `/rest/v1/thematic_exhibitions?select=*&id=eq.${encodeURIComponent(themeId)}&limit=1`,
+      { method: 'GET' },
+      'Load article body'
+    );
+    return this._fromDbTheme(this._singleRow(data, 'Load article body'));
   }
 
   async createThematicExhibition(themeData) {
@@ -559,7 +630,7 @@ class NativeSupabaseService {
   // =========================================================================
   async getCourseAlbums() {
     const data = await this._request(
-      '/rest/v1/thematic_exhibitions?select=*&order=created_at.desc',
+      '/rest/v1/thematic_exhibitions?select=*&id=like.album-*&order=created_at.desc',
       { method: 'GET' },
       '读取课程作品集'
     );
@@ -569,9 +640,7 @@ class NativeSupabaseService {
       .filter(Boolean);
 
     this._writeCache('albums', list);
-    try {
-      localStorage.setItem('pear_course_albums', JSON.stringify(list));
-    } catch (e) {}
+    try { localStorage.removeItem('pear_course_albums'); } catch (e) {}
     console.log('📚 成功直连 Supabase 拉取课程作品集:', list.length, '套');
     return list;
   }
