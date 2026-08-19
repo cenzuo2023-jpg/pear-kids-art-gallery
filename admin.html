@@ -730,197 +730,254 @@
   <!-- ========================================================================= -->
   <!-- 模态框 3：主题特展 策划 / 编辑模态框 (Theme Modal) -->
   <!-- ========================================================================= -->
-  <div id="themeModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="w-full max-w-2xl bg-[#111C15] border border-white/10 rounded-3xl p-6 sm:p-8 space-y-5 my-auto max-h-[90vh] overflow-y-auto shadow-2xl">
-      <div class="flex items-center justify-between pb-4 border-b border-white/[0.08]">
-        <div>
-          <h3 id="themeModalTitle" class="text-lg font-black text-white flex items-center gap-2">
-            <span>🏛️</span>
-            <span>策划新主题特展</span>
-          </h3>
-          <p class="text-xs text-stone-400 mt-0.5">撰写专题期刊、挑选参展画作并配置首页大轮播</p>
-        </div>
-        <button onclick="closeThemeModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 text-stone-400 hover:text-white flex items-center justify-center transition-colors">
-          ✕
-        </button>
-      </div>
+  <!-- 🏛️ 沉浸式在线特展策展工作台 (Full-Screen Immersive Curatorial Studio) -->
+  <!-- ========================================================================= -->
+  <div id="themeModal" class="fixed inset-0 z-50 bg-[#0C140F] text-stone-100 hidden flex-col w-screen h-screen overflow-hidden select-text">
+    <form id="themeForm" onsubmit="handleSaveTheme(event)" class="flex flex-col w-full h-full">
+      <input type="hidden" id="themeFormId">
 
-      <form id="themeForm" onsubmit="handleSaveTheme(event)" class="space-y-4 text-xs">
-        <input type="hidden" id="themeFormId">
-
-        <div class="space-y-1.5">
-          <label class="font-bold text-stone-300">特展主标题 <span class="text-teal-400">*</span></label>
-          <input type="text" id="themeFormTitle" required placeholder="如：森林与星空的对话：2026 夏季少儿自然探索特展" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400">
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="space-y-1.5">
-            <label class="font-bold text-stone-300">英文 / 副标题</label>
-            <input type="text" id="themeFormSubTitle" placeholder="如：Forest & Starry Sky" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400">
-          </div>
-
-          <div class="space-y-1.5">
-            <label class="font-bold text-stone-300">特展标签</label>
-            <input type="text" id="themeFormTag" placeholder="如：🌟 2026 夏季年度重磅特展" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400">
+      <!-- 1. 🌟 顶部全功能悬浮控制导航栏 (Sticky Command Ribbon) -->
+      <header class="h-16 px-4 sm:px-8 bg-[#111D15]/95 backdrop-blur-xl border-b border-white/[0.08] flex items-center justify-between flex-shrink-0 z-30 shadow-lg">
+        <!-- 左侧：返回与工作台标题 -->
+        <div class="flex items-center gap-3">
+          <button 
+            type="button" 
+            onclick="closeThemeModal()" 
+            class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-stone-300 hover:text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer border border-white/10 active:scale-95"
+            title="返回特展列表"
+          >
+            <span>←</span>
+            <span class="hidden sm:inline">返回后台</span>
+          </button>
+          <div class="h-4 w-[1px] bg-white/10 hidden sm:block"></div>
+          <div class="flex items-center gap-2">
+            <span class="text-base sm:text-lg">🏛️</span>
+            <span class="font-black text-xs sm:text-sm text-white tracking-tight" id="themeModalTitle">策展工作台</span>
+            <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] text-emerald-400 font-bold">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>在线写作模式</span>
+            </span>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="space-y-1.5">
-            <label class="font-bold text-stone-300">展期 (如 2026.08 - 2026.10)</label>
-            <input type="text" id="themeFormDate" placeholder="2026.08 - 2026.10" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400">
-          </div>
+        <!-- 中间：三种沉浸式视图切换 -->
+        <div class="flex items-center gap-1 p-1 bg-stone-900/90 rounded-2xl border border-white/10 text-xs">
+          <button type="button" id="adminThemeTabEdit" onclick="switchAdminThemeEditorMode('edit')" class="px-3 py-1.5 rounded-xl font-bold transition-all bg-teal-500/20 text-teal-300 border border-teal-500/30">
+            ✍️ 专注写作
+          </button>
+          <button type="button" id="adminThemeTabSplit" onclick="switchAdminThemeEditorMode('split')" class="px-3 py-1.5 rounded-xl font-bold transition-all bg-transparent text-stone-400 hover:text-white">
+            🌓 左右分屏
+          </button>
+          <button type="button" id="adminThemeTabPreview" onclick="switchAdminThemeEditorMode('preview')" class="px-3 py-1.5 rounded-xl font-bold transition-all bg-transparent text-stone-400 hover:text-white">
+            👁️ 杂志预览
+          </button>
+        </div>
 
-          <!-- 特展封面图管理 (支持本地文件上传 + 粘贴 URL + 实时预览) -->
-          <div class="space-y-1.5">
-            <label class="font-bold text-stone-300">特展封面图 <span class="text-teal-400">*</span></label>
-            <div class="flex items-center gap-3">
-              <img id="themeCoverPreview" src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85" class="w-16 h-12 rounded-xl object-cover border border-white/10 flex-shrink-0 bg-stone-900 shadow">
-              <div class="flex-1 space-y-1.5 min-w-0">
+        <!-- 右侧：在线协作跳转与保存发布按钮 -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <a 
+            href="https://stackedit.io/app" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="hidden lg:flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 hover:text-teal-300 font-bold text-xs border border-white/10 transition-all cursor-pointer"
+            title="在新标签页中打开独立的在线 Markdown 编辑器"
+          >
+            <span>🌐 在线协作平台 ↗</span>
+          </a>
+          <button 
+            type="submit" 
+            class="px-5 sm:px-6 py-2 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-[#10E57A] text-stone-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>💾</span>
+            <span>保存并发布特展</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- 2. 📜 沉浸式宽幅文档画布 (Notion/Medium-Style Immersive Canvas) -->
+      <main class="flex-1 overflow-y-auto w-full bg-[#0C140F] p-4 sm:p-8 lg:p-12">
+        <div class="max-w-4xl mx-auto w-full space-y-8 pb-24">
+
+          <!-- 🖼️ 电影级特展全宽封面展示与快捷更换区 -->
+          <div class="relative w-full aspect-[21/8] sm:aspect-[24/8] rounded-3xl overflow-hidden shadow-2xl bg-stone-900 border border-white/10 group">
+            <img 
+              id="themeCoverPreview" 
+              src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85" 
+              class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
+              alt="特展封面"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-between p-4 sm:p-6">
+              <div class="flex items-center gap-2">
+                <span class="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-emerald-400 font-bold text-xs border border-white/15">
+                  🖼️ 宽幅特展封面
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
                 <input type="file" id="themeCoverFileInput" accept="image/*" class="hidden" onchange="handleThemeCoverSelected(event)">
                 <input type="hidden" id="themeFormCover" required value="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85">
-                <div class="flex gap-2">
-                  <button type="button" onclick="document.getElementById('themeCoverFileInput').click()" class="px-3 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs border border-white/10 flex items-center gap-1.5 flex-shrink-0 cursor-pointer transition-all">
-                    <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                    <span>上传本地封面</span>
-                  </button>
-                  <input type="url" id="themeCoverUrlInput" placeholder="或粘贴网络图片 URL..." oninput="updateThemeCoverFromUrl(this.value)" class="flex-1 min-w-0 px-3 py-2 bg-stone-900 border border-stone-700/80 rounded-xl text-white text-xs focus:outline-none focus:border-teal-400">
-                </div>
+                <button 
+                  type="button" 
+                  onclick="document.getElementById('themeCoverFileInput').click()" 
+                  class="px-3.5 py-2 rounded-xl bg-stone-950/80 hover:bg-[#10E57A] hover:text-stone-950 text-white font-bold text-xs backdrop-blur-md border border-white/20 transition-all flex items-center gap-1.5 shadow-lg cursor-pointer"
+                >
+                  <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                  <span>上传封面图</span>
+                </button>
+                <input 
+                  type="url" 
+                  id="themeCoverUrlInput" 
+                  placeholder="或粘贴图片 URL..." 
+                  oninput="updateThemeCoverFromUrl(this.value)" 
+                  class="hidden sm:block w-48 px-3 py-2 bg-stone-950/80 backdrop-blur-md border border-white/20 rounded-xl text-white text-xs placeholder:text-stone-400 focus:outline-none focus:border-teal-400"
+                />
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="space-y-1.5">
-          <label class="font-bold text-stone-300">特展简介概述</label>
-          <textarea id="themeFormIntro" rows="2" placeholder="在大自然与星空之间，孩子们以纯真直觉构筑森林树屋..." class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 leading-relaxed"></textarea>
-        </div>
+          <!-- 📝 文档标题与 Notion 风格属性元数据卡片 -->
+          <div class="space-y-4 pt-2">
+            <!-- 特展大标题 (超大字无框输入) -->
+            <input 
+              type="text" 
+              id="themeFormTitle" 
+              required 
+              placeholder="输入特展主标题..." 
+              class="w-full bg-transparent text-3xl sm:text-4xl lg:text-5xl font-black text-white placeholder:text-stone-700 border-0 focus:outline-none tracking-tight leading-tight"
+            />
 
-        <!-- 🎨 强大的标准 Markdown 图文排版引擎 (支持在线编辑器跳转、图文混排与分屏实时预览) -->
-        <div class="space-y-3 pt-2">
-          <!-- 顶部在线编辑器快捷跳转横幅 -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl bg-gradient-to-r from-teal-500/15 via-emerald-500/10 to-transparent border border-teal-500/30">
-            <div class="flex items-center gap-2.5">
-              <span class="text-xl">✍️</span>
-              <div>
-                <div class="font-black text-white text-xs flex items-center gap-1.5">
-                  <span>标准 Markdown 策展图文手记编辑器</span>
-                  <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-teal-400/20 text-teal-300 font-mono font-bold">GFM 格式</span>
-                </div>
-                <div class="text-[10px] text-teal-300/80 mt-0.5">支持标题、引用、列表、图片、超链接等标准 Markdown 语法</div>
+            <!-- 英文 / 副标题 -->
+            <input 
+              type="text" 
+              id="themeFormSubTitle" 
+              placeholder="添加副标题或英文引语 (如：Forest & Starry Sky)..." 
+              class="w-full bg-transparent text-base sm:text-xl text-stone-400 placeholder:text-stone-700 border-0 focus:outline-none font-medium"
+            />
+
+            <!-- 🏷️ Notion-Style 属性网格栏 -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-[#111D15] border border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <div class="space-y-1">
+                <span class="text-stone-400 font-bold flex items-center gap-1">
+                  <span>🏷️</span><span>特展标签</span>
+                </span>
+                <input 
+                  type="text" 
+                  id="themeFormTag" 
+                  placeholder="如：🌟 2026 夏季特别策划" 
+                  class="w-full px-3 py-2 bg-stone-900/80 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs"
+                />
+              </div>
+
+              <div class="space-y-1">
+                <span class="text-stone-400 font-bold flex items-center gap-1">
+                  <span>📅</span><span>展期时间</span>
+                </span>
+                <input 
+                  type="text" 
+                  id="themeFormDate" 
+                  placeholder="如：2026.08 - 2026.10" 
+                  class="w-full px-3 py-2 bg-stone-900/80 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs"
+                />
+              </div>
+
+              <div class="space-y-1">
+                <span class="text-stone-400 font-bold flex items-center gap-1">
+                  <span>🌟</span><span>首页焦点置顶</span>
+                </span>
+                <label class="flex items-center gap-2 px-3 py-2 bg-stone-900/80 border border-stone-700/80 rounded-xl text-white cursor-pointer h-[34px]">
+                  <input type="checkbox" id="themeFormIsInHero" checked class="w-4 h-4 rounded text-teal-500 focus:ring-0">
+                  <span class="text-[11px] font-bold text-teal-300">置顶于首页大轮播</span>
+                </label>
               </div>
             </div>
-            <div class="flex items-center gap-2">
-              <a 
-                href="https://stackedit.io/app" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-300 hover:to-emerald-300 text-stone-950 font-black text-xs shadow-md shadow-teal-500/20 flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 whitespace-nowrap"
-                title="在独立的专业在线 Markdown 编辑器中进行富文本排版，排版完成后直接将 Markdown 文本复制粘贴回此处即可"
-              >
-                <span>🌐 打开在线 Markdown 编辑器 ↗</span>
-              </a>
+
+            <!-- 💡 Notion 引言呼出框 (Lead Intro Summary) -->
+            <div class="p-4 rounded-2xl bg-emerald-500/10 border-l-4 border-teal-400 space-y-1">
+              <div class="text-[11px] text-teal-300 font-bold flex items-center gap-1">
+                <span>💡</span><span>特展导语 / 策展引言概述</span>
+              </div>
+              <textarea 
+                id="themeFormIntro" 
+                rows="2" 
+                placeholder="在此写下本期特展的导语短句（如：在大自然与星空之间，孩子们以纯真直觉构筑森林树屋...）" 
+                class="w-full bg-transparent text-stone-200 text-xs sm:text-sm leading-relaxed border-0 focus:outline-none placeholder:text-stone-600 font-serif italic"
+              ></textarea>
             </div>
+
+            <!-- 🎨 关联参展作品折叠面板 -->
+            <details class="p-4 rounded-2xl bg-stone-900/80 border border-white/10 group">
+              <summary class="flex items-center justify-between cursor-pointer font-bold text-xs text-stone-300 select-none">
+                <div class="flex items-center gap-2">
+                  <span>🖼️</span>
+                  <span>勾选本期关联参展画作</span>
+                  <span class="text-[10px] text-teal-400 font-normal">（可勾选作品库已有画作，亦可在下方正文中直接插入照片）</span>
+                </div>
+                <span class="text-stone-500 group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <div id="themeArtworkSelectorBox" class="mt-3 pt-3 border-t border-white/10 max-h-48 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                <!-- 动态生成作品选择框 -->
+              </div>
+            </details>
           </div>
 
-          <!-- 模式切换与工具栏 -->
-          <div class="flex items-center justify-between">
-            <label class="font-bold text-stone-300 flex items-center gap-1.5">
-              <span>📝 策展文章 Markdown 内容</span>
-              <span class="text-[10px] text-teal-400 font-normal">（可直接粘贴任意 Markdown 文本）</span>
-            </label>
-            <div class="flex items-center gap-1 bg-stone-900 p-1 rounded-xl border border-stone-700/80">
-              <button type="button" id="adminThemeTabEdit" onclick="switchAdminThemeEditorMode('edit')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30">
-                ✍️ 编辑源码
-              </button>
-              <button type="button" id="adminThemeTabSplit" onclick="switchAdminThemeEditorMode('split')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-stone-800 text-stone-400 hover:text-white">
-                🌓 左右分屏
-              </button>
-              <button type="button" id="adminThemeTabPreview" onclick="switchAdminThemeEditorMode('preview')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-stone-800 text-stone-400 hover:text-white">
-                👁️ 纯净预览
-              </button>
-            </div>
-          </div>
-
-          <!-- 快捷 Markdown 工具栏 -->
-          <div class="flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-stone-800/90 border border-stone-700/80 text-xs">
-            <button type="button" onclick="document.getElementById('adminThemeInlineImageFileInput').click()" class="px-2.5 py-1.5 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm" title="上传电脑中的画作/现场照片直接插入文章">
-              <span>📷 插入本地图片</span>
+          <!-- 🛠️ 悬浮 Markdown 写作排版工具栏 (Sticky Editor Ribbon) -->
+          <div class="sticky top-20 z-20 flex flex-wrap items-center gap-1.5 p-2.5 rounded-2xl bg-[#111D15]/95 backdrop-blur-xl border border-teal-500/30 shadow-xl text-xs">
+            <button type="button" onclick="document.getElementById('adminThemeInlineImageFileInput').click()" class="px-2.5 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm" title="上传本地照片插入文章">
+              <span>📷 本地插图</span>
             </button>
-            <button type="button" onclick="insertAdminThemeWebImagePrompt()" class="px-2.5 py-1.5 rounded-lg bg-stone-700/80 hover:bg-stone-700 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入网络图片链接">
+            <button type="button" onclick="insertAdminThemeWebImagePrompt()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入网络图片">
               <span>🌐 网络图片</span>
             </button>
-            <button type="button" onclick="insertAdminThemeLinkPrompt()" class="px-2.5 py-1.5 rounded-lg bg-stone-700/80 hover:bg-stone-700 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入超链接">
-              <span>🔗 插入超链接</span>
+            <button type="button" onclick="insertAdminThemeLinkPrompt()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入外部超链接">
+              <span>🔗 超链接</span>
             </button>
-            <button type="button" onclick="insertAdminThemeHeading(2)" class="px-2.5 py-1.5 rounded-lg bg-stone-700/80 hover:bg-stone-700 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入章节大标题 (H2)">
+            <div class="h-4 w-[1px] bg-white/10 mx-0.5"></div>
+            <button type="button" onclick="insertAdminThemeHeading(2)" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入二级大标题">
               <span>📌 H2 标题</span>
             </button>
-            <button type="button" onclick="insertAdminThemeHeading(3)" class="px-2.5 py-1.5 rounded-lg bg-stone-700/80 hover:bg-stone-700 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入小章节标题 (H3)">
+            <button type="button" onclick="insertAdminThemeHeading(3)" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入三级小标题">
               <span>▸ H3 标题</span>
             </button>
-            <button type="button" onclick="insertAdminThemeBold()" class="px-2.5 py-1.5 rounded-lg bg-stone-700/80 hover:bg-stone-700 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="加粗文本">
+            <button type="button" onclick="insertAdminThemeBold()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="加粗文字">
               <span><strong>B</strong> 加粗</span>
             </button>
-            <button type="button" onclick="insertAdminThemeQuote()" class="px-2.5 py-1.5 rounded-lg bg-stone-700/80 hover:bg-stone-700 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入金句引用">
+            <button type="button" onclick="insertAdminThemeQuote()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入金句引用">
               <span>💬 引用</span>
             </button>
-            <button type="button" onclick="insertAdminThemeList()" class="px-2.5 py-1.5 rounded-lg bg-stone-700/80 hover:bg-stone-700 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入无序列表">
+            <button type="button" onclick="insertAdminThemeList()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入列表">
               <span>• 列表</span>
             </button>
-            <button type="button" onclick="insertAdminThemeDivider()" class="px-2.5 py-1.5 rounded-lg bg-stone-700/80 hover:bg-stone-700 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入分割线">
+            <button type="button" onclick="insertAdminThemeDivider()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入分割线">
               <span>--- 分割线</span>
             </button>
-            <button type="button" onclick="pasteFromClipboardToEditor()" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold flex items-center gap-1 transition-all cursor-pointer ml-auto" title="一键从系统剪贴板粘贴 Markdown">
+            <div class="h-4 w-[1px] bg-white/10 mx-0.5"></div>
+            <button type="button" onclick="pasteFromClipboardToEditor()" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold flex items-center gap-1 transition-all cursor-pointer ml-auto" title="一键粘贴剪贴板 Markdown">
               <span>📋 粘贴剪贴板</span>
             </button>
             <input type="file" id="adminThemeInlineImageFileInput" accept="image/*" class="hidden" onchange="handleAdminThemeInlineImageSelected(event)">
           </div>
 
-          <!-- 编辑器主体：编辑区 vs 预览区 vs 左右分屏 -->
-          <div id="adminThemeEditorLayout" class="grid grid-cols-1 gap-3">
-            <div id="adminThemeEditorEditContainer">
+          <!-- ✍️ 沉浸式正文编辑核心区 (Focus / Split / Preview) -->
+          <div id="adminThemeEditorLayout" class="grid grid-cols-1 gap-6">
+            <!-- Markdown 源码沉浸式编辑区 -->
+            <div id="adminThemeEditorEditContainer" class="w-full">
               <textarea 
                 id="themeFormCuratorNote" 
-                rows="8" 
-                placeholder="在此编写或粘贴标准 Markdown 格式的策展手记文章...&#10;&#10;💡 点击右上角【🌐 打开在线 Markdown 编辑器 ↗】可在专业编辑器中排版后一键复制粘贴；&#10;💡 点击上方【📷 插入本地图片】可直接上传本地画作/现场照片；&#10;💡 点击【🔗 插入超链接】可加入任意外部网站或视频链接。" 
-                class="w-full px-3.5 py-3 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 leading-relaxed font-mono text-xs"
+                rows="18" 
+                placeholder="在此沉浸式撰写或粘贴标准 Markdown 格式的特展长篇文章...&#10;&#10;✨ 支持标准 Markdown 语法：&#10;# 章节标题&#10;## 小节标题&#10;> 策展金句引言&#10;![说明文字](图片链接)&#10;[链接文本](外部网页URL)&#10;&#10;💡 点击上方工具栏【📷 本地插图】可直接上传高清照片；&#10;💡 点击右上角【🌓 左右分屏】可边写边看实时杂志效果。" 
+                class="w-full min-h-[500px] p-6 sm:p-8 bg-stone-900/60 border border-white/10 rounded-3xl text-stone-100 focus:outline-none focus:border-teal-400 leading-relaxed font-mono text-sm shadow-inner transition-all"
                 oninput="renderAdminThemeEditorLivePreview()"
               ></textarea>
             </div>
 
-            <div id="adminThemeEditorPreviewContainer" class="hidden p-4 rounded-xl bg-stone-950 border border-stone-800 max-h-80 overflow-y-auto text-stone-200 text-xs leading-relaxed space-y-3">
+            <!-- 实时 Markdown 杂志排版预览区 -->
+            <div id="adminThemeEditorPreviewContainer" class="hidden p-6 sm:p-10 rounded-3xl bg-stone-950/90 border border-white/10 max-h-[850px] overflow-y-auto text-stone-200 text-sm leading-relaxed space-y-4 shadow-2xl">
               <!-- 实时 Markdown 渲染预览 -->
             </div>
           </div>
-        </div>
 
-        <!-- 关联作品多选 (可选) -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <label class="font-bold text-stone-300">勾选参展作品 <span class="text-[10px] text-stone-400 font-normal">(可选，若无在库作品可留空，或直接在正文中插入画作)</span></label>
-          </div>
-          <div id="themeArtworkSelectorBox" class="max-h-36 overflow-y-auto p-3 rounded-xl bg-stone-900 border border-stone-800 grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <!-- 动态生成作品选择项 -->
-          </div>
         </div>
-
-        <div class="flex items-center gap-2 pt-1">
-          <input type="checkbox" id="themeFormIsInHero" checked class="w-4 h-4 rounded text-teal-500 focus:ring-0">
-          <label for="themeFormIsInHero" class="text-stone-300 font-bold cursor-pointer">在首页顶部焦点大轮播中置顶展示</label>
-        </div>
-
-        <!-- 底部提交栏 -->
-        <div class="pt-4 border-t border-white/[0.08] flex items-center justify-end gap-3">
-          <button type="button" onclick="closeThemeModal()" class="px-5 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold transition-all cursor-pointer">
-            取消
-          </button>
-          <button type="submit" class="px-6 py-2.5 rounded-xl bg-teal-400 hover:bg-teal-300 text-stone-950 font-black shadow-lg shadow-teal-500/25 active:scale-95 transition-all cursor-pointer">
-            💾 保存特展策划
-          </button>
-        </div>
-      </form>
-    </div>
+      </main>
+    </form>
   </div>
 
   <!-- Toast 提示框 -->
