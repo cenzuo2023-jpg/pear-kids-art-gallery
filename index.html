@@ -726,21 +726,7 @@
         </div>
       </div>
 
-      <!-- 文章署名与导读条 (沉浸式文章行内排版，无板块边框) -->
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-5 pb-3 w-full flex items-center justify-between text-xs sm:text-sm text-stone-500 dark:text-stone-400 border-b border-black/[0.06] dark:border-white/[0.08]">
-        <div class="flex items-center gap-2">
-          <span>文 / <strong id="themeCuratorName" class="text-stone-900 dark:text-stone-100 font-bold">陈昨 & 想吃梨教研组</strong></span>
-        </div>
 
-        <!-- 🎙️ 语音导读微按键 -->
-        <button 
-          onclick="toggleAudioPlay();" 
-          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-800 dark:text-[#10E57A] font-bold text-xs hover:bg-emerald-500/20 active:scale-95 transition-all cursor-pointer"
-        >
-          <i data-lucide="play" class="w-3.5 h-3.5"></i>
-          <span>语音导读</span>
-        </button>
-      </div>
 
       <!-- 策展金句引言 (优雅内嵌引语) -->
       <blockquote id="themeQuoteBox" class="max-w-4xl mx-auto px-4 sm:px-6 my-6 text-stone-700 dark:text-emerald-100/90 italic font-serif text-base sm:text-lg border-l-2 border-emerald-500 pl-4 py-1 leading-relaxed">
@@ -2165,34 +2151,51 @@
     }
 
     function renderThemeExhibition(theme) {
+      if (!theme) return;
       currentActiveThemeId = theme.id;
       const coverEl = document.getElementById('themeHeroCover');
       if (coverEl) {
-        coverEl.src = theme.coverImage;
+        coverEl.src = theme.coverImage || theme.cover_image || '';
         coverEl.onerror = () => { coverEl.src = 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85'; };
       }
-      document.getElementById('themeTagBadge').textContent = theme.tag;
-      document.getElementById('themeDateBadge').textContent = theme.date;
-      document.getElementById('themeMainTitle').textContent = theme.title;
-      document.getElementById('themeSubTitle').textContent = theme.subTitle;
-      document.getElementById('themeCuratorName').textContent = theme.curator;
-      document.getElementById('themeArtworkCount').textContent = theme.artworkCount;
-      document.getElementById('themeQuoteBox').textContent = `“${theme.introSummary}”`;
+      const tagEl = document.getElementById('themeTagBadge');
+      if (tagEl) tagEl.textContent = theme.tag || '🌟 特别策划';
+      const dateEl = document.getElementById('themeDateBadge');
+      if (dateEl) dateEl.textContent = theme.date || '';
+      const titleEl = document.getElementById('themeMainTitle');
+      if (titleEl) titleEl.textContent = theme.title || '';
+      const subTitleEl = document.getElementById('themeSubTitle');
+      if (subTitleEl) subTitleEl.textContent = theme.subTitle || theme.subtitle || '';
+
+      // 优雅引语框 (仅在有真实引言时展示)
+      const quoteBox = document.getElementById('themeQuoteBox');
+      const intro = (theme.introSummary || theme.intro || '').trim();
+      if (quoteBox) {
+        if (intro && intro !== '引言短句...' && !intro.includes('引言短句')) {
+          quoteBox.textContent = `“${intro}”`;
+          quoteBox.classList.remove('hidden');
+        } else {
+          quoteBox.classList.add('hidden');
+        }
+      }
 
       // 渲染深度图文策展手记文章 (支持图文混排、超链接、小标题与引用)
       const paragraphsBox = document.getElementById('themeArticleParagraphs');
-      paragraphsBox.innerHTML = parseRichCuratorArticle(theme.curatorStatement);
+      if (paragraphsBox) {
+        paragraphsBox.innerHTML = parseRichCuratorArticle(theme.curatorStatement || theme.curator_note);
+      }
 
-      // 渲染美育亮点卡片
+      // 渲染美育亮点卡片 (无内容时彻底隐藏)
       const highlightsSection = document.getElementById('themeHighlightsSection');
       const highlightsGrid = document.getElementById('themeHighlightsGrid');
-      if (highlightsGrid) {
-        if (!theme.keyHighlights || theme.keyHighlights.length === 0) {
-          if (highlightsSection) highlightsSection.classList.add('hidden');
+      const highlights = theme.keyHighlights || theme.highlights || [];
+      if (highlightsSection && highlightsGrid) {
+        if (!Array.isArray(highlights) || highlights.length === 0) {
+          highlightsSection.classList.add('hidden');
           highlightsGrid.innerHTML = '';
         } else {
-          if (highlightsSection) highlightsSection.classList.remove('hidden');
-          highlightsGrid.innerHTML = theme.keyHighlights.map(h => `
+          highlightsSection.classList.remove('hidden');
+          highlightsGrid.innerHTML = highlights.map(h => `
             <div class="p-3.5 rounded-2xl bg-emerald-50/50 dark:bg-[#111C15] border border-emerald-500/15 space-y-1">
               <div class="text-xl">${h.icon || '💡'}</div>
               <div class="text-xs font-black text-stone-950 dark:text-stone-100">${h.title}</div>
@@ -2202,45 +2205,45 @@
         }
       }
 
-      // 渲染参展画作列表（支持纯图文专栏无在库作品时优雅适配）
+      // 渲染参展画作列表 (精确匹配 artworkIds / artwork_ids)
       const worksSection = document.getElementById('themeWorksSection');
       const worksGrid = document.getElementById('themeWorksGrid');
-      const themeArtworks = artworks.filter(a => theme.artworkIds && theme.artworkIds.includes(a.id));
-      const countBadge = document.getElementById('themeArtworkCountBadge');
+      const rawArtworkIds = (theme.artworkIds || theme.artwork_ids || []).map(String);
+      const allAvailableArtworks = (artworks && artworks.length > 0) ? artworks : (typeof initialArtworks !== 'undefined' ? initialArtworks : []);
+      
+      let themeArtworks = allAvailableArtworks.filter(a => rawArtworkIds.includes(String(a.id)));
 
-      if (themeArtworks.length === 0) {
-        if (worksSection) worksSection.classList.add('hidden');
-        const inlineCount = (String(theme.curatorStatement).match(/!\[/g) || []).length;
-        if (countBadge) {
-          countBadge.innerHTML = inlineCount > 0 
-            ? `<span>📷 特展插图 ${inlineCount} 幅</span>`
-            : `<span>📖 深度图文专栏</span>`;
-        }
-      } else {
-        if (worksSection) worksSection.classList.remove('hidden');
-        if (countBadge) {
-          countBadge.innerHTML = `<span>🎨 参展收录 <span id="themeArtworkCount">${themeArtworks.length}</span> 件力作</span>`;
-        }
-        worksGrid.innerHTML = themeArtworks.map(item => `
-          <article class="contemporary-card p-2.5 sm:p-3 cursor-pointer group flex flex-col justify-between rounded-2xl" onclick="openArtModal('${item.id}')">
-            <div class="artwork-frame aspect-[4/3] relative mb-2 rounded-xl overflow-hidden">
-              <span class="artwork-category-badge text-[9px] px-1.5 py-0.5">${item.categoryName}</span>
-              <img src="${item.image}" alt="${item.title}" loading="lazy" class="artwork-img" />
-            </div>
-            <div class="px-0.5 space-y-1">
-              <div class="flex items-baseline justify-between gap-1">
-                <h4 class="font-black text-xs sm:text-sm text-stone-900 dark:text-stone-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">${item.title}</h4>
-                <span class="text-[9px] font-mono text-stone-400 whitespace-nowrap">${item.date || ''}</span>
+      // 智能保底：若未精确勾选但有作品库画作，且特展未内嵌画作图片时，自动展示关联画作
+      if (themeArtworks.length === 0 && rawArtworkIds.length === 0 && allAvailableArtworks.length > 0) {
+        themeArtworks = allAvailableArtworks.slice(0, 4);
+      }
+
+      if (worksSection && worksGrid) {
+        if (themeArtworks.length > 0) {
+          worksSection.classList.remove('hidden');
+          worksGrid.innerHTML = themeArtworks.map(item => `
+            <article class="contemporary-card p-2.5 sm:p-3 cursor-pointer group flex flex-col justify-between rounded-2xl" onclick="openArtModal('${item.id}')">
+              <div class="artwork-frame aspect-[4/3] relative mb-2 rounded-xl overflow-hidden">
+                <span class="artwork-category-badge text-[9px] px-1.5 py-0.5">${item.categoryName || '少儿当代'}</span>
+                <img src="${item.image}" alt="${item.title}" loading="lazy" class="artwork-img" />
               </div>
-              <div class="flex items-center justify-between text-[11px] pt-1 border-t border-black/[0.04] dark:border-white/[0.06]">
-                <span class="font-bold text-stone-600 dark:text-emerald-300 truncate">🎨 ${item.author} (${item.age})</span>
-                <span class="text-[10px] text-emerald-600 dark:text-[#10E57A] font-extrabold flex-shrink-0">
-                  品鉴 →
-                </span>
+              <div class="px-0.5 space-y-1">
+                <div class="flex items-baseline justify-between gap-1">
+                  <h4 class="font-black text-xs sm:text-sm text-stone-900 dark:text-stone-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">${item.title}</h4>
+                  <span class="text-[9px] font-mono text-stone-400 whitespace-nowrap">${item.date || ''}</span>
+                </div>
+                <div class="flex items-center justify-between text-[11px] pt-1 border-t border-black/[0.04] dark:border-white/[0.06]">
+                  <span class="font-bold text-stone-600 dark:text-emerald-300 truncate">🎨 ${item.author} (${item.age || '学员'})</span>
+                  <span class="text-[10px] text-emerald-600 dark:text-[#10E57A] font-extrabold flex-shrink-0">
+                    品鉴 →
+                  </span>
+                </div>
               </div>
-            </div>
-          </article>
-        `).join('');
+            </article>
+          `).join('');
+        } else {
+          worksSection.classList.add('hidden');
+        }
       }
 
       lucide.createIcons();

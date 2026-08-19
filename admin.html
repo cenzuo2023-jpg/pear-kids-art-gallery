@@ -1473,9 +1473,9 @@
           document.getElementById('themeFormCuratorNote').value = Array.isArray(theme.curatorStatement) ? theme.curatorStatement.join('\n\n') : (theme.curatorStatement || '');
           document.getElementById('themeFormIsInHero').checked = theme.isInHero !== false;
 
-          const checkedIds = theme.artworkIds || [];
+          const checkedIds = (theme.artworkIds || theme.artwork_ids || []).map(String);
           document.querySelectorAll('input[name="themeArtworks"]').forEach(chk => {
-            if (checkedIds.includes(chk.value)) chk.checked = true;
+            if (checkedIds.includes(String(chk.value))) chk.checked = true;
           });
         }
       } else {

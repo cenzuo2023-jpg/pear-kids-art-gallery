@@ -96,26 +96,29 @@ class NativeSupabaseService {
 
   _fromDbTheme(t) {
     if (!t) return null;
+    const rawIds = Array.isArray(t.artwork_ids) ? t.artwork_ids : (Array.isArray(t.artworkIds) ? t.artworkIds : []);
     return {
       id: String(t.id || ''),
       title: t.title || '',
-      subTitle: t.subtitle || '',
+      subTitle: t.subtitle || t.subTitle || '',
       tag: t.tag || '🌟 特别策划',
       season: t.season || '',
       date: t.date || '2026.08',
-      coverImage: t.cover_image || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85',
+      coverImage: t.cover_image || t.coverImage || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85',
       curator: t.curator || '陈昨 & 想吃梨教研组',
-      artworkCount: Array.isArray(t.artwork_ids) ? t.artwork_ids.length : 0,
-      introSummary: t.intro || '',
-      curatorStatement: t.curator_note ? t.curator_note.split('\n\n') : [],
+      artworkCount: rawIds.length,
+      introSummary: t.intro || t.introSummary || '',
+      curatorStatement: t.curator_note ? (Array.isArray(t.curator_note) ? t.curator_note : t.curator_note.split('\n\n')) : (Array.isArray(t.curatorStatement) ? t.curatorStatement : []),
       keyHighlights: Array.isArray(t.highlights) ? t.highlights : (Array.isArray(t.sections) ? t.sections : []),
-      artworkIds: Array.isArray(t.artwork_ids) ? t.artwork_ids : [],
+      artworkIds: rawIds,
+      artwork_ids: rawIds,
       isInHero: Boolean(t.is_in_hero !== false),
       heroOrder: parseInt(t.hero_order || 1)
     };
   }
 
   _toDbTheme(t) {
+    const rawIds = Array.isArray(t.artworkIds) ? t.artworkIds : (Array.isArray(t.artwork_ids) ? t.artwork_ids : []);
     return {
       id: String(t.id || ('theme-' + Date.now())),
       title: String(t.title || ''),
@@ -125,7 +128,7 @@ class NativeSupabaseService {
       date: String(t.date || '2026.08'),
       intro: String(t.introSummary || t.intro || ''),
       curator_note: Array.isArray(t.curatorStatement) ? t.curatorStatement.join('\n\n') : String(t.curatorStatement || t.curator_note || ''),
-      artwork_ids: Array.isArray(t.artworkIds) ? t.artworkIds : [],
+      artwork_ids: rawIds,
       is_in_hero: Boolean(t.isInHero !== false),
       hero_order: parseInt(t.heroOrder || t.hero_order || 1)
     };
