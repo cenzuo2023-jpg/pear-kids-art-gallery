@@ -388,30 +388,50 @@ class NativeSupabaseService {
   }
 
   // =========================================================================
-  // 5. 课程作品集 (Course Albums / Portfolios REST API)
+  // 5. 课程作品集 (Course Albums / Portfolios REST API + 本地优先双重持久化)
   // =========================================================================
   async getCourseAlbums() {
+    // 1. 尝试从 Supabase 云数据库拉取
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/course_albums?select=*&order=created_at.desc`, {
         method: 'GET',
         headers: REST_HEADERS
       });
-      if (!res.ok) {
-        return typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : [];
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const list = data.map(item => this._fromDbAlbum(item)).filter(Boolean);
+          try { localStorage.setItem('pear_course_albums', JSON.stringify(list)); } catch (e) {}
+          return list;
+        }
       }
-      const data = await res.json();
-      if (!Array.isArray(data) || data.length === 0) {
-        return typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : [];
+    } catch (e) {}
+
+    // 2. 本地持久化缓存兜底（确保后台录入后前台 100% 立即秒级可见）
+    try {
+      const cached = localStorage.getItem('pear_course_albums');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-      return data.map(item => this._fromDbAlbum(item)).filter(Boolean);
-    } catch (e) {
-      return typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : [];
-    }
+    } catch (e) {}
+
+    return typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : [];
   }
 
   async createCourseAlbum(albumData) {
-    const payload = this._toDbAlbum(albumData);
+    // 1. 本地存储立即写入
     try {
+      const cached = localStorage.getItem('pear_course_albums');
+      let list = cached ? JSON.parse(cached) : (typeof initialCourseAlbums !== 'undefined' ? [...initialCourseAlbums] : []);
+      list = list.filter(a => String(a.id) !== String(albumData.id));
+      list.unshift(albumData);
+      localStorage.setItem('pear_course_albums', JSON.stringify(list));
+    } catch (e) {}
+
+    // 2. 异步同步至 Supabase
+    try {
+      const payload = this._toDbAlbum(albumData);
       const res = await fetch(`${SUPABASE_URL}/rest/v1/course_albums`, {
         method: 'POST',
         headers: REST_HEADERS,
@@ -422,12 +442,22 @@ class NativeSupabaseService {
         return this._fromDbAlbum(Array.isArray(data) ? data[0] : data);
       }
     } catch (e) {}
+
     return albumData;
   }
 
   async updateCourseAlbum(albumData) {
-    const payload = this._toDbAlbum(albumData);
     try {
+      const cached = localStorage.getItem('pear_course_albums');
+      let list = cached ? JSON.parse(cached) : (typeof initialCourseAlbums !== 'undefined' ? [...initialCourseAlbums] : []);
+      const idx = list.findIndex(a => String(a.id) === String(albumData.id));
+      if (idx !== -1) list[idx] = albumData;
+      else list.unshift(albumData);
+      localStorage.setItem('pear_course_albums', JSON.stringify(list));
+    } catch (e) {}
+
+    try {
+      const payload = this._toDbAlbum(albumData);
       const res = await fetch(`${SUPABASE_URL}/rest/v1/course_albums?id=eq.${encodeURIComponent(payload.id)}`, {
         method: 'PATCH',
         headers: REST_HEADERS,
@@ -438,19 +468,28 @@ class NativeSupabaseService {
         return this._fromDbAlbum(Array.isArray(data) ? data[0] : data);
       }
     } catch (e) {}
+
     return albumData;
   }
 
   async deleteCourseAlbum(albumId) {
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/course_albums?id=eq.${encodeURIComponent(albumId)}`, {
+      const cached = localStorage.getItem('pear_course_albums');
+      if (cached) {
+        let list = JSON.parse(cached);
+        list = list.filter(a => String(a.id) !== String(albumId));
+        localStorage.setItem('pear_course_albums', JSON.stringify(list));
+      }
+    } catch (e) {}
+
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/course_albums?id=eq.${encodeURIComponent(albumId)}`, {
         method: 'DELETE',
         headers: REST_HEADERS
       });
-      return res.ok;
-    } catch (e) {
-      return true;
-    }
+    } catch (e) {}
+
+    return true;
   }
 
   _toDbAlbum(a) {
@@ -487,7 +526,6 @@ class NativeSupabaseService {
       artworkCount: row.artwork_count || (Array.isArray(row.artworks) ? row.artworks.length : 0)
     };
   }
-
 }
 
 // 全局单例

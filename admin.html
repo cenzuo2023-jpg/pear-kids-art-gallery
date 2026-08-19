@@ -1514,15 +1514,15 @@ button:focus:not(:focus-visible),
         const file = imageFiles[i];
         const base64 = await compressImageFile(file, 1200, 0.82);
         if (base64) {
-          const defaultAuthor = (adminStudents && adminStudents[i % adminStudents.length]) ? adminStudents[i % adminStudents.length].name : '学员';
-          const defaultTitle = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ") || `作品第 ${currentStudioAlbumArtworks.length + 1} 幅`;
+          const cleanFileName = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ").trim();
+          const defaultTitle = cleanFileName || `作品第 ${currentStudioAlbumArtworks.length + 1} 幅`;
           
           currentStudioAlbumArtworks.push({
             id: 'art-alb-item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
             title: defaultTitle,
-            author: defaultAuthor,
-            image: base64,
-            comment: '色彩与线条充满探索灵气。'
+            author: '', // 🌟 用户建议 1：默认不选中任何小朋友，由老师自主选择或输入
+            comment: '', // 🌟 用户建议 2：默认空说明，供老师针对单张作品填写专属深度说明
+            image: base64
           });
 
           // 如果封面还是默认图，自动用第一张画作作为封面
@@ -1544,56 +1544,79 @@ button:focus:not(:focus-visible),
       if (!list) return;
 
       if (currentStudioAlbumArtworks.length === 0) {
-        list.innerHTML = '<div class="py-4 text-center text-xs text-stone-500">尚未添加画作，请拖入或选择照片批量上传</div>';
+        list.innerHTML = '<div class="py-6 text-center text-xs text-stone-500">尚未添加画作，请拖入或选择照片批量上传</div>';
         return;
       }
 
       // 生成学员花名册选项
-      const studentOptions = (adminStudents || []).map(s => `<option value="${s.name}">${s.name} (${s.ageGroup ? s.ageGroup + '岁' : s.className})</option>`).join('');
+      const studentOptions = (adminStudents || []).map(s => `<option value="${s.name}">${s.name} (${s.ageGroup ? s.ageGroup + '岁' : (s.className || '学员')})</option>`).join('');
 
       list.innerHTML = currentStudioAlbumArtworks.map((art, idx) => `
-        <div class="p-3 sm:p-4 rounded-2xl bg-stone-900/90 border border-white/10 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between group">
-          <div class="flex items-center gap-3 flex-1 min-w-0 w-full sm:w-auto">
-            <span class="w-6 h-6 rounded-full bg-teal-500/20 text-teal-300 flex items-center justify-center font-mono text-xs font-bold flex-shrink-0">
-              ${idx + 1}
-            </span>
-            <img src="${art.image}" class="w-14 h-14 rounded-xl object-cover border border-white/10 bg-stone-950 flex-shrink-0" />
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1 min-w-0">
-              <input 
-                type="text" 
-                value="${art.title}" 
-                oninput="currentStudioAlbumArtworks[${idx}].title = this.value" 
-                placeholder="画作标题" 
-                class="px-2.5 py-1.5 bg-stone-950 border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-teal-400 font-bold"
-              />
-              <div class="flex items-center gap-1">
-                <input 
-                  type="text" 
-                  value="${art.author}" 
-                  oninput="currentStudioAlbumArtworks[${idx}].author = this.value" 
-                  placeholder="学员姓名" 
-                  class="w-24 px-2 py-1.5 bg-stone-950 border border-white/10 rounded-lg text-xs text-teal-300 font-bold focus:outline-none focus:border-teal-400"
-                />
-                <select 
-                  onchange="this.previousElementSibling.value = this.value; currentStudioAlbumArtworks[${idx}].author = this.value;" 
-                  class="flex-1 px-1.5 py-1.5 bg-stone-950 border border-white/10 rounded-lg text-[11px] text-stone-400 focus:outline-none cursor-pointer"
-                >
-                  <option value="">花名册点选</option>
-                  ${studentOptions}
-                </select>
+        <div class="p-4 sm:p-5 rounded-2xl bg-stone-900/90 border border-white/10 flex flex-col gap-3 group hover:border-teal-500/40 transition-all shadow-md">
+          <!-- 上半部分：序号、缩略图、画作标题与学员选择器 -->
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
+            <div class="flex items-center gap-3 flex-1 min-w-0 w-full sm:w-auto">
+              <span class="w-7 h-7 rounded-full bg-teal-500/20 text-teal-300 flex items-center justify-center font-mono text-xs font-bold flex-shrink-0">
+                ${idx + 1}
+              </span>
+              <img src="${art.image}" class="w-16 h-16 rounded-xl object-cover border border-white/10 bg-stone-950 flex-shrink-0 shadow" />
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1 min-w-0">
+                <div class="space-y-1">
+                  <span class="text-[10px] text-stone-400 font-bold">画作标题</span>
+                  <input 
+                    type="text" 
+                    value="${art.title || ''}" 
+                    oninput="currentStudioAlbumArtworks[${idx}].title = this.value" 
+                    placeholder="输入画作名称..." 
+                    class="w-full px-2.5 py-1.5 bg-stone-950 border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-teal-400 font-bold"
+                  />
+                </div>
+                <div class="space-y-1">
+                  <span class="text-[10px] text-stone-400 font-bold">小作者姓名 (选填或点选)</span>
+                  <div class="flex items-center gap-1.5">
+                    <input 
+                      type="text" 
+                      value="${art.author || ''}" 
+                      oninput="currentStudioAlbumArtworks[${idx}].author = this.value" 
+                      placeholder="小作者名字" 
+                      class="w-28 px-2.5 py-1.5 bg-stone-950 border border-white/10 rounded-lg text-xs text-teal-300 font-bold focus:outline-none focus:border-teal-400"
+                    />
+                    <select 
+                      onchange="this.previousElementSibling.value = this.value; currentStudioAlbumArtworks[${idx}].author = this.value;" 
+                      class="flex-1 px-2 py-1.5 bg-stone-950 border border-white/10 rounded-lg text-[11px] text-stone-300 focus:outline-none cursor-pointer"
+                    >
+                      <option value="">▼ 花名册快速点选</option>
+                      ${studentOptions}
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="flex items-center gap-2 self-end sm:self-auto">
+            <!-- 移除画作按钮 -->
             <button 
               type="button" 
               onclick="removeAlbumStudioArtwork(${idx})" 
-              class="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white text-xs transition-all cursor-pointer"
+              class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white text-xs transition-all cursor-pointer self-end sm:self-auto flex items-center gap-1"
               title="移除该画作"
             >
               <i data-lucide="trash-2" class="w-4 h-4"></i>
+              <span class="sm:hidden text-xs">移除</span>
             </button>
+          </div>
+
+          <!-- 🌟 用户建议 2：单张作品专属说明板块 (创作故事 / 童言童语 / 导师观察) -->
+          <div class="pt-2.5 border-t border-white/5 space-y-1">
+            <label class="text-[11px] text-teal-300 font-bold flex items-center gap-1">
+              <span>💬</span>
+              <span>单张作品专属说明 / 创作童言 / 导师点评：</span>
+            </label>
+            <textarea 
+              rows="2" 
+              oninput="currentStudioAlbumArtworks[${idx}].comment = this.value" 
+              placeholder="在此输入这幅画的创作故事、孩子童言或导师观察说明（如：用橙红与钴蓝表现出睡莲在夕阳下的光影变化，笔触大胆自信...）" 
+              class="w-full px-3 py-2 bg-stone-950/80 border border-white/10 rounded-xl text-xs text-stone-200 placeholder:text-stone-600 focus:outline-none focus:border-teal-400 leading-relaxed font-sans"
+            >${art.comment || ''}</textarea>
           </div>
         </div>
       `).join('');
