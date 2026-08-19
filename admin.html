@@ -1420,7 +1420,82 @@ button:focus:not(:focus-visible),
       console.log('⚡ 后台管理数据已全量平滑同步完毕！');
     }
 
-        function renderAdminArtworksTable() {
+        
+    function renderOverviewStats() {
+      const artCount = (adminArtworks || []).length;
+      const albumCount = (adminAlbums || []).length;
+      const studentCount = (adminStudents || []).length;
+      const themeCount = (adminThemes || []).length;
+      const noteCount = (adminNotes || []).length;
+
+      const setEl = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = String(val);
+      };
+
+      setEl('stat-art-count', artCount);
+      setEl('stat-album-count', albumCount);
+      setEl('stat-student-count', studentCount);
+      setEl('stat-theme-count', themeCount);
+      setEl('stat-note-count', noteCount);
+
+      setEl('backupStatArtCount', artCount);
+      setEl('backupStatStudentCount', studentCount);
+      setEl('backupStatThemeCount', themeCount);
+      setEl('backupStatNoteCount', noteCount);
+    }
+
+    function renderAdminAlbumsGrid() {
+      const grid = document.getElementById('adminAlbumsGrid');
+      if (!grid) return;
+      if (!Array.isArray(adminAlbums) || adminAlbums.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-12 text-center text-stone-500">暂无课程作品集，点击右上角新建</div>';
+        return;
+      }
+      grid.innerHTML = adminAlbums.map(alb => `
+        <div class="p-4 rounded-2xl bg-stone-900/60 border border-white/10 hover:border-emerald-500/30 transition-all flex flex-col justify-between group">
+          <div class="space-y-2.5">
+            <div class="aspect-[16/10] rounded-xl overflow-hidden bg-stone-950 relative border border-white/5">
+              <img src="${alb.coverImage || (alb.artworks && alb.artworks[0] && alb.artworks[0].image) || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800'}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] text-emerald-400 font-bold border border-white/10">${alb.tag || '课程作品集'}</span>
+            </div>
+            <h4 class="font-black text-sm text-white line-clamp-1">${alb.title}</h4>
+            <p class="text-xs text-stone-400 line-clamp-2 leading-relaxed">${alb.introSummary || ''}</p>
+          </div>
+          <div class="pt-3 mt-3 border-t border-white/10 flex items-center justify-between">
+            <span class="text-[11px] text-stone-400 font-mono">🎨 ${Array.isArray(alb.artworks) ? alb.artworks.length : 0} 幅画作</span>
+            <button onclick="openAlbumModal('${alb.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500 text-emerald-400 hover:text-stone-950 text-xs font-bold transition-all">编辑</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateAuthorDropdowns() {
+      const artAuthorSelect = document.getElementById('artFormAuthorSelect');
+      if (artAuthorSelect && Array.isArray(adminStudents) && adminStudents.length > 0) {
+        const currentVal = artAuthorSelect.value;
+        artAuthorSelect.innerHTML = '<option value="">-- 选择已有小艺术家或手动输入 --</option>' + 
+          adminStudents.map(s => `<option value="${s.name}">${s.name} (${s.age || '5岁'} · ${s.className || '创想班'})</option>`).join('');
+        if (currentVal) artAuthorSelect.value = currentVal;
+      }
+    }
+
+    function initializeAdminTheme() {}
+    function initializeAdminSidebar() {}
+
+    function applyAdminRouteFromUrl() {
+      const hash = window.location.hash.replace(/^#\/?/, '');
+      if (hash && typeof switchAdminTab === 'function') {
+        const cleanTab = hash.split('/')[0];
+        if (['overview', 'artworks', 'students', 'albums', 'themes', 'notes', 'backup', 'theme-studio'].includes(cleanTab)) {
+          switchAdminTab(cleanTab);
+        }
+      }
+    }
+
+    
+
+    function renderAdminArtworksTable() {
       const tbody = document.getElementById('adminArtworksTableBody');
       const search = (document.getElementById('adminArtSearchInput')?.value || '').toLowerCase();
       if (!tbody) return;
