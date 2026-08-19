@@ -83,20 +83,20 @@
       <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
         <nav class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
           <button 
-            id="nav-tab-gallery" 
-            onclick="navigateTo('gallery')" 
-            class="nav-tab active flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
-          >
-            <span class="text-xs sm:text-sm">🖼️</span>
-            <span>作品展厅</span>
-          </button>
-          <button 
             id="nav-tab-albums" 
             onclick="navigateTo('albums')" 
             class="nav-tab flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">📚</span>
             <span>课程作品集</span>
+          </button>
+          <button 
+            id="nav-tab-gallery" 
+            onclick="navigateTo('gallery')" 
+            class="nav-tab active flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
+          >
+            <span class="text-xs sm:text-sm">🖼️</span>
+            <span>作品展厅</span>
           </button>
           <button 
             id="nav-tab-themes" 
@@ -186,11 +186,11 @@
 
       <!-- 移动端顶部第二行：全宽等分6格导航胶囊 (完美容纳全部6大核心板块) -->
       <div class="grid grid-cols-6 gap-0.5 w-full py-0.5 text-center">
-        <button id="nav-tab-gallery-mob" onclick="navigateTo('gallery')" class="mob-nav-tab active flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-black transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-sm w-full">
-          <span>🖼️</span><span class="truncate">展厅</span>
-        </button>
         <button id="nav-tab-albums-mob" onclick="navigateTo('albums')" class="mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full">
           <span>📚</span><span class="truncate">作品集</span>
+        </button>
+        <button id="nav-tab-gallery-mob" onclick="navigateTo('gallery')" class="mob-nav-tab active flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-black transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-sm w-full">
+          <span>🖼️</span><span class="truncate">展厅</span>
         </button>
         <button id="nav-tab-themes-mob" onclick="navigateTo('themes')" class="mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full">
           <span>🎨</span><span class="truncate">专栏</span>
@@ -865,63 +865,62 @@
 
   <!-- ========================================================================= -->
   <!-- ========================================================================= -->
+  <!-- ========================================================================= -->
+  <!-- 页面视图：🎨【美育专栏 · 教学手记与启蒙随笔文库 (Editorial Blog Archive)】 -->
+  <!-- ========================================================================= -->
   <div id="view-themes" class="view-page flex-1 flex flex-col z-10 hidden">
-    <!-- 特展专栏专属 Header -->
+    <!-- 美育专栏专属 Header -->
     <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-10 sm:pt-14 pb-6 w-full">
       <div class="space-y-3.5 mb-8 text-left">
         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-stone-50 tracking-tight">
-          历期儿童美育主题特展与策展手记
+          美育专栏
         </h1>
         <p class="text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed font-normal">
-          记录每一个阶段孩子的创想脉络、探索主题与美育成长。每一期特展，都是一次关于自由与童真的艺术盛宴，所有特展文章均在此永久收录与沉淀。
+          少儿美育随笔、教学手记与艺术启蒙思考。记录每一次关于童真探索的深度对话，沉淀启迪灵感的文字画卷。
         </p>
       </div>
 
       <!-- 控制操作栏 (独立一行排布) -->
       <div class="flex items-center justify-between gap-4 pt-2 pb-6 border-b border-black/[0.05] dark:border-white/[0.08]">
-        <!-- 主理人专属策划特展按键 (管理模式下可见) -->
         <div class="flex items-center gap-3">
           <button 
             id="themeArchiveAdminBtn" 
             onclick="openThemeEditModal()" 
             class="hidden px-5 py-2.5 rounded-full bg-stone-900 dark:bg-[#15241B] border border-black/10 dark:border-emerald-500/30 text-stone-100 hover:bg-[#10E57A] hover:text-stone-950 font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 items-center gap-2 cursor-pointer"
           >
-            <span>⚙️ 策划与排期特展</span>
+            <span>✍️ 发布专栏文章</span>
           </button>
         </div>
       </div>
     </section>
 
-    <!-- 特展文章卡片网格 -->
+    <!-- 专栏文章卡片网格 -->
     <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-8 pb-24 w-full pt-6">
-
-      <!-- 2. 特展文章卡片网格 (Card-based exhibition list) -->
       <div id="themesArchiveGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
-        <!-- JS 动态渲染各期特展卡片 -->
+        <!-- JS 动态渲染专栏博客卡片 -->
       </div>
 
       <!-- 空状态 -->
       <div id="themesArchiveEmpty" class="hidden py-16 text-center text-stone-400">
-        <div class="text-4xl mb-2">🎨</div>
-        <p class="text-sm font-bold">暂无已收录的主题特展</p>
-        <p class="text-xs text-emerald-500 hover:text-emerald-400 mt-1 cursor-pointer font-bold" onclick="openThemeEditModal()">点击策划第一期特展吧！✨</p>
+        <div class="text-4xl mb-2">📝</div>
+        <p class="text-sm font-bold">暂无已发布的专栏文章</p>
+        <p class="text-xs text-emerald-500 hover:text-emerald-400 mt-1 cursor-pointer font-bold" onclick="openThemeEditModal()">点击发布第一篇美育文章吧！✨</p>
       </div>
-
     </main>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 页面视图六：【世界级少儿当代美术馆·特展深度单篇专栏 (Thematic Single Article View)】 -->
+  <!-- 页面视图：📖【美育专栏·单篇博客文章阅读 (Blog Article Reader View)】 -->
   <!-- ========================================================================= -->
   <div id="view-theme" class="view-page flex-1 flex flex-col z-10 hidden">
     
-    <!-- 1. 顶部极简返回链接 (去掉冗余大框与装饰标签) -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-4 pb-2 w-full flex items-center justify-between">
+    <!-- 顶部极简返回链接 -->
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-3 w-full flex items-center justify-between">
       <button 
         onclick="navigateTo('themes')" 
-        class="inline-flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-[#10E57A] transition-colors cursor-pointer font-medium"
+        class="inline-flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-[#10E57A] transition-colors cursor-pointer font-bold"
       >
-        <span>← 返回特展专栏</span>
+        <span>← 返回专栏列表</span>
       </button>
 
       <!-- ✏️ 编辑按钮 (管理模式下可见) -->
@@ -930,90 +929,77 @@
         onclick="openCurrentThemeEditor()"
         class="hidden inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-[#10E57A] hover:underline cursor-pointer"
       >
-        <span>✏️ 编辑本期特展</span>
+        <span>✏️ 编辑本文</span>
       </button>
     </div>
 
-    <!-- 2. 深度沉浸式文章主体 (纯粹杂志级排版，去除割裂板块大框) -->
+    <!-- 纯粹典雅的博客文章主体 -->
     <article class="w-full pb-20">
       
-      <!-- 头部：标题与展期元信息 -->
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-6 w-full space-y-3">
-        <div class="flex items-center gap-2 text-xs font-mono text-stone-400">
+      <!-- 头部：标题与发布信息 -->
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-6 w-full space-y-3">
+        <div class="flex items-center gap-2 text-xs font-mono text-stone-400 flex-wrap">
           <span id="themeTagBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-[#10E57A] font-bold text-[11px]">
-            🌟 2026 夏季年度重磅特展
+            🌟 美育专栏
           </span>
-          <span id="themeDateBadge">2026.06 - 2026.08</span>
+          <span id="themeDateBadge" class="text-stone-400 font-mono">2026.08</span>
+          <span>•</span>
+          <span id="themeAuthorBadge" class="text-stone-500 font-medium">想吃梨美育团队</span>
         </div>
 
         <h1 id="themeMainTitle" class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-stone-950 dark:text-stone-50 leading-snug">
-          特展主标题
+          文章标题
         </h1>
 
-        <p id="themeSubTitle" class="text-xs sm:text-sm text-stone-400 dark:text-emerald-200/60 font-mono">
-          SubTitle English / Curatorial Concept
+        <p id="themeSubTitle" class="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-serif leading-relaxed">
+          副标题或引言概述
         </p>
       </div>
 
-      <!-- 首图展示 (无黑色边框线，纯粹高级大图) -->
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 w-full">
-        <div class="relative w-full aspect-[16/9] sm:aspect-[21/10] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border-0 group bg-stone-100 dark:bg-stone-900">
+      <!-- 首图展示 (宽幅高清封面) -->
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 w-full mb-8">
+        <div class="relative w-full aspect-[16/9] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border border-black/[0.04] dark:border-white/[0.08] bg-stone-100 dark:bg-stone-900">
           <img 
             id="themeHeroCover" 
             src="" 
-            alt="特展主视觉" 
+            alt="文章封面" 
             class="w-full h-full object-cover select-none"
             onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85'"
           />
         </div>
       </div>
 
-
-
-      <!-- 策展金句引言 (优雅内嵌引语) -->
-      <blockquote id="themeQuoteBox" class="max-w-4xl mx-auto px-4 sm:px-6 my-6 text-stone-700 dark:text-emerald-100/90 italic font-serif text-base sm:text-lg border-l-2 border-emerald-500 pl-4 py-1 leading-relaxed">
+      <!-- 导读金句引言 (优雅内嵌引语) -->
+      <blockquote id="themeQuoteBox" class="max-w-3xl mx-auto px-4 sm:px-6 my-6 text-stone-700 dark:text-emerald-100/90 italic font-serif text-base sm:text-lg border-l-4 border-[#10E57A] pl-4 py-1 leading-relaxed">
         “引言短句...”
       </blockquote>
 
-      <!-- 正文内容 (纯粹杂志长文排版，大字距与行高，支持图文混排) -->
-      <div id="themeArticleParagraphs" class="max-w-4xl mx-auto px-4 sm:px-6 space-y-6 text-base sm:text-lg leading-[1.85] text-stone-800 dark:text-stone-200 font-normal">
-        <!-- JS 动态注入段落 -->
+      <!-- 文章正文内容 (纯粹杂志长文排版，大字距与行高，支持图文混排) -->
+      <div id="themeArticleParagraphs" class="max-w-3xl mx-auto px-4 sm:px-6 space-y-6 text-base sm:text-lg leading-[1.85] text-stone-800 dark:text-stone-200 font-normal">
+        <!-- JS 动态注入文章正文 -->
       </div>
 
-      <!-- 💡 美育探索亮点 (仅在有内容时自然流式呈现) -->
-      <div id="themeHighlightsSection" class="max-w-4xl mx-auto px-4 sm:px-6 pt-8 space-y-3">
-        <div class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-700 dark:text-[#10E57A]">
-          💡 本期美育探索视角
-        </div>
-        <div id="themeHighlightsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <!-- JS 动态渲染亮点卡片 -->
-        </div>
-      </div>
-
-      <!-- 3. 🎨 参展作品区 (紧凑 4 列排版，简洁标题，无副标题与冗余标签) -->
-      <div id="themeWorksSection" class="max-w-4xl mx-auto px-4 sm:px-6 pt-12 pb-6 space-y-4">
-        <div class="pb-2 border-b border-black/[0.06] dark:border-white/[0.08]">
-          <h3 class="text-lg sm:text-xl font-black text-stone-950 dark:text-stone-100 tracking-tight flex items-center gap-2">
-            <span>🎨 参展作品</span>
-          </h3>
+      <!-- 文章尾部：作者签名卡片与返回按钮 -->
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 pt-12 mt-12 border-t border-black/[0.06] dark:border-white/[0.08] space-y-6">
+        <div class="p-5 rounded-2xl bg-white dark:bg-[#111D15] border border-stone-200/80 dark:border-white/10 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-[#10E57A] flex items-center justify-center text-xl shadow-md flex-shrink-0">
+            🍐
+          </div>
+          <div>
+            <div class="font-black text-sm text-stone-900 dark:text-white">想吃梨 · 美育创作教研组</div>
+            <div class="text-xs text-stone-500 dark:text-stone-400 mt-0.5">用心守护每一个孩子的自由想象力与童心直觉。</div>
+          </div>
         </div>
 
-        <!-- 4列紧凑卡片网格 (容纳4张卡片) -->
-        <div id="themeWorksGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-          <!-- JS 动态渲染参展画作卡片 -->
+        <div class="text-center pt-4">
+          <button 
+            onclick="navigateTo('themes')" 
+            class="px-6 py-2.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-[#10E57A] text-xs font-bold transition-all cursor-pointer"
+          >
+            ← 阅览更多专栏文章
+          </button>
         </div>
       </div>
-
-      <!-- 4. 底部返回按钮 -->
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-10 text-center">
-        <button 
-          onclick="navigateTo('themes')" 
-          class="px-6 py-2.5 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-emerald-500 hover:text-stone-950 text-stone-700 dark:text-stone-200 font-bold text-xs active:scale-95 transition-all shadow-sm cursor-pointer"
-        >
-          ← 返回特展专栏
-        </button>
-      </div>
-
     </article>
   </div>
 
@@ -2616,7 +2602,7 @@
     }
 
     // ==========================================
-    // 📚 视图：历期美育主题特展专栏文库卡片网格渲染 (Thematic Exhibition Essays Collection)
+    // 📚 视图：美育专栏文章卡片网格渲染 (Editorial Blog Collection)
     // ==========================================
     function renderThemesArchive() {
       const grid = document.getElementById('themesArchiveGrid');
@@ -2624,7 +2610,7 @@
       const adminBtn = document.getElementById('themeArchiveAdminBtn');
       if (adminBtn) {
         adminBtn.className = isCuratorAdminUnlocked 
-          ? 'inline-flex px-5 py-3 rounded-2xl bg-stone-900 dark:bg-stone-800 text-white hover:bg-[#10E57A] hover:text-stone-950 font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 items-center gap-2 cursor-pointer'
+          ? 'inline-flex px-5 py-2.5 rounded-full bg-stone-900 dark:bg-[#15241B] border border-black/10 dark:border-emerald-500/30 text-stone-100 hover:bg-[#10E57A] hover:text-stone-950 font-extrabold text-xs sm:text-sm shadow-md transition-all active:scale-95 items-center gap-2 cursor-pointer'
           : 'hidden';
       }
 
@@ -2637,19 +2623,15 @@
 
       grid.innerHTML = themeExhibitions.map((theme, idx) => {
         const coverImg = theme.coverImage || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80';
-        const highlightsHtml = (theme.keyHighlights || []).slice(0, 3).map(h => `
-          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-800 dark:text-[#10E57A] text-[10px] font-bold">
-            <span>${h.icon || '✨'}</span>
-            <span class="truncate max-w-[90px]">${h.title}</span>
-          </span>
-        `).join('');
+        const tagText = theme.tag || '美育随笔';
+        const authorText = theme.curator || '想吃梨美育团队';
 
         return `
           <article 
             onclick="openThemeById('${theme.id}')"
-            class="contemporary-card overflow-hidden rounded-[28px] p-0 flex flex-col justify-between cursor-pointer group hover:-translate-y-1.5 transition-all duration-300 border border-black/[0.04] dark:border-emerald-500/15"
+            class="contemporary-card overflow-hidden rounded-[28px] p-0 flex flex-col justify-between cursor-pointer group hover:-translate-y-1.5 transition-all duration-300 border border-black/[0.04] dark:border-white/[0.08] bg-white dark:bg-[#111D15] shadow-sm hover:shadow-xl dark:shadow-none"
           >
-            <!-- 封面大图与角标 -->
+            <!-- 封面图 -->
             <div class="relative w-full aspect-[16/10] overflow-hidden bg-stone-900">
               <img 
                 src="${coverImg}" 
@@ -2657,11 +2639,10 @@
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 select-none"
                 onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80'"
               />
-              <div class="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/20 to-transparent"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
               
-              <!-- 顶部标签 -->
+              <!-- 顶部标签与日期 -->
               <div class="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between z-10">
-                <span class="px-3 py-1 rounded-full bg-emerald-500/90 text-stone-950 text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-md">
                   ${theme.tag || '主题特展'}
                 </span>
                 <span class="px-2.5 py-0.5 rounded-full bg-stone-950/75 text-white/90 font-mono text-[9px] font-bold backdrop-blur-md">
@@ -2818,17 +2799,26 @@
         coverEl.onerror = () => { coverEl.src = 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85'; };
       }
       const tagEl = document.getElementById('themeTagBadge');
-      if (tagEl) tagEl.textContent = theme.tag || '🌟 特别策划';
+      if (tagEl) tagEl.textContent = theme.tag || '🌟 美育专栏';
       const dateEl = document.getElementById('themeDateBadge');
-      if (dateEl) dateEl.textContent = theme.date || '';
+      if (dateEl) dateEl.textContent = theme.date || '2026.08';
+      const authorEl = document.getElementById('themeAuthorBadge');
+      if (authorEl) authorEl.textContent = theme.curator || '想吃梨美育团队';
       const titleEl = document.getElementById('themeMainTitle');
       if (titleEl) titleEl.textContent = theme.title || '';
       const subTitleEl = document.getElementById('themeSubTitle');
-      if (subTitleEl) subTitleEl.textContent = theme.subTitle || theme.subtitle || '';
+      const intro = (theme.introSummary || theme.intro || '').trim();
+      if (subTitleEl) {
+        if (theme.subTitle || theme.subtitle) {
+          subTitleEl.textContent = theme.subTitle || theme.subtitle;
+          subTitleEl.classList.remove('hidden');
+        } else {
+          subTitleEl.classList.add('hidden');
+        }
+      }
 
       // 优雅引语框 (仅在有真实引言时展示)
       const quoteBox = document.getElementById('themeQuoteBox');
-      const intro = (theme.introSummary || theme.intro || '').trim();
       if (quoteBox) {
         if (intro && intro !== '引言短句...' && !intro.includes('引言短句')) {
           quoteBox.textContent = `“${intro}”`;
@@ -2838,73 +2828,11 @@
         }
       }
 
-      // 渲染深度图文策展手记文章 (支持图文混排、超链接、小标题与引用)
+      // 渲染文章正文
       const paragraphsBox = document.getElementById('themeArticleParagraphs');
       if (paragraphsBox) {
         paragraphsBox.innerHTML = parseRichCuratorArticle(theme.curatorStatement || theme.curator_note);
       }
-
-      // 渲染美育亮点卡片 (无内容时彻底隐藏)
-      const highlightsSection = document.getElementById('themeHighlightsSection');
-      const highlightsGrid = document.getElementById('themeHighlightsGrid');
-      const highlights = theme.keyHighlights || theme.highlights || [];
-      if (highlightsSection && highlightsGrid) {
-        if (!Array.isArray(highlights) || highlights.length === 0) {
-          highlightsSection.classList.add('hidden');
-          highlightsGrid.innerHTML = '';
-        } else {
-          highlightsSection.classList.remove('hidden');
-          highlightsGrid.innerHTML = highlights.map(h => `
-            <div class="p-3.5 rounded-2xl bg-emerald-50/50 dark:bg-[#111C15] border border-emerald-500/15 space-y-1">
-              <div class="text-xl">${h.icon || '💡'}</div>
-              <div class="text-xs font-black text-stone-950 dark:text-stone-100">${h.title}</div>
-              <div class="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed">${h.desc}</div>
-            </div>
-          `).join('');
-        }
-      }
-
-      // 渲染参展画作列表 (精确匹配 artworkIds / artwork_ids)
-      const worksSection = document.getElementById('themeWorksSection');
-      const worksGrid = document.getElementById('themeWorksGrid');
-      const rawArtworkIds = (theme.artworkIds || theme.artwork_ids || []).map(String);
-      const allAvailableArtworks = artworks || [];
-      
-      let themeArtworks = allAvailableArtworks.filter(a => rawArtworkIds.includes(String(a.id)));
-
-      // 智能保底：若未精确勾选但有作品库画作，且特展未内嵌画作图片时，自动展示关联画作
-      if (themeArtworks.length === 0 && rawArtworkIds.length === 0 && allAvailableArtworks.length > 0) {
-        themeArtworks = allAvailableArtworks.slice(0, 4);
-      }
-
-      if (worksSection && worksGrid) {
-        if (themeArtworks.length > 0) {
-          worksSection.classList.remove('hidden');
-          worksGrid.innerHTML = themeArtworks.map(item => `
-            <article class="contemporary-card p-2.5 sm:p-3 cursor-pointer group flex flex-col justify-between rounded-2xl" onclick="openArtModal('${item.id}')">
-              <div class="artwork-frame aspect-[4/3] relative mb-2 rounded-xl overflow-hidden">
-                <span class="artwork-category-badge text-[9px] px-1.5 py-0.5">${item.categoryName || '少儿当代'}</span>
-                <img src="${item.image}" alt="${item.title}" loading="lazy" class="artwork-img" />
-              </div>
-              <div class="px-0.5 space-y-1">
-                <div class="flex items-baseline justify-between gap-1">
-                  <h4 class="font-black text-xs sm:text-sm text-stone-900 dark:text-stone-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">${item.title}</h4>
-                  <span class="text-[9px] font-mono text-stone-400 whitespace-nowrap">${item.date || ''}</span>
-                </div>
-                <div class="flex items-center justify-between text-[11px] pt-1 border-t border-black/[0.04] dark:border-white/[0.06]">
-                  <span class="font-bold text-stone-600 dark:text-emerald-300 truncate">🎨 ${item.author} (${item.age || '学员'})</span>
-                  <span class="text-[10px] text-emerald-600 dark:text-[#10E57A] font-extrabold flex-shrink-0">
-                    品鉴 →
-                  </span>
-                </div>
-              </div>
-            </article>
-          `).join('');
-        } else {
-          worksSection.classList.add('hidden');
-        }
-      }
-
       lucide.createIcons();
     }
 
@@ -3910,17 +3838,23 @@
       return result;
     }
 
+    function handleHallSearch(val) {
+      currentHallSearch = (val || '').trim();
+      renderHall();
+    }
+
     function renderHall() {
       const grid = document.getElementById('hallGrid');
       if (!grid) return;
       
+      const sTerm = (currentHallSearch || '').toLowerCase().trim();
       let filtered = (studentList || []).filter(s => {
         if (!s) return false;
-        const sTerm = (currentHallSearch || '').toLowerCase().trim();
         if (!sTerm) return true;
         const nameMatch = (s.name || '').toLowerCase().includes(sTerm);
         const classMatch = (s.className || '').toLowerCase().includes(sTerm);
-        return nameMatch || classMatch;
+        const bioMatch = (s.bio || '').toLowerCase().includes(sTerm);
+        return nameMatch || classMatch || bioMatch;
       });
 
       // 🌟 数据打通：精准统计每位学员在【独立展厅 + 课程作品集】中的全部画作总数
