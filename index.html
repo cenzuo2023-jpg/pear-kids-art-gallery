@@ -49,15 +49,16 @@
 
   <!-- 1. 🌟 通栏固定全宽导航栏 (Full-Width Sticky Frosted Header) -->
   <header class="site-header-fixed">
-    <div class="max-w-7xl mx-auto px-4 sm:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-6">
+    <!-- 桌面端与平板布局 (sm 及以上：单行全景排版) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 hidden sm:flex h-16 sm:h-20 items-center justify-between gap-4 sm:gap-6">
       
-      <!-- 品牌标识 (🍐 梨子卡通徽章 + 想吃梨儿童艺术启蒙，内置主理人专属暗门) -->
+      <!-- 品牌标识 (🍐 梨子卡通徽标 + 想吃梨儿童艺术启蒙，内置主理人专属暗门) -->
       <div class="flex items-center gap-2.5 sm:gap-3.5 cursor-pointer group flex-shrink-0" onclick="navigateTo('gallery')">
         <div 
           id="brandLogoSecretBtn"
           onclick="handleBrandSecretClick(event)"
           class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-[#10E57A] flex items-center justify-center text-stone-950 font-bold shadow-md shadow-emerald-500/25 group-hover:rotate-12 active:scale-90 transition-transform flex-shrink-0 text-base sm:text-lg select-none"
-          title="想吃梨美育（快速连点3次开启录入通道）"
+          title="想吃梨美育（快速连击3次开启录入通道）"
         >
           🍐
         </div>
@@ -72,56 +73,55 @@
         </div>
       </div>
 
-      <!-- 右侧整体操作区：核心导航按钮 + 🎵背景音乐 + 🌓模式切换 (全部靠右紧密排布) -->
-      <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0 overflow-x-auto no-scrollbar py-1">
-        <!-- 核心页面独立分体式导航按钮 -->
+      <!-- 右侧桌面端导航组 -->
+      <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
         <nav class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <button 
             id="nav-tab-gallery" 
             onclick="navigateTo('gallery')" 
-            class="nav-tab active flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
+            class="nav-tab active flex items-center gap-1.5 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">🖼️</span>
-            <span><span class="hidden sm:inline">作品</span>展厅</span>
+            <span>作品展厅</span>
           </button>
           <button 
             id="nav-tab-themes" 
             onclick="navigateTo('themes')" 
-            class="nav-tab flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
+            class="nav-tab flex items-center gap-1.5 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">🎨</span>
-            <span><span class="hidden sm:inline">特展</span>专栏</span>
+            <span>特展专栏</span>
           </button>
           <button 
             id="nav-tab-hall" 
             onclick="navigateTo('hall')" 
-            class="nav-tab flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
+            class="nav-tab flex items-center gap-1.5 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">👑</span>
-            <span><span class="hidden sm:inline">小艺术家</span>名人堂</span>
+            <span>小艺术家名人堂</span>
           </button>
           <button 
             id="nav-tab-notes" 
             onclick="navigateTo('notes')" 
-            class="nav-tab flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
+            class="nav-tab flex items-center gap-1.5 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">📝</span>
-            <span><span class="hidden sm:inline">美育</span>便签墙</span>
+            <span>美育便签墙</span>
           </button>
           <button 
             id="nav-tab-teacher" 
             onclick="navigateTo('teacher')" 
-            class="nav-tab flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
+            class="nav-tab flex items-center gap-1.5 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">👩‍🏫</span>
-            <span><span class="hidden sm:inline">关于</span>老师</span>
+            <span>关于老师</span>
           </button>
         </nav>
 
         <!-- 细微垂直发丝分隔线 -->
-        <div class="h-5 w-[1px] bg-black/[0.08] dark:bg-white/[0.1] flex-shrink-0 hidden sm:block"></div>
+        <div class="h-5 w-[1px] bg-black/[0.08] dark:bg-white/[0.1] flex-shrink-0"></div>
 
-        <!-- 🎵 轻柔钢琴背景音乐控制按钮 (位于主题切换左侧，点击切换播放/暂停) -->
+        <!-- 🎵 音乐 & 🌓 主题模式 -->
         <button 
           id="bgmToggleBtn" 
           onclick="toggleBgm()" 
@@ -131,7 +131,6 @@
           <span id="bgmIcon" class="music-icon-playing text-emerald-600 dark:text-[#10E57A]">🎵</span>
         </button>
 
-        <!-- 🌓 黑暗/浅色模式切换按钮 -->
         <button 
           id="themeToggleBtn" 
           onclick="toggleTheme()" 
@@ -140,6 +139,53 @@
         >
           <span class="block dark:hidden">☀️</span>
           <span class="hidden dark:block">🌙</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 📱 移动端精巧双层全景布局 (针对小屏幕手机完美适配，永不截断/溢出) -->
+    <div class="sm:hidden flex flex-col w-full px-3 pt-2.5 pb-2">
+      <!-- 移动端顶部第一行：Logo + 右侧操作按钮 -->
+      <div class="flex items-center justify-between w-full pb-2">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('gallery')">
+          <div 
+            onclick="handleBrandSecretClick(event)"
+            class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-[#10E57A] flex items-center justify-center text-stone-950 font-bold shadow-sm text-sm"
+          >
+            🍐
+          </div>
+          <span class="font-black text-sm tracking-tight text-stone-950 dark:text-stone-50 flex items-center gap-1">
+            <span>想吃梨儿童艺术启蒙</span>
+          </span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <button id="bgmToggleBtnMob" onclick="toggleBgm()" class="w-8 h-8 rounded-full bg-white dark:bg-[#15241B] border border-black/[0.05] dark:border-emerald-500/20 flex items-center justify-center text-stone-600 dark:text-emerald-100/90 shadow-sm text-xs" title="背景音乐">
+            <span id="bgmIconMob" class="music-icon-playing text-emerald-600 dark:text-[#10E57A]">🎵</span>
+          </button>
+          <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-white dark:bg-[#15241B] border border-black/[0.05] dark:border-emerald-500/20 flex items-center justify-center text-stone-600 dark:text-emerald-100/90 shadow-sm text-xs" title="切换模式">
+            <span class="block dark:hidden">☀️</span>
+            <span class="hidden dark:block">🌙</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 移动端顶部第二行：全宽水平滑动导航胶囊栏 (完整展示所有5个板块，顺滑滑动，不卡边) -->
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full">
+        <button id="nav-tab-gallery-mob" onclick="navigateTo('gallery')" class="mob-nav-tab active flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-black transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-sm whitespace-nowrap flex-shrink-0">
+          <span>🖼️</span><span>作品展厅</span>
+        </button>
+        <button id="nav-tab-themes-mob" onclick="navigateTo('themes')" class="mob-nav-tab flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0">
+          <span>🎨</span><span>特展专栏</span>
+        </button>
+        <button id="nav-tab-hall-mob" onclick="navigateTo('hall')" class="mob-nav-tab flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0">
+          <span>👑</span><span>名人堂</span>
+        </button>
+        <button id="nav-tab-notes-mob" onclick="navigateTo('notes')" class="mob-nav-tab flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0">
+          <span>📝</span><span>便签墙</span>
+        </button>
+        <button id="nav-tab-teacher-mob" onclick="navigateTo('teacher')" class="mob-nav-tab flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0">
+          <span>👩‍🏫</span><span>关于老师</span>
         </button>
       </div>
     </div>
@@ -1575,16 +1621,28 @@
     function updateBgmUi(playing) {
       const btn = document.getElementById('bgmToggleBtn');
       const icon = document.getElementById('bgmIcon');
-      if (!btn || !icon) return;
+      const mobIcon = document.getElementById('bgmIconMob');
 
       if (playing) {
-        btn.setAttribute('title', '背景音乐：播放中 (点击暂停)');
-        icon.className = 'music-icon-playing text-emerald-600 dark:text-[#10E57A] inline-block text-base';
-        icon.innerHTML = '🎵';
+        if (btn) btn.setAttribute('title', '背景音乐：播放中 (点击暂停)');
+        if (icon) {
+          icon.className = 'music-icon-playing text-emerald-600 dark:text-[#10E57A] inline-block text-base';
+          icon.innerHTML = '🎵';
+        }
+        if (mobIcon) {
+          mobIcon.className = 'music-icon-playing text-emerald-600 dark:text-[#10E57A] inline-block text-xs';
+          mobIcon.innerHTML = '🎵';
+        }
       } else {
-        btn.setAttribute('title', '背景音乐：已暂停 (点击播放)');
-        icon.className = 'text-stone-400 dark:text-stone-500 inline-block opacity-60 text-base';
-        icon.innerHTML = '🔇';
+        if (btn) btn.setAttribute('title', '背景音乐：已暂停 (点击播放)');
+        if (icon) {
+          icon.className = 'text-stone-400 dark:text-stone-500 inline-block opacity-60 text-base';
+          icon.innerHTML = '🔇';
+        }
+        if (mobIcon) {
+          mobIcon.className = 'text-stone-400 dark:text-stone-500 inline-block opacity-60 text-xs';
+          mobIcon.innerHTML = '🔇';
+        }
       }
     }
 

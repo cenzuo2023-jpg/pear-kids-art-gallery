@@ -101,16 +101,33 @@ button:focus:not(:focus-visible),
 }
 
 
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
 body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
   background-color: var(--bg-main);
   color: var(--text-title);
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "Comic Sans MS", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  position: relative;
   transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.view-page,
+main,
+section,
+article {
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 /* 🎨 漂浮青柠与极光背景氛围层 (Floating Aurora Starlight) */
