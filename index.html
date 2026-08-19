@@ -207,13 +207,13 @@
             <span>🌈 全部画作 (8)</span>
           </button>
           <button onclick="setAgeFilter('3-5')" class="age-tab h-8 flex items-center gap-1.5 px-3.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap flex-shrink-0 font-bold text-xs focus:outline-none" data-age="3-5">
-            <span>🐣 3-5岁 启蒙</span>
+            <span>🐣 3-5岁 · 启蒙</span>
           </button>
           <button onclick="setAgeFilter('6-8')" class="age-tab h-8 flex items-center gap-1.5 px-3.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap flex-shrink-0 font-bold text-xs focus:outline-none" data-age="6-8">
-            <span>🚀 6-8岁 创想</span>
+            <span>🚀 6-8岁 · 创想</span>
           </button>
           <button onclick="setAgeFilter('9-12')" class="age-tab h-8 flex items-center gap-1.5 px-3.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap flex-shrink-0 font-bold text-xs focus:outline-none" data-age="9-12">
-            <span>🎨 9-12岁 大师</span>
+            <span>🎨 9-12岁 · 创作</span>
           </button>
         </div>
 
@@ -331,11 +331,8 @@
               <h2 id="studentDetailName" class="text-2xl sm:text-3xl font-black text-stone-950 dark:text-stone-100 tracking-tight">
                 学生姓名
               </h2>
-              <span id="studentDetailAge" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-[#10E57A]">
-                5岁
-              </span>
-              <span id="studentDetailClass" class="text-xs text-stone-400 font-mono bg-stone-100 dark:bg-emerald-950/40 dark:text-emerald-300 px-2.5 py-0.5 rounded-md">
-                启蒙创想一班
+              <span id="studentDetailAge" class="text-xs font-extrabold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-[#10E57A]">
+                3-5岁 · 启蒙
               </span>
             </div>
             <p id="studentDetailBio" class="text-xs sm:text-sm text-stone-700 dark:text-emerald-100/90 mt-2.5 leading-relaxed italic font-medium bg-emerald-50/70 dark:bg-emerald-950/40 dark:border dark:border-emerald-500/20 p-2.5 rounded-xl">
@@ -3170,6 +3167,15 @@
     // ==========================================
     // 🌟 视图二：小艺术家名人堂 (Playful Hall of Fame)
     // ==========================================
+    function getAgeGroupTag(groupKey) {
+      const map = {
+        '3-5': '3-5岁 · 启蒙',
+        '6-8': '6-8岁 · 创想',
+        '9-12': '9-12岁 · 创作'
+      };
+      return map[groupKey] || (groupKey ? (groupKey.includes('岁') ? groupKey : groupKey + '岁 · 启蒙') : '3-5岁 · 启蒙');
+    }
+
     function renderHall() {
       const grid = document.getElementById('hallGrid');
       
@@ -3216,9 +3222,8 @@
             <span class="text-xs">✨</span>
           </h3>
 
-          <div class="flex items-center justify-center gap-1 mt-1 text-xs flex-wrap">
-            <span class="bg-emerald-500/15 text-emerald-800 dark:bg-emerald-500/20 dark:text-[#10E57A] px-2 py-0.5 rounded-full font-extrabold text-[10px] whitespace-nowrap">${s.age}</span>
-            <span class="text-stone-400 font-mono text-[10px] truncate max-w-[100px]">${s.className}</span>
+          <div class="flex items-center justify-center gap-1 mt-1.5 text-xs flex-wrap">
+            <span class="bg-emerald-500/15 text-emerald-800 dark:bg-emerald-500/20 dark:text-[#10E57A] px-2.5 py-0.5 rounded-full font-extrabold text-[10px] whitespace-nowrap">${getAgeGroupTag(s.ageGroup)}</span>
           </div>
 
           <!-- 3. 艺术家简介/名言 (紧凑型气泡框，保持精致不占用过多垂直空间) -->
@@ -3274,8 +3279,10 @@
       
       document.getElementById('studentDetailAvatar').src = student.avatar;
       document.getElementById('studentDetailName').textContent = student.name;
-      document.getElementById('studentDetailAge').textContent = student.age;
-      document.getElementById('studentDetailClass').textContent = student.className;
+      const ageTagEl = document.getElementById('studentDetailAge');
+      if (ageTagEl) ageTagEl.textContent = getAgeGroupTag(student.ageGroup);
+      const classEl = document.getElementById('studentDetailClass');
+      if (classEl) classEl.textContent = '';
       document.getElementById('studentDetailBio').textContent = `“${student.bio}”`;
 
       const studentArtworks = artworks.filter(a => a.author === student.name);

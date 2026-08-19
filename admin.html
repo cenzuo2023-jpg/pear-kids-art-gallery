@@ -686,9 +686,9 @@
           <div class="space-y-1.5">
             <label class="font-bold text-stone-300">所属年龄组</label>
             <select id="studentFormAgeGroup" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400">
-              <option value="3-5">3-5岁 启蒙班</option>
-              <option value="6-8">6-8岁 进阶班</option>
-              <option value="9-12">9-12岁 创想班</option>
+              <option value="3-5">3-5岁 · 启蒙</option>
+              <option value="6-8">6-8岁 · 创想</option>
+              <option value="9-12">9-12岁 · 创作</option>
             </select>
           </div>
         </div>
@@ -1247,6 +1247,15 @@
     // =========================================================================
     // 🌟 小艺术家名人堂管理 (Students)
     // =========================================================================
+    function getAgeGroupTag(groupKey) {
+      const map = {
+        '3-5': '3-5岁 · 启蒙',
+        '6-8': '6-8岁 · 创想',
+        '9-12': '9-12岁 · 创作'
+      };
+      return map[groupKey] || (groupKey ? (groupKey.includes('岁') ? groupKey : groupKey + '岁 · 启蒙') : '3-5岁 · 启蒙');
+    }
+
     function renderAdminStudentsGrid() {
       const grid = document.getElementById('adminStudentsGrid');
       if (!grid) return;
@@ -1263,9 +1272,8 @@
             <div class="min-w-0 flex-1 space-y-0.5">
               <div class="flex items-center justify-between">
                 <span class="font-black text-sm text-white truncate">${student.name}</span>
-                <span class="text-[10px] text-amber-400 font-mono font-bold bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">${student.age}</span>
+                <span class="text-[10px] text-amber-400 font-mono font-bold bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">${getAgeGroupTag(student.ageGroup)}</span>
               </div>
-              <div class="text-[11px] text-stone-400 font-mono">${student.className || '启蒙学员班'}</div>
               <div class="text-[10px] text-emerald-400 font-mono">🎨 收录 ${student.featuredArtCount || 1} 件代表作</div>
             </div>
           </div>
@@ -1339,9 +1347,9 @@
 
       // 根据年龄组智能赋予显示标签与班级
       const ageGroupMap = {
-        '3-5': { age: '4-5岁', className: '启蒙班' },
-        '6-8': { age: '6-8岁', className: '进阶班' },
-        '9-12': { age: '9-12岁', className: '创想班' }
+        '3-5': { age: '3-5岁', className: '启蒙班' },
+        '6-8': { age: '6-8岁', className: '创想班' },
+        '9-12': { age: '9-12岁', className: '创作班' }
       };
       const defaultInfo = ageGroupMap[ageGroup] || { age: '5岁', className: '启蒙班' };
 

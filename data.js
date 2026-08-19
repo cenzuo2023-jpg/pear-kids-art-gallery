@@ -190,7 +190,7 @@ var studentList = [
     name: "林雨桐",
     age: "5岁",
     ageGroup: "3-5",
-    className: "启蒙创想一班",
+    className: "启蒙班",
     avatar: "https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80",
     bio: "画画的时候我可以去任何想去的地方，我最喜欢天马行空的怪兽和甜品。",
     featuredArtCount: 2
@@ -240,7 +240,7 @@ var studentList = [
     name: "苏可儿",
     age: "8岁",
     ageGroup: "6-8",
-    className: "大师大师拼贴班",
+    className: "创想班",
     avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&auto=format&fit=crop&q=80",
     bio: "艺术可以从不同的角度去看，拼贴出来的画面总是充满惊喜。",
     featuredArtCount: 1
