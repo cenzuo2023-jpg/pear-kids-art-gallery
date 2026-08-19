@@ -3,13 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>想吃梨儿童艺术启蒙 · 主理人专属策展管理中心 (Curator CMS)</title>
+  <title>想吃梨</title>
   <!-- 🍐 梨子品牌网页 Favicon 图标 -->
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍐</text></svg>">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+  <script>
+    (() => {
+      try {
+        const savedTheme = localStorage.getItem('pear_admin_theme');
+        if (savedTheme === 'light') document.documentElement.classList.remove('dark');
+        else document.documentElement.classList.add('dark');
+      } catch (e) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -17,7 +28,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- 🍐 纯原生零依赖 Supabase 云数据库直连引擎 -->
   <script src="data.js?v=20260819"></script>
-  <script src="cloudConfig.js?v=20260818"></script>
+  <script src="cloudConfig.js?v=20260819_cloud_authority_v1"></script>
   <link rel="stylesheet" href="style.css?v=20260818">
   <script>
     tailwind.config = {
@@ -77,7 +88,7 @@
       <span class="text-2xl filter drop-shadow">🍐</span>
       <div>
         <div class="flex items-center gap-2">
-          <span class="font-black text-base text-white tracking-tight">想吃梨儿童艺术启蒙</span>
+          <span class="font-black text-base text-white tracking-tight">想吃梨</span>
           <span class="px-2 py-0.5 rounded-md bg-[#10E57A]/20 text-[#10E57A] font-extrabold text-[10px] uppercase font-mono tracking-wider border border-[#10E57A]/30">
             CURATOR CMS
           </span>
@@ -110,8 +121,19 @@
         <span>📥 备份数据文件</span>
       </button>
 
-      <button 
-        onclick="refreshAdminData()" 
+      <button
+        id="adminThemeToggle"
+        onclick="toggleAdminTheme()"
+        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold transition-all border border-white/10"
+        title="切换亮色/暗黑模式"
+        aria-label="切换亮色/暗黑模式"
+      >
+        <i id="adminThemeToggleIcon" data-lucide="sun" class="w-4 h-4"></i>
+        <span id="adminThemeToggleLabel" class="hidden sm:inline">亮色</span>
+      </button>
+
+      <button
+        onclick="refreshAdminData()"
         class="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs transition-all active:scale-95 border border-white/10"
         title="刷新最新数据"
       >
@@ -129,12 +151,15 @@
   </header>
 
   <!-- 主体工作区 (左侧菜单 + 右侧内容) -->
-  <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+  <div class="flex-1 min-h-0 h-[calc(100vh-4rem)] flex flex-col md:flex-row overflow-hidden">
     
     <!-- 左侧导航菜单 -->
-    <aside id="adminSidebar" class="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#0A100C]/70 p-4 flex md:flex-col gap-1.5 overflow-x-auto md:overflow-visible flex-shrink-0">
-      <div class="hidden md:block text-[10px] font-mono text-stone-400 uppercase tracking-wider px-3 mb-1">
-        Management Modules
+    <aside id="adminSidebar" class="admin-sidebar w-full md:w-64 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#0A100C]/70 p-4 flex md:flex-col gap-1.5 overflow-x-auto md:overflow-visible flex-shrink-0">
+      <div class="admin-sidebar-heading hidden md:flex items-center justify-between gap-2 px-3 mb-1">
+        <span class="sidebar-label text-[10px] font-mono text-stone-400 uppercase tracking-wider">管理目录</span>
+        <button id="adminSidebarToggle" type="button" onclick="toggleAdminSidebar()" class="w-8 h-8 rounded-xl border border-white/10 text-stone-400 hover:text-[#10E57A] hover:bg-white/5 inline-flex items-center justify-center transition-all" title="折叠管理目录" aria-label="折叠管理目录" aria-expanded="true">
+          <i data-lucide="panel-left-close" class="w-4 h-4"></i>
+        </button>
       </div>
 
       <button 
@@ -143,7 +168,7 @@
         class="admin-nav-item active flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
       >
         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-        <span>📊 展厅数据总览</span>
+        <span class="sidebar-label">总览</span>
       </button>
 
       <button 
@@ -152,7 +177,7 @@
         class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
       >
         <i data-lucide="image" class="w-4 h-4"></i>
-        <span>🎨 少儿作品档案库</span>
+        <span class="sidebar-label">作品展</span>
       </button>
 
       <button 
@@ -161,7 +186,7 @@
         class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
       >
         <i data-lucide="users" class="w-4 h-4"></i>
-        <span>🌟 小艺术家名人堂</span>
+        <span class="sidebar-label">小艺术家</span>
       </button>
 
       <button 
@@ -170,7 +195,7 @@
         class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
       >
         <i data-lucide="book-open" class="w-4 h-4"></i>
-        <span>📚 课程作品集</span>
+        <span class="sidebar-label">作品集</span>
       </button>
 
       <button 
@@ -179,7 +204,7 @@
         class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
       >
         <i data-lucide="sparkles" class="w-4 h-4"></i>
-        <span>🏛️ 特展与轮播排期</span>
+        <span class="sidebar-label">专栏</span>
       </button>
 
       <button 
@@ -188,7 +213,7 @@
         class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
       >
         <i data-lucide="message-square" class="w-4 h-4"></i>
-        <span>💬 美育便签墙审核</span>
+        <span class="sidebar-label">便签墙</span>
       </button>
 
       <button 
@@ -197,10 +222,10 @@
         class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap text-emerald-400"
       >
         <i data-lucide="shield-check" class="w-4 h-4 text-[#10E57A]"></i>
-        <span class="text-emerald-300 font-black">🛡️ 数据固化与安全</span>
+        <span class="sidebar-label text-emerald-300 font-black">数据</span>
       </button>
 
-      <div class="mt-auto hidden md:block pt-6 border-t border-white/[0.06]">
+      <div class="admin-sidebar-info mt-auto hidden md:block pt-6 border-t border-white/[0.06]">
         <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-300 space-y-1">
           <div class="font-black flex items-center gap-1">
             <span>🛡️ 数据实时同步</span>
@@ -213,7 +238,7 @@
     </aside>
 
     <!-- 右侧内容视窗 -->
-    <main class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6">
+    <main class="flex-1 min-h-0 h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-8 space-y-6">
       
       <!-- ===================================================================== -->
       <!-- 模块 1：展厅数据总览 (Overview) -->
@@ -223,7 +248,7 @@
           <h2 class="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
             <span>📊 展厅运营与数字化资产概览</span>
           </h2>
-          <p class="text-xs text-stone-400 mt-1">实时汇总画廊在线展出力作、小艺术家名人堂、主题特展排期及社区便签互动数据</p>
+          <p class="text-xs text-stone-400 mt-1">实时汇总画廊在线展出力作、小艺术家名人堂、美育专栏文章及社区便签互动数据</p>
         </div>
 
         <!-- 5 大核心统计卡片 -->
@@ -263,12 +288,12 @@
 
           <div class="p-5 rounded-2xl bg-[#111C15] border border-white/[0.08] relative overflow-hidden">
             <div class="text-stone-400 text-xs font-bold flex items-center justify-between">
-              <span>主题特展期刊</span>
-              <span class="text-lg">🏛️</span>
+              <span>美育专栏文章</span>
+              <span class="text-lg">📝</span>
             </div>
             <div id="stat-theme-count" class="text-2xl sm:text-3xl font-black text-white mt-2 font-mono">0</div>
             <div class="text-[10px] text-[#10E57A] mt-1 flex items-center gap-1 font-mono">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#10E57A]"></span> 首页焦点轮播排期中
+              <span class="w-1.5 h-1.5 rounded-full bg-[#10E57A]"></span> 教学手记与美育随笔
             </div>
           </div>
 
@@ -331,18 +356,18 @@
             </button>
           </div>
 
-          <!-- 4. 策划新特展 -->
+          <!-- 4. 撰写专栏文章 -->
           <div class="p-5 rounded-2xl bg-gradient-to-br from-cyan-950/40 to-[#111C15] border border-cyan-500/20 flex flex-col justify-between hover:border-cyan-500/40 transition-all">
             <div>
               <div class="text-base font-black text-white flex items-center gap-2">
-                <span>🏛️ 策划新特展</span>
+                <span>📝 撰写专栏文章</span>
               </div>
               <p class="text-xs text-stone-400 mt-1.5 leading-relaxed">
-                撰写主题特展深度期刊文章，挑选参展作品并一键设定首页大轮播排期。
+                撰写少儿美育随笔、教学手记与启蒙故事，并一键设定首页大轮播推荐。
               </p>
             </div>
             <button onclick="openThemeStudio()" class="mt-4 w-full py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-stone-950 font-black text-xs transition-all active:scale-95 cursor-pointer shadow-md shadow-cyan-500/20">
-              + 策划新特展
+              + 撰写专栏文章
             </button>
           </div>
         </div>
@@ -584,21 +609,21 @@
       </section>
 
       <!-- ===================================================================== -->
-      <!-- 模块 4：特展与轮播排期工作台 (Themes) -->
+      <!-- 模块 4：美育专栏文章管理 (Themes / Articles) -->
       <!-- ===================================================================== -->
       <section id="admin-view-themes" class="space-y-4 hidden">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 class="text-xl font-black text-white">🏛️ 主题特展与首页轮播排期</h2>
-            <p class="text-xs text-stone-400 mt-0.5">策划深度特展期刊文章，并一键调配首页顶部焦点大轮播的展示与顺序</p>
+            <h2 class="text-xl font-black text-white">📝 美育专栏文章管理</h2>
+            <p class="text-xs text-stone-400 mt-0.5">撰写与发布美育随笔、教学手记与艺术启蒙思考文章，支持一键推荐至首页轮播</p>
           </div>
           <button onclick="openThemeStudio()" class="px-4 py-2.5 rounded-xl bg-teal-400 hover:bg-teal-300 text-stone-950 font-black text-xs shadow-lg shadow-teal-500/20 flex items-center gap-1.5 self-start sm:self-auto cursor-pointer">
             <i data-lucide="plus" class="w-4 h-4"></i>
-            <span>策划新特展</span>
+            <span>✍️ 发布新文章</span>
           </button>
         </div>
 
-        <!-- 特展卡片列表 -->
+        <!-- 专栏文章卡片列表 -->
         <div id="adminThemesGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <!-- JS 动态渲染 -->
         </div>
@@ -739,52 +764,32 @@
                 type="button" 
                 onclick="switchAdminTab('themes')" 
                 class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-stone-300 hover:text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer border border-white/10 active:scale-95"
-                title="返回特展列表"
+                title="返回专栏文章列表"
               >
                 <span>←</span>
-                <span>返回特展列表</span>
+                <span>返回专栏列表</span>
               </button>
               <div class="h-4 w-[1px] bg-white/10 hidden sm:block"></div>
               <div class="flex items-center gap-2">
-                <span class="text-lg">🏛️</span>
-                <span class="font-black text-sm text-white tracking-tight" id="themeModalTitle">策展工作台</span>
-                <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] text-emerald-400 font-bold">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span>在线协作模式</span>
-                </span>
+                <span class="text-lg">📝</span>
+                <span class="font-black text-sm text-white tracking-tight" id="themeModalTitle">美育专栏 · 文章编辑器</span>
               </div>
             </div>
 
-            <!-- 中间：三种视图切换 -->
-            <div class="flex items-center gap-1 p-1 bg-stone-900/90 rounded-2xl border border-white/10 text-xs">
-              <button type="button" id="adminThemeTabVisual" onclick="switchAdminThemeEditorMode('visual')" class="px-3 py-1.5 rounded-xl font-bold transition-all bg-teal-500/20 text-teal-300 border border-teal-500/30 shadow-sm">
-                ✨ 所见即所得编辑
-              </button>
-              <button type="button" id="adminThemeTabEdit" onclick="switchAdminThemeEditorMode('edit')" class="px-3 py-1.5 rounded-xl font-bold transition-all bg-transparent text-stone-400 hover:text-white">
-                📝 Markdown 源码
-              </button>
-              <button type="button" id="adminThemeTabPreview" onclick="switchAdminThemeEditorMode('preview')" class="px-3 py-1.5 rounded-xl font-bold transition-all bg-transparent text-stone-400 hover:text-white">
-                👁️ 杂志真机预览
-              </button>
+            <!-- 简单博客编辑器 -->
+            <div class="flex items-center gap-2 text-xs font-bold text-stone-300">
+              <i data-lucide="file-pen-line" class="w-4 h-4 text-teal-400"></i>
+              <span>博客正文编辑器</span>
             </div>
 
-            <!-- 右侧：外部在线平台与保存发布 -->
+            <!-- 右侧：保存发布 -->
             <div class="flex items-center gap-2">
-              <a 
-                href="https://stackedit.io/app" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                class="hidden xl:flex items-center gap-1 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 hover:text-teal-300 font-bold text-xs border border-white/10 transition-all cursor-pointer"
-                title="在新标签页中打开独立的在线 Markdown 编辑器"
-              >
-                <span>🌐 在线协作平台 ↗</span>
-              </a>
               <button 
                 type="submit" 
                 class="px-5 sm:px-6 py-2 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-[#10E57A] text-stone-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer ml-auto"
               >
                 <span>💾</span>
-                <span>保存并发布特展</span>
+                <span>保存并发布文章</span>
               </button>
             </div>
           </div>
@@ -792,18 +797,18 @@
           <!-- ② 📜 沉浸式宽幅文档画布 -->
           <div class="max-w-4xl mx-auto w-full space-y-8 pb-20 pt-2">
 
-            <!-- 🖼️ 电影级特展全宽封面展示与快捷更换区 -->
+            <!-- 🖼️ 宽幅文章封面展示与快捷更换区 -->
             <div class="relative w-full aspect-[21/8] sm:aspect-[24/8] rounded-3xl overflow-hidden shadow-2xl bg-stone-900 border border-white/10 group">
               <img 
                 id="themeCoverPreview" 
                 src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85" 
                 class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700"
-                alt="特展封面"
+                alt="文章封面"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-between p-4 sm:p-6">
                 <div class="flex items-center gap-2">
                   <span class="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-emerald-400 font-bold text-xs border border-white/15">
-                    🖼️ 宽幅特展封面
+                    🖼️ 文章封面大图
                   </span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -834,118 +839,82 @@
                 type="text" 
                 id="themeFormTitle" 
                 required 
-                placeholder="输入特展主标题..." 
+                placeholder="输入文章标题..." 
                 class="w-full bg-transparent text-3xl sm:text-4xl lg:text-5xl font-black text-white placeholder:text-stone-700 border-0 focus:outline-none tracking-tight leading-tight"
               />
+              <input type="hidden" id="themeFormSubTitle" value="">
 
-              <input 
-                type="text" 
-                id="themeFormSubTitle" 
-                placeholder="添加副标题或英文引语 (如：Forest & Starry Sky)..." 
-                class="w-full bg-transparent text-base sm:text-xl text-stone-400 placeholder:text-stone-700 border-0 focus:outline-none font-medium"
-              />
-
-              <!-- 🏷️ Notion 属性元数据栏 -->
-              <div class="p-4 sm:p-5 rounded-2xl bg-[#111D15] border border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <!-- 🏷️ 属性元数据栏 -->
+              <div class="p-4 sm:p-5 rounded-2xl bg-[#111D15] border border-white/10 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
                 <div class="space-y-1">
                   <span class="text-stone-400 font-bold flex items-center gap-1">
-                    <span>🏷️</span><span>特展标签</span>
+                    <span>🏷️</span><span>分类标签</span>
                   </span>
                   <input 
                     type="text" 
                     id="themeFormTag" 
-                    placeholder="如：🌟 2026 夏季特别策划" 
+                    placeholder="如：教学手记 / 美育随笔" 
                     class="w-full px-3 py-2 bg-stone-900/80 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs"
                   />
                 </div>
 
                 <div class="space-y-1">
                   <span class="text-stone-400 font-bold flex items-center gap-1">
-                    <span>📅</span><span>展期时间</span>
+                    <span>✍️</span><span>署名作者</span>
+                  </span>
+                  <input 
+                    type="text" 
+                    id="themeFormCurator" 
+                    placeholder="如：想吃梨美育团队" 
+                    class="w-full px-3 py-2 bg-stone-900/80 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs"
+                  />
+                </div>
+
+                <div class="space-y-1">
+                  <span class="text-stone-400 font-bold flex items-center gap-1">
+                    <span>📅</span><span>发布日期</span>
                   </span>
                   <input 
                     type="text" 
                     id="themeFormDate" 
-                    placeholder="如：2026.08 - 2026.10" 
+                    placeholder="如：2026.08" 
                     class="w-full px-3 py-2 bg-stone-900/80 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-teal-400 text-xs"
                   />
                 </div>
 
                 <div class="space-y-1">
                   <span class="text-stone-400 font-bold flex items-center gap-1">
-                    <span>🌟</span><span>首页焦点置顶</span>
+                    <span>🌟</span><span>首页大轮播</span>
                   </span>
                   <label class="flex items-center gap-2 px-3 py-2 bg-stone-900/80 border border-stone-700/80 rounded-xl text-white cursor-pointer h-[34px]">
                     <input type="checkbox" id="themeFormIsInHero" checked class="w-4 h-4 rounded text-teal-500 focus:ring-0">
-                    <span class="text-[11px] font-bold text-teal-300">置顶于首页大轮播</span>
+                    <span class="text-[11px] font-bold text-teal-300">置顶推荐</span>
                   </label>
                 </div>
               </div>
 
-              <!-- 💡 导语引言概述框 -->
-              <div class="p-4 rounded-2xl bg-emerald-500/10 border-l-4 border-teal-400 space-y-1">
-                <div class="text-[11px] text-teal-300 font-bold flex items-center gap-1">
-                  <span>💡</span><span>特展导语 / 策展引言概述</span>
-                </div>
-                <textarea 
-                  id="themeFormIntro" 
-                  rows="2" 
-                  placeholder="在此写下本期特展的导语短句（如：在大自然与星空之间，孩子们以纯真直觉构筑森林树屋...）" 
-                  class="w-full bg-transparent text-stone-200 text-xs sm:text-sm leading-relaxed border-0 focus:outline-none placeholder:text-stone-600 font-serif italic"
-                ></textarea>
-              </div>
 
-              <!-- 🎨 关联参展作品折叠面板 -->
-              <details open class="p-4 rounded-2xl bg-stone-900/80 border border-white/10 group">
-                <summary class="flex items-center justify-between cursor-pointer font-bold text-xs text-stone-300 select-none">
-                  <div class="flex items-center gap-2">
-                    <span>🖼️</span>
-                    <span>勾选本期关联参展画作</span>
-                    <span id="selectedArtworksCountBadge" class="px-2 py-0.5 rounded-full bg-stone-800 text-stone-400 text-[10px]">未勾选</span>
-                    <span class="text-[10px] text-teal-400 font-normal hidden sm:inline">（可勾选作品库已有画作，亦可在下方正文中直接插入照片）</span>
-                  </div>
-                  <span class="text-stone-500 group-open:rotate-180 transition-transform">▼</span>
-                </summary>
-                <div id="themeArtworkSelectorBox" class="mt-3 pt-3 border-t border-white/10 max-h-56 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-                  <!-- 动态生成作品选择框 (含缩略图、作者、画作标题与年龄) -->
-                </div>
-              </details>
             </div>
 
-            <!-- 🛠️ 悬浮 Markdown 写作排版工具栏 -->
-            <div class="sticky top-20 z-20 flex flex-wrap items-center gap-1.5 p-2.5 rounded-2xl bg-[#111D15]/95 backdrop-blur-xl border border-teal-500/30 shadow-xl text-xs">
-              <button type="button" onclick="document.getElementById('adminThemeInlineImageFileInput').click()" class="px-2.5 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm" title="上传本地照片插入文章">
-                <span>📷 本地插图</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeWebImagePrompt()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入网络图片">
-                <span>🌐 网络图片</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeLinkPrompt()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入外部超链接">
-                <span>🔗 超链接</span>
-              </button>
-              <div class="h-4 w-[1px] bg-white/10 mx-0.5"></div>
-              <button type="button" onclick="insertAdminThemeHeading(2)" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入二级大标题">
-                <span>📌 H2 标题</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeHeading(3)" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入三级小标题">
-                <span>▸ H3 标题</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeBold()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="加粗文字">
-                <span><strong>B</strong> 加粗</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeQuote()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入金句引用">
-                <span>💬 引用</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeList()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入列表">
-                <span>• 列表</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeDivider()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入分割线">
-                <span>--- 分割线</span>
-              </button>
-              <div class="h-4 w-[1px] bg-white/10 mx-0.5"></div>
-              <button type="button" onclick="pasteFromClipboardToEditor()" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold flex items-center gap-1 transition-all cursor-pointer ml-auto" title="一键粘贴剪贴板 Markdown">
-                <span>📋 粘贴剪贴板</span>
-              </button>
+            <!-- 简洁博客写作工具栏 -->
+            <div id="themeEditorToolbar" class="admin-theme-toolbar sticky top-4 z-40 flex flex-wrap items-center gap-1 p-2 rounded-xl bg-[#111D15]/95 backdrop-blur-xl border border-white/15 shadow-2xl text-xs" role="toolbar" aria-label="文章格式工具">
+              <select onchange="formatAdminThemeBlock(this.value); this.value='p';" class="h-8 px-2 rounded-lg bg-stone-900 border border-white/10 text-stone-200 font-bold focus:outline-none focus:border-teal-400" aria-label="段落样式">
+                <option value="p">段落</option>
+                <option value="h2">大标题</option>
+                <option value="h3">小标题</option>
+              </select>
+              <div class="h-5 w-px bg-white/10 mx-1"></div>
+              <button type="button" onclick="formatAdminThemeCommand('bold')" class="editor-tool-btn" title="加粗" aria-label="加粗"><strong>B</strong></button>
+              <button type="button" onclick="formatAdminThemeCommand('italic')" class="editor-tool-btn italic" title="斜体" aria-label="斜体">I</button>
+              <button type="button" onclick="insertAdminThemeLinkPrompt()" class="editor-tool-btn" title="链接" aria-label="插入链接"><i data-lucide="link" class="w-4 h-4"></i></button>
+              <button type="button" onclick="insertAdminThemeQuote()" class="editor-tool-btn" title="引用" aria-label="插入引用"><i data-lucide="quote" class="w-4 h-4"></i></button>
+              <div class="h-5 w-px bg-white/10 mx-1"></div>
+              <button type="button" onclick="formatAdminThemeCommand('insertUnorderedList')" class="editor-tool-btn" title="项目列表" aria-label="项目列表"><i data-lucide="list" class="w-4 h-4"></i></button>
+              <button type="button" onclick="formatAdminThemeCommand('insertOrderedList')" class="editor-tool-btn" title="编号列表" aria-label="编号列表"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
+              <button type="button" onclick="document.getElementById('adminThemeInlineImageFileInput').click()" class="editor-tool-btn" title="插入图片" aria-label="插入图片"><i data-lucide="image-plus" class="w-4 h-4"></i></button>
+              <div class="h-5 w-px bg-white/10 mx-1"></div>
+              <button type="button" onclick="formatAdminThemeCommand('undo')" class="editor-tool-btn" title="撤销" aria-label="撤销"><i data-lucide="undo-2" class="w-4 h-4"></i></button>
+              <button type="button" onclick="formatAdminThemeCommand('redo')" class="editor-tool-btn" title="重做" aria-label="重做"><i data-lucide="redo-2" class="w-4 h-4"></i></button>
               <input type="file" id="adminThemeInlineImageFileInput" accept="image/*" class="hidden" onchange="handleAdminThemeInlineImageSelected(event)">
             </div>
 
@@ -956,8 +925,8 @@
                 <div 
                   id="themeVisualCanvas" 
                   contenteditable="true" 
-                  class="w-full min-h-[550px] p-6 sm:p-10 bg-stone-900/70 border border-white/15 rounded-3xl text-stone-100 focus:outline-none focus:border-teal-400/80 leading-[1.9] text-base sm:text-lg shadow-2xl transition-all select-text space-y-4"
-                  placeholder="在此直接输入正文内容，点击上方按钮或直接粘贴图片（Ctrl+V），图片将立即在画布中高清呈现..."
+                  class="w-full min-h-[520px] p-6 sm:p-8 bg-stone-900/70 border border-white/15 rounded-2xl text-stone-100 focus:outline-none focus:border-teal-400/80 leading-[1.9] text-base shadow-xl transition-all select-text"
+                  data-placeholder="开始写文章正文…可直接粘贴文字或图片"
                   oninput="handleVisualCanvasInput()"
                 >
                 </div>
@@ -1269,6 +1238,98 @@ button:focus:not(:focus-visible),
       background: #10E57A;
       font-weight: 900;
     }
+    .admin-sidebar {
+      transition: width 220ms ease, padding 220ms ease;
+    }
+
+    .admin-sidebar .sidebar-label,
+    .admin-sidebar .admin-sidebar-info {
+      transition: opacity 160ms ease, width 220ms ease;
+    }
+
+    @media (min-width: 768px) {
+      .admin-sidebar.is-collapsed {
+        width: 4.75rem !important;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+
+      .admin-sidebar.is-collapsed .sidebar-label,
+      .admin-sidebar.is-collapsed .admin-sidebar-info {
+        width: 0;
+        opacity: 0;
+        overflow: hidden;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+
+      .admin-sidebar.is-collapsed .admin-nav-item {
+        justify-content: center;
+        gap: 0;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+
+      .admin-sidebar.is-collapsed .admin-sidebar-heading {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    #themeVisualCanvas:empty::before {
+      content: attr(data-placeholder);
+      color: #57534e;
+      pointer-events: none;
+    }
+
+    #themeVisualCanvas h2 { font-size: 1.5rem; font-weight: 900; margin: 2rem 0 0.75rem; color: #fff; }
+    #themeVisualCanvas h3 { font-size: 1.2rem; font-weight: 800; margin: 1.5rem 0 0.5rem; color: #6ee7b7; }
+    #themeVisualCanvas p { margin: 0.75rem 0; }
+    #themeVisualCanvas blockquote { margin: 1.25rem 0; padding: 1rem 1.25rem; border-left: 3px solid #10E57A; background: rgba(16, 229, 122, 0.08); color: #d1fae5; }
+    .editor-tool-btn {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #d6d3d1;
+      transition: color 150ms ease, background 150ms ease;
+    }
+    .editor-tool-btn:hover { color: #10E57A; background: rgba(255, 255, 255, 0.07); }
+
+    /* Admin theme switch: dark is the default; light mode keeps the same layout and controls. */
+    html:not(.dark) body { background: #f4f8f5 !important; color: #1c1917 !important; }
+    html:not(.dark) header,
+    html:not(.dark) #adminSidebar { background: rgba(255, 255, 255, 0.94) !important; border-color: #dfe9e2 !important; }
+    html:not(.dark) main { background: #f4f8f5 !important; }
+    html:not(.dark) [class*="bg-[#111"],
+    html:not(.dark) [class*="bg-[#0E"],
+    html:not(.dark) [class*="bg-[#0A"],
+    html:not(.dark) [class*="bg-stone-950"],
+    html:not(.dark) [class*="bg-stone-900"],
+    html:not(.dark) [class*="bg-stone-800"] { background-color: #ffffff !important; }
+    html:not(.dark) [class*="bg-black"] { background-color: #eef4ef !important; }
+    html:not(.dark) [class*="text-white"] { color: #1c1917 !important; }
+    html:not(.dark) [class*="text-stone-100"],
+    html:not(.dark) [class*="text-stone-200"],
+    html:not(.dark) [class*="text-stone-300"] { color: #3f3f46 !important; }
+    html:not(.dark) [class*="text-stone-400"],
+    html:not(.dark) [class*="text-stone-500"] { color: #64716a !important; }
+    html:not(.dark) [class*="border-white"] { border-color: #dfe9e2 !important; }
+    html:not(.dark) .admin-nav-item { color: #57534e; }
+    html:not(.dark) .admin-nav-item:hover { color: #1c1917; background: #edf5ef; }
+    html:not(.dark) .admin-nav-item.active { color: #052e16; background: #6ee7b7; }
+    html:not(.dark) #curatorAuthOverlay { background: rgba(236, 245, 239, 0.96) !important; }
+    html:not(.dark) #themeVisualCanvas,
+    html:not(.dark) #themeFormCuratorNote,
+    html:not(.dark) #adminThemeEditorPreviewContainer { background: #ffffff !important; color: #292524 !important; border-color: #dfe9e2 !important; }
+    html:not(.dark) #themeVisualCanvas h2 { color: #1c1917; }
+    html:not(.dark) #themeVisualCanvas h3 { color: #047857; }
+    html:not(.dark) #themeVisualCanvas blockquote { color: #166534; background: #ecfdf5; }
+    html:not(.dark) #themeEditorToolbar { background: rgba(255, 255, 255, 0.96) !important; border-color: #dfe9e2 !important; }
+    html:not(.dark) .editor-tool-btn { color: #57534e; }
   </style>
 
   <!-- 核心交互脚本 -->
@@ -1282,25 +1343,22 @@ button:focus:not(:focus-visible),
     // --- 数据加载与渲染 ---
     async function loadAllAdminData() {
       try {
-        if (window.galleryCloud) {
-          const [arts, themes, notes, students, albums] = await Promise.all([
-            window.galleryCloud.getArtworks(),
-            window.galleryCloud.getThematicExhibitions(),
-            window.galleryCloud.getStickyNotes(),
-            window.galleryCloud.getStudents(),
-            window.galleryCloud.getCourseAlbums ? window.galleryCloud.getCourseAlbums() : Promise.resolve([])
-          ]);
-          adminArtworks = arts || [];
-          adminThemes = themes || [];
-          adminNotes = notes || [];
-          adminStudents = students || [];
-          adminAlbums = albums && albums.length > 0 ? albums : (typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : []);
-        } else {
-          adminArtworks = typeof initialArtworks !== 'undefined' ? initialArtworks : [];
-          adminThemes = typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : [];
-          adminNotes = typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : [];
-          adminStudents = typeof initialStudents !== 'undefined' ? initialStudents : [];
+        if (!window.galleryCloud) {
+          throw new Error('云端数据服务尚未加载');
         }
+
+        const [arts, themes, notes, students, albums] = await Promise.all([
+          window.galleryCloud.getArtworks(),
+          window.galleryCloud.getThematicExhibitions(),
+          window.galleryCloud.getStickyNotes(),
+          window.galleryCloud.getStudents(),
+          window.galleryCloud.getCourseAlbums ? window.galleryCloud.getCourseAlbums() : Promise.resolve([])
+        ]);
+        adminArtworks = arts || [];
+        adminThemes = themes || [];
+        adminNotes = notes || [];
+        adminStudents = students || [];
+        adminAlbums = albums || [];
 
         renderOverviewStats();
         renderAdminArtworksTable();
@@ -1309,15 +1367,130 @@ button:focus:not(:focus-visible),
         renderAdminThemesGrid();
         renderAdminNotesGrid();
         updateAuthorDropdowns();
+        syncAdminToLocalCache();
         lucide.createIcons();
       } catch (e) {
         console.error('加载后台数据出错:', e);
+        showToast('❌ 云端数据加载失败：' + (e.message || '请稍后重试'));
       }
     }
 
-    function switchAdminTab(tabName) {
-      const allTabs = ['overview', 'artworks', 'albums', 'album-studio', 'themes', 'notes', 'students', 'backup', 'theme-studio'];
-      allTabs.forEach(tab => {
+    function syncAdminToLocalCache() {
+      try {
+        localStorage.setItem('art_gallery_cache_artworks', JSON.stringify(adminArtworks));
+        localStorage.setItem('art_gallery_cache_students', JSON.stringify(adminStudents));
+        localStorage.setItem('art_gallery_cache_themes', JSON.stringify(adminThemes));
+        localStorage.setItem('art_gallery_cache_albums', JSON.stringify(adminAlbums));
+        localStorage.setItem('art_gallery_cache_notes', JSON.stringify(adminNotes));
+        localStorage.setItem('pear_course_albums', JSON.stringify(adminAlbums));
+      } catch (e) {}
+    }
+
+    const ADMIN_TABS = ['overview', 'artworks', 'albums', 'album-studio', 'themes', 'notes', 'students', 'backup', 'theme-studio'];
+    const ADMIN_TAB_TITLES = {
+      overview: '总览',
+      artworks: '作品展',
+      albums: '作品集',
+      'album-studio': '编辑作品集',
+      themes: '专栏',
+      'theme-studio': '编辑专栏',
+      students: '小艺术家',
+      notes: '便签墙',
+      backup: '数据'
+    };
+
+    function getAdminTabFromUrl() {
+      const requested = new URL(window.location.href).searchParams.get('section') || 'overview';
+      return ADMIN_TABS.includes(requested) ? requested : 'overview';
+    }
+
+    function updateAdminUrl(tabName, replaceState = false) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('section', tabName);
+      url.searchParams.delete('id');
+
+      const editorId = tabName === 'theme-studio'
+        ? document.getElementById('themeFormId')?.value
+        : (tabName === 'album-studio' ? document.getElementById('albumFormId')?.value : '');
+
+      if (editorId) url.searchParams.set('id', editorId);
+
+      const nextUrl = url.pathname + url.search + url.hash;
+      const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+      if (nextUrl !== currentUrl) {
+        history[replaceState ? 'replaceState' : 'pushState']({ adminTab: tabName }, '', nextUrl);
+      }
+    }
+
+    function setAdminSidebarCollapsed(collapsed, persist = false) {
+      const sidebar = document.getElementById('adminSidebar');
+      const toggle = document.getElementById('adminSidebarToggle');
+      if (!sidebar) return;
+
+      sidebar.classList.toggle('is-collapsed', Boolean(collapsed));
+      if (toggle) {
+        toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        toggle.setAttribute('aria-label', collapsed ? '展开管理目录' : '折叠管理目录');
+        toggle.title = collapsed ? '展开管理目录' : '折叠管理目录';
+        toggle.innerHTML = `<i data-lucide="${collapsed ? 'panel-left-open' : 'panel-left-close'}" class="w-4 h-4"></i>`;
+      }
+      if (persist) {
+        localStorage.setItem('pear_admin_sidebar_collapsed', collapsed ? 'true' : 'false');
+      }
+      lucide.createIcons();
+    }
+
+    function getAdminTheme() {
+      return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    }
+
+    function updateAdminThemeToggle() {
+      const theme = getAdminTheme();
+      const button = document.getElementById('adminThemeToggle');
+      const icon = document.getElementById('adminThemeToggleIcon');
+      const label = document.getElementById('adminThemeToggleLabel');
+      if (button) {
+        button.title = theme === 'dark' ? '切换到亮色模式' : '切换到暗黑模式';
+        button.setAttribute('aria-label', button.title);
+      }
+      if (icon) icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+      if (label) label.textContent = theme === 'dark' ? '亮色' : '暗黑';
+      if (window.lucide?.createIcons) lucide.createIcons();
+    }
+
+    function applyAdminTheme(theme, persist = true) {
+      const isDark = theme !== 'light';
+      document.documentElement.classList.toggle('dark', isDark);
+      if (persist) {
+        try { localStorage.setItem('pear_admin_theme', isDark ? 'dark' : 'light'); } catch (e) {}
+      }
+      updateAdminThemeToggle();
+    }
+
+    function toggleAdminTheme() {
+      applyAdminTheme(getAdminTheme() === 'dark' ? 'light' : 'dark');
+    }
+
+    function initializeAdminTheme() {
+      let saved = 'dark';
+      try { saved = localStorage.getItem('pear_admin_theme') || 'dark'; } catch (e) {}
+      applyAdminTheme(saved, false);
+    }
+
+    function initializeAdminSidebar() {
+      setAdminSidebarCollapsed(localStorage.getItem('pear_admin_sidebar_collapsed') === 'true');
+    }
+
+    function toggleAdminSidebar() {
+      const sidebar = document.getElementById('adminSidebar');
+      if (!sidebar) return;
+      setAdminSidebarCollapsed(!sidebar.classList.contains('is-collapsed'), true);
+    }
+
+    function switchAdminTab(tabName, updateUrl = true, replaceState = false) {
+      if (!ADMIN_TABS.includes(tabName)) tabName = 'overview';
+
+      ADMIN_TABS.forEach(tab => {
         const viewEl = document.getElementById(`admin-view-${tab}`);
         const btnEl = document.getElementById(`tab-btn-${tab}`);
         if (viewEl) viewEl.classList.add('hidden');
@@ -1325,22 +1498,36 @@ button:focus:not(:focus-visible),
       });
 
       const activeView = document.getElementById(`admin-view-${tabName}`);
-      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      const navTab = tabName === 'theme-studio' ? 'themes' : (tabName === 'album-studio' ? 'albums' : tabName);
+      const activeBtn = document.getElementById(`tab-btn-${navTab}`);
       if (activeView) activeView.classList.remove('hidden');
       if (activeBtn) activeBtn.classList.add('active');
 
-      // 如果进入策展工作台，隐藏左侧边栏提供 100% 全宽沉浸式画布
-      const sidebar = document.getElementById('adminSidebar');
-      if (sidebar) {
-        if (tabName === 'theme-studio' || tabName === 'album-studio') {
-          sidebar.classList.add('hidden');
-        } else {
-          sidebar.classList.remove('hidden');
-        }
+      const isStudio = tabName === 'theme-studio' || tabName === 'album-studio';
+      const savedCollapsed = localStorage.getItem('pear_admin_sidebar_collapsed') === 'true';
+      setAdminSidebarCollapsed(isStudio ? true : savedCollapsed);
+
+      if (updateUrl) updateAdminUrl(tabName, replaceState);
+      document.title = '想吃梨';
+      window.scrollTo({ top: 0, behavior: updateUrl ? 'smooth' : 'auto' });
+      lucide.createIcons();
+    }
+
+    function applyAdminRouteFromUrl() {
+      const tabName = getAdminTabFromUrl();
+      const id = new URL(window.location.href).searchParams.get('id');
+
+      if (tabName === 'theme-studio') {
+        openThemeStudio(id || null, false);
+      } else if (tabName === 'album-studio') {
+        openAlbumStudio(id || null, false);
+      } else {
+        switchAdminTab(tabName, false);
       }
 
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      lucide.createIcons();
+      if (!new URL(window.location.href).searchParams.has('section')) {
+        updateAdminUrl(tabName, true);
+      }
     }
 
     function renderOverviewStats() {
@@ -1380,9 +1567,7 @@ button:focus:not(:focus-visible),
       const grid = document.getElementById('adminAlbumsGrid');
       if (!grid) return;
 
-      const albums = (adminAlbums && adminAlbums.length > 0)
-        ? adminAlbums
-        : (typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : []);
+      const albums = adminAlbums || [];
 
       if (albums.length === 0) {
         grid.innerHTML = '<div class="col-span-full p-8 text-center text-stone-500 bg-stone-900/40 rounded-2xl border border-white/5">暂无课程作品集，点击上方按钮批量录入第一套作品集</div>';
@@ -1428,13 +1613,13 @@ button:focus:not(:focus-visible),
       lucide.createIcons();
     }
 
-    function openAlbumStudio(albumId = null) {
+    function openAlbumStudio(albumId = null, updateUrl = true) {
       const form = document.getElementById('albumForm');
       if (form) form.reset();
       currentStudioAlbumArtworks = [];
 
       if (albumId) {
-        const albums = (adminAlbums && adminAlbums.length > 0) ? adminAlbums : (typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : []);
+        const albums = adminAlbums || [];
         const alb = albums.find(a => String(a.id) === String(albumId));
         if (alb) {
           document.getElementById('albumStudioTitle').textContent = `编辑课程作品集 · 《${alb.title}》`;
@@ -1471,7 +1656,7 @@ button:focus:not(:focus-visible),
       }
 
       renderAlbumStudioArtworks();
-      switchAdminTab('album-studio');
+      switchAdminTab('album-studio', updateUrl);
       lucide.createIcons();
     }
 
@@ -1685,39 +1870,45 @@ button:focus:not(:focus-visible),
 
       showToast('💾 正在保存课程作品集...');
       try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+        let savedAlbum;
         if (id) {
-          if (window.galleryCloud && window.galleryCloud.updateCourseAlbum) {
-            await window.galleryCloud.updateCourseAlbum(albumData);
-          }
+          savedAlbum = await window.galleryCloud.updateCourseAlbum(albumData);
           const idx = adminAlbums.findIndex(a => a.id === id);
-          if (idx !== -1) adminAlbums[idx] = albumData;
+          if (idx !== -1) adminAlbums[idx] = savedAlbum;
           showToast(`🎉 成功更新作品集《${title}》！`);
         } else {
-          if (window.galleryCloud && window.galleryCloud.createCourseAlbum) {
-            await window.galleryCloud.createCourseAlbum(albumData);
-          }
-          adminAlbums.unshift(albumData);
+          savedAlbum = await window.galleryCloud.createCourseAlbum(albumData);
+          adminAlbums.unshift(savedAlbum);
           showToast(`🎉 成功发布新作品集《${title}》！`);
         }
       } catch (err) {
         console.error('保存作品集失败:', err);
+        showToast(`❌ 作品集未保存到云端：${err.message || '请稍后重试'}`);
+        return;
       }
 
       renderAdminAlbumsGrid();
       renderOverviewStats();
+      syncAdminToLocalCache();
       switchAdminTab('albums');
     }
 
     async function adminDeleteAlbum(id) {
       const alb = adminAlbums.find(a => a.id === id);
       if (confirm(`⚠️ 确定要删除课程作品集《${alb ? alb.title : id}》吗？`)) {
-        if (window.galleryCloud && window.galleryCloud.deleteCourseAlbum) {
+        try {
+          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
           await window.galleryCloud.deleteCourseAlbum(id);
+          adminAlbums = adminAlbums.filter(a => a.id !== id);
+          showToast('🗑️ 作品集已从云端删除');
+          renderAdminAlbumsGrid();
+          renderOverviewStats();
+          syncAdminToLocalCache();
+        } catch (err) {
+          console.error('删除作品集失败:', err);
+          showToast('❌ 作品集未从云端删除：' + (err.message || '请稍后重试'));
         }
-        adminAlbums = adminAlbums.filter(a => a.id !== id);
-        showToast('🗑️ 作品集已删除');
-        renderAdminAlbumsGrid();
-        renderOverviewStats();
       }
     }
 
@@ -1916,6 +2107,9 @@ button:focus:not(:focus-visible),
 
     async function handleSaveArtwork(e) {
       e.preventDefault();
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+
       const id = document.getElementById('artFormId').value;
       const title = document.getElementById('artFormTitle').value.trim();
       const author = document.getElementById('artFormAuthor').value.trim();
@@ -1960,29 +2154,44 @@ button:focus:not(:focus-visible),
       // 联动检查小艺术家是否已存在
       const studentExists = adminStudents.find(s => s.name === author);
       if (!studentExists) {
-        const newStudent = {
-          id: 's-' + Date.now(),
-          name: author,
-          age,
-          ageGroup,
-          className: '想吃梨启蒙学员班',
-          avatar: mainImage,
-          bio: '热爱绘画与自由想象的新生代小艺术家。',
-          featuredArtCount: 1
-        };
-        if (window.galleryCloud) await window.galleryCloud.createStudent(newStudent);
+        try {
+          const newStudent = {
+            id: 's-' + Date.now(),
+            name: author,
+            age,
+            ageGroup,
+            className: '想吃梨启蒙学员班',
+            avatar: mainImage,
+            bio: '热爱绘画与自由想象的新生代小艺术家。',
+            featuredArtCount: 1
+          };
+          await window.galleryCloud.createStudent(newStudent);
+        } catch (studentErr) {
+          console.warn('画作已保存，但自动创建学员档案失败:', studentErr);
+          showToast('⚠️ 画作已保存；学员档案联动失败，请稍后在学员管理中补录');
+        }
       }
 
       closeArtworkModal();
       await loadAllAdminData();
+      } catch (err) {
+        console.error('保存画作失败:', err);
+        showToast('❌ 画作未保存到云端：' + (err.message || '请稍后重试'));
+      }
     }
 
     async function adminDeleteArtwork(id) {
       const art = adminArtworks.find(a => a.id === id);
       if (confirm(`【主理人管理】确定要删除画作《${art ? art.title : id}》吗？`)) {
-        if (window.galleryCloud) await window.galleryCloud.deleteArtwork(id);
-        showToast('🗑️ 画作已下架删除！');
-        await loadAllAdminData();
+        try {
+          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+          await window.galleryCloud.deleteArtwork(id);
+          showToast('🗑️ 画作已从云端删除！');
+          await loadAllAdminData();
+        } catch (err) {
+          console.error('删除画作失败:', err);
+          showToast('❌ 画作未从云端删除：' + (err.message || '请稍后重试'));
+        }
       }
     }
 
@@ -2081,6 +2290,9 @@ button:focus:not(:focus-visible),
 
     async function handleSaveStudent(e) {
       e.preventDefault();
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+
       const id = document.getElementById('studentFormId').value;
       const name = document.getElementById('studentFormName').value.trim();
       const ageGroup = document.getElementById('studentFormAgeGroup').value;
@@ -2114,14 +2326,15 @@ button:focus:not(:focus-visible),
         featuredArtCount: artCount
       };
 
+      let savedStudent;
       if (id) {
-        if (window.galleryCloud) await window.galleryCloud.updateStudent(studentData);
+        savedStudent = await window.galleryCloud.updateStudent(studentData);
         const idx = adminStudents.findIndex(s => s.id === id);
-        if (idx !== -1) adminStudents[idx] = studentData;
+        if (idx !== -1) adminStudents[idx] = savedStudent;
         showToast(`✨ 小艺术家 ${name} 的档案已更新！`);
       } else {
-        if (window.galleryCloud) await window.galleryCloud.createStudent(studentData);
-        adminStudents.unshift(studentData);
+        savedStudent = await window.galleryCloud.createStudent(studentData);
+        adminStudents.unshift(savedStudent);
         showToast(`🎉 成功添加小艺术家 ${name} 到名人堂！`);
       }
 
@@ -2129,17 +2342,29 @@ button:focus:not(:focus-visible),
       renderAdminStudentsGrid();
       renderOverviewStats();
       updateAuthorDropdowns();
+      syncAdminToLocalCache();
+      } catch (err) {
+        console.error('保存小艺术家失败:', err);
+        showToast('❌ 小艺术家档案未保存到云端：' + (err.message || '请稍后重试'));
+      }
     }
 
     async function adminDeleteStudent(id) {
       const s = adminStudents.find(item => item.id === id);
       if (confirm(`【主理人管理】确定要从小艺术家名人堂移除 ${s ? s.name : ''} 吗？`)) {
-        if (window.galleryCloud) await window.galleryCloud.deleteStudent(id);
-        adminStudents = adminStudents.filter(item => item.id !== id);
-        renderAdminStudentsGrid();
-        renderOverviewStats();
-        updateAuthorDropdowns();
-        showToast('🗑️ 小艺术家档案已移除！');
+        try {
+          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+          await window.galleryCloud.deleteStudent(id);
+          adminStudents = adminStudents.filter(item => item.id !== id);
+          renderAdminStudentsGrid();
+          renderOverviewStats();
+          updateAuthorDropdowns();
+          syncAdminToLocalCache();
+          showToast('🗑️ 小艺术家档案已从云端移除！');
+        } catch (err) {
+          console.error('删除小艺术家失败:', err);
+          showToast('❌ 小艺术家档案未从云端删除：' + (err.message || '请稍后重试'));
+        }
       }
     }
 
@@ -2157,12 +2382,13 @@ button:focus:not(:focus-visible),
               <img src="${theme.coverImage}" class="w-full h-full object-cover">
             </div>
             <div class="space-y-1 min-w-0 flex-1">
-              <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-[#10E57A] text-[10px] font-bold">${theme.tag}</span>
-                <span class="text-[10px] font-mono text-stone-400">排序: 第 ${theme.heroOrder || (idx + 1)} 位</span>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-[#10E57A] text-[10px] font-bold">${theme.tag || '美育专栏'}</span>
+                <span class="text-[10px] font-mono text-stone-400">📅 ${theme.date || '2026.08'}</span>
+                <span class="text-[10px] text-stone-400 font-medium">✍️ ${theme.curator || '想吃梨美育团队'}</span>
               </div>
-              <h3 class="font-black text-sm text-white truncate">${theme.title}</h3>
-              <p class="text-[11px] text-stone-400 line-clamp-2 leading-relaxed">${theme.introSummary || theme.intro || ''}</p>
+              <h3 class="font-black text-sm text-white truncate mt-1">${theme.title}</h3>
+
             </div>
           </div>
 
@@ -2170,7 +2396,7 @@ button:focus:not(:focus-visible),
             <label class="inline-flex items-center gap-2 cursor-pointer">
               <input type="checkbox" ${theme.isInHero !== false ? 'checked' : ''} onchange="toggleThemeHero('${theme.id}', this.checked)" class="w-4 h-4 rounded text-emerald-500 focus:ring-0">
               <span class="text-xs font-bold ${theme.isInHero !== false ? 'text-emerald-400' : 'text-stone-500'}">
-                ${theme.isInHero !== false ? '🌟 首页大轮播展出中' : '⏸️ 已从轮播撤下'}
+                ${theme.isInHero !== false ? '🌟 首页大轮播推荐中' : '⏸️ 未在首页推荐'}
               </span>
             </label>
 
@@ -2188,46 +2414,44 @@ button:focus:not(:focus-visible),
       lucide.createIcons();
     }
 
-    function renderThemeArtworkSelectorBox(selectedIds = []) {
-      const selectorBox = document.getElementById('themeArtworkSelectorBox');
-      if (!selectorBox) return;
+    async function toggleThemeHero(id, checked) {
+      const theme = adminThemes.find(item => item.id === id);
+      if (!theme) return;
 
-      const arts = (adminArtworks && adminArtworks.length > 0) 
-        ? adminArtworks 
-        : (typeof initialArtworks !== 'undefined' ? initialArtworks : []);
-
-      if (arts.length === 0) {
-        selectorBox.innerHTML = '<div class="col-span-full py-4 text-center text-stone-500 text-xs">作品库中暂无画作，可在正文中直接插入画作照片</div>';
-        updateSelectedArtworkChipCount();
-        return;
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+        const savedTheme = await window.galleryCloud.updateThematicExhibition({
+          ...theme,
+          isInHero: checked
+        });
+        const index = adminThemes.findIndex(item => item.id === id);
+        if (index >= 0) adminThemes[index] = savedTheme;
+        renderAdminThemesGrid();
+        syncAdminToLocalCache();
+        showToast(checked ? '🌟 已保存到首页轮播' : '⏸️ 已从首页轮播下线');
+      } catch (err) {
+        console.error('更新特展轮播状态失败:', err);
+        renderAdminThemesGrid();
+        showToast('❌ 轮播状态未保存到云端：' + (err.message || '请稍后重试'));
       }
-
-      selectorBox.innerHTML = arts.map(art => {
-        const isChecked = selectedIds.map(String).includes(String(art.id));
-        const cover = art.imageUrl || art.image || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300&auto=format&fit=crop&q=80';
-        return `
-          <label class="flex items-center gap-2.5 p-2 rounded-xl bg-stone-950/70 hover:bg-white/5 border border-white/5 cursor-pointer text-xs transition-all group select-none">
-            <input type="checkbox" name="themeArtworks" value="${art.id}" ${isChecked ? 'checked' : ''} class="w-4 h-4 rounded text-teal-500 focus:ring-0 cursor-pointer flex-shrink-0" onchange="updateSelectedArtworkChipCount()">
-            <img src="${cover}" class="w-9 h-9 rounded-lg object-cover bg-stone-900 border border-white/10 flex-shrink-0" onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=300&auto=format&fit=crop&q=80'" />
-            <div class="flex-1 min-w-0">
-              <div class="font-bold text-stone-200 truncate group-hover:text-teal-300 transition-colors">${art.title}</div>
-              <div class="text-[10px] text-stone-400 truncate">${art.author} · ${art.ageGroup || (art.age ? art.age + '岁' : '少儿')}</div>
-            </div>
-          </label>
-        `;
-      }).join('');
-
-      updateSelectedArtworkChipCount();
     }
 
-    function updateSelectedArtworkChipCount() {
-      const count = document.querySelectorAll('input[name="themeArtworks"]:checked').length;
-      const countSpan = document.getElementById('selectedArtworksCountBadge');
-      if (countSpan) {
-        countSpan.textContent = count > 0 ? `已选 ${count} 幅` : '未勾选';
-        countSpan.className = count > 0 
-          ? 'px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 font-bold text-[10px]' 
-          : 'px-2 py-0.5 rounded-full bg-stone-800 text-stone-400 text-[10px]';
+    async function adminDeleteTheme(id) {
+      const theme = adminThemes.find(item => item.id === id);
+      if (!theme) return;
+      if (!confirm('确定要从云端删除特展《' + theme.title + '》吗？')) return;
+
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+        await window.galleryCloud.deleteThematicExhibition(id);
+        adminThemes = adminThemes.filter(item => item.id !== id);
+        renderAdminThemesGrid();
+        renderOverviewStats();
+        syncAdminToLocalCache();
+        showToast('🗑️ 特展已从云端删除');
+      } catch (err) {
+        console.error('删除特展失败:', err);
+        showToast('❌ 特展未从云端删除：' + (err.message || '请稍后重试'));
       }
     }
 
@@ -2249,12 +2473,15 @@ button:focus:not(:focus-visible),
         }
 
         if (theme) {
-          document.getElementById('themeModalTitle').innerHTML = `<span>✏️</span><span>编辑主题特展 · 《${theme.title}》</span>`;
+          document.getElementById('themeModalTitle').innerHTML = `<span>✏️</span><span>编辑专栏文章 · 《${theme.title}》</span>`;
           document.getElementById('themeFormId').value = theme.id;
-          document.getElementById('themeFormTitle').value = theme.title;
+          document.getElementById('themeFormTitle').value = theme.title || '';
           document.getElementById('themeFormSubTitle').value = theme.subTitle || theme.subtitle || '';
-          document.getElementById('themeFormTag').value = theme.tag || '';
-          document.getElementById('themeFormDate').value = theme.date || '';
+          document.getElementById('themeFormTag').value = theme.tag || '美育随笔';
+          if (document.getElementById('themeFormCurator')) {
+            document.getElementById('themeFormCurator').value = theme.curator || '想吃梨美育团队';
+          }
+          document.getElementById('themeFormDate').value = theme.date || '2026.08';
           
           const cover = theme.coverImage || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85';
           document.getElementById('themeFormCover').value = cover;
@@ -2263,18 +2490,14 @@ button:focus:not(:focus-visible),
             document.getElementById('themeCoverUrlInput').value = cover.startsWith('data:') ? '' : cover;
           }
 
-          document.getElementById('themeFormIntro').value = theme.introSummary || theme.intro || '';
-          const noteContent = Array.isArray(theme.curatorStatement) ? theme.curatorStatement.join('\n\n') : (theme.curatorStatement || '');
+          const noteContent = Array.isArray(theme.curatorStatement) ? theme.curatorStatement.join('\n\n') : (theme.curatorStatement || theme.curator_note || '');
           document.getElementById('themeFormCuratorNote').value = noteContent;
           syncMarkdownToCanvas();
 
           document.getElementById('themeFormIsInHero').checked = theme.isInHero !== false;
-
-          const checkedIds = (theme.artworkIds || theme.artwork_ids || []).map(String);
-          renderThemeArtworkSelectorBox(checkedIds);
         }
       } else {
-        document.getElementById('themeModalTitle').innerHTML = `<span>🏛️</span><span>策划新主题特展</span>`;
+        document.getElementById('themeModalTitle').innerHTML = `<span>✍️</span><span>发布新美育专栏文章</span>`;
         document.getElementById('themeFormId').value = '';
         const defaultCover = 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85';
         document.getElementById('themeFormCover').value = defaultCover;
@@ -2282,19 +2505,19 @@ button:focus:not(:focus-visible),
         if (document.getElementById('themeCoverUrlInput')) {
           document.getElementById('themeCoverUrlInput').value = '';
         }
-        document.getElementById('themeFormTag').value = '🌟 2026 特别策划';
-        document.getElementById('themeFormDate').value = '2026.08 - 2026.10';
+        document.getElementById('themeFormTag').value = '美育随笔';
+        if (document.getElementById('themeFormCurator')) {
+          document.getElementById('themeFormCurator').value = '想吃梨美育团队';
+        }
+        document.getElementById('themeFormDate').value = '2026.08';
         document.getElementById('themeFormTitle').value = '';
         document.getElementById('themeFormSubTitle').value = '';
-        document.getElementById('themeFormIntro').value = '';
         document.getElementById('themeFormCuratorNote').value = '';
         const canvas = document.getElementById('themeVisualCanvas');
         if (canvas) canvas.innerHTML = '<p><br></p>';
-
-        renderThemeArtworkSelectorBox([]);
       }
 
-      switchAdminTab('theme-studio');
+      switchAdminTab('theme-studio', updateUrl);
       lucide.createIcons();
     }
 
@@ -2448,35 +2671,74 @@ button:focus:not(:focus-visible),
     function insertAdminThemeWebImagePrompt() {
       const url = prompt('请输入网络图片的 URL 链接 (如 https://...):');
       if (url && url.trim()) {
-        const caption = prompt('请输入图片说明/图注（可选）：', '') || '';
-        insertVisualImageBlock(url.trim(), caption);
+        insertVisualImageBlock(url.trim());
         showToast('🌐 网络图片已插入！');
       }
     }
 
-    function insertVisualImageBlock(imgSrc, caption = '') {
+    function insertVisualImageBlock(imgSrc) {
       const imageHtml = `
-        <figure class="my-6 rounded-2xl overflow-hidden shadow-xl border border-white/15 bg-stone-950 text-center relative group select-none" contenteditable="false" data-figure="true">
-          <div class="relative max-h-[560px] flex items-center justify-center p-3 sm:p-4 bg-stone-950/90">
-            <img src="${imgSrc}" class="max-w-full max-h-[500px] object-contain rounded-xl shadow-md" alt="${caption}" />
+        <figure class="my-6 relative group select-none" contenteditable="false" data-figure="true">
+          <div class="relative flex items-center justify-center">
+            <img src="${imgSrc}" class="block max-w-full h-auto object-contain" alt="" />
             <div class="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <button type="button" onclick="this.closest('figure').remove(); syncCanvasToMarkdown();" class="px-2.5 py-1 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-black shadow-lg cursor-pointer flex items-center gap-1">
                 <span>🗑️</span><span>删除</span>
               </button>
             </div>
           </div>
-          <figcaption class="px-4 py-2.5 text-center text-xs text-teal-300 font-bold bg-[#111C15] border-t border-white/10 flex items-center justify-center gap-1.5">
-            <span>📷</span>
-            <span contenteditable="true" onblur="syncCanvasToMarkdown()" class="outline-none hover:underline focus:underline cursor-text">${caption || '点击编辑图片说明'}</span>
-          </figcaption>
         </figure>
         <p><br></p>
       `;
       if (adminThemeEditorCurrentMode === 'visual') {
-        insertHtmlAtVisualCursor(imageHtml);
+        const canvas = document.getElementById('themeVisualCanvas');
+        if (!canvas) return;
+
+        const holder = document.createElement('div');
+        holder.innerHTML = imageHtml;
+        const fragment = document.createDocumentFragment();
+        let child;
+        let lastInsertedNode = null;
+        while ((child = holder.firstChild)) {
+          lastInsertedNode = fragment.appendChild(child);
+        }
+
+        const selection = window.getSelection();
+        const range = selection && selection.rangeCount ? selection.getRangeAt(0) : null;
+        let anchor = range ? range.commonAncestorContainer : null;
+        if (anchor && anchor.nodeType === Node.TEXT_NODE) anchor = anchor.parentNode;
+        while (anchor && anchor !== canvas && anchor.parentNode !== canvas) {
+          anchor = anchor.parentNode;
+        }
+
+        if (anchor && anchor !== canvas && anchor.parentNode === canvas) {
+          canvas.insertBefore(fragment, anchor.nextSibling);
+        } else {
+          canvas.appendChild(fragment);
+        }
+
+        if (selection && lastInsertedNode) {
+          const caret = document.createRange();
+          caret.selectNodeContents(lastInsertedNode);
+          caret.collapse(false);
+          selection.removeAllRanges();
+          selection.addRange(caret);
+        }
+        syncCanvasToMarkdown();
       } else {
-        insertAdminThemeText(`\n\n![${caption}](${imgSrc})\n\n`);
+        insertAdminThemeText(`\n\n![](${imgSrc})\n\n`);
       }
+    }
+    function formatAdminThemeBlock(tagName) {
+      formatAdminThemeCommand('formatBlock', tagName || 'p');
+    }
+
+    function formatAdminThemeCommand(command, value = null) {
+      const canvas = document.getElementById('themeVisualCanvas');
+      if (!canvas) return;
+      canvas.focus();
+      document.execCommand(command, false, value);
+      syncCanvasToMarkdown();
     }
 
     function insertAdminThemeHeading(level = 2) {
@@ -2610,30 +2872,29 @@ button:focus:not(:focus-visible),
 
     // 🌟 将视觉画布 DOM 序列化为干净的标准 Markdown
     function syncCanvasToMarkdown() {
-      if (isSyncingCanvas) return;
+      if (isSyncingCanvas) return document.getElementById('themeFormCuratorNote')?.value || '';
       isSyncingCanvas = true;
       const canvas = document.getElementById('themeVisualCanvas');
       const textarea = document.getElementById('themeFormCuratorNote');
       if (!canvas || !textarea) {
         isSyncingCanvas = false;
-        return;
+        return '';
       }
 
       let markdown = '';
-      const children = Array.from(canvas.childNodes);
+      try {
+        Array.from(canvas.childNodes).forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent.trim();
+            if (text) markdown += `${text}\n\n`;
+            return;
+          }
+          if (node.nodeType !== Node.ELEMENT_NODE) return;
 
-      children.forEach(node => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const t = node.textContent.trim();
-          if (t) markdown += `${t}\n\n`;
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
           const tag = node.tagName.toLowerCase();
           if (tag === 'figure' || node.dataset.figure === 'true') {
-            const img = node.querySelector('img');
-            const figcap = node.querySelector('figcaption');
-            const src = img ? img.src : '';
-            const cap = figcap ? figcap.textContent.replace('📷', '').trim() : '';
-            if (src) markdown += `![${cap}](${src})\n\n`;
+            const src = node.querySelector('img')?.src || '';
+            if (src) markdown += `![](${src})\n\n`;
           } else if (tag === 'h1' || tag === 'h2') {
             markdown += `## ${node.textContent.replace('✦', '').trim()}\n\n`;
           } else if (tag === 'h3' || tag === 'h4') {
@@ -2646,29 +2907,31 @@ button:focus:not(:focus-visible),
             });
             markdown += '\n';
           } else if (tag === 'ol') {
-            Array.from(node.querySelectorAll('li')).forEach((li, i) => {
-              markdown += `${i + 1}. ${li.textContent.trim()}\n`;
+            Array.from(node.querySelectorAll('li')).forEach((li, index) => {
+              markdown += `${index + 1}. ${li.textContent.trim()}\n`;
             });
             markdown += '\n';
           } else if (tag === 'hr') {
             markdown += '---\n\n';
           } else {
-            // 常规段落 (处理内嵌超链接与加粗)
             let htmlContent = node.innerHTML;
             htmlContent = htmlContent.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
             htmlContent = htmlContent.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**');
+            htmlContent = htmlContent.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
+            htmlContent = htmlContent.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
             htmlContent = htmlContent.replace(/<a[^>]*href=["'](.*?)["'][^>]*>(.*?)<\/a>/gi, '[$2]($1)');
             htmlContent = htmlContent.replace(/<br\s*\/?>/gi, '\n');
             const plain = htmlContent.replace(/<[^>]+>/g, '').trim();
             if (plain) markdown += `${plain}\n\n`;
           }
-        }
-      });
+        });
 
-      textarea.value = markdown.trim();
-      isSyncingCanvas = false;
+        textarea.value = markdown.trim();
+        return textarea.value;
+      } finally {
+        isSyncingCanvas = false;
+      }
     }
-
     // 🌟 将 Markdown 转换为视觉画布的富文本 HTML
     function syncMarkdownToCanvas() {
       const canvas = document.getElementById('themeVisualCanvas');
@@ -2696,19 +2959,15 @@ button:focus:not(:focus-visible),
           const cap = imgMatch[1] || '';
           const src = imgMatch[2];
           html += `
-            <figure class="my-6 rounded-2xl overflow-hidden shadow-xl border border-white/15 bg-stone-950 text-center relative group select-none" contenteditable="false" data-figure="true">
-              <div class="relative max-h-[560px] flex items-center justify-center p-3 sm:p-4 bg-stone-950/90">
-                <img src="${src}" class="max-w-full max-h-[500px] object-contain rounded-xl shadow-md" alt="${cap}" />
+            <figure class="my-6 relative group select-none" contenteditable="false" data-figure="true">
+              <div class="relative flex items-center justify-center">
+                <img src="${src}" class="block max-w-full h-auto object-contain" alt="" />
                 <div class="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <button type="button" onclick="this.closest('figure').remove(); syncCanvasToMarkdown();" class="px-2.5 py-1 rounded-lg bg-red-500 hover:bg-red-600 text-white text-xs font-black shadow-lg cursor-pointer flex items-center gap-1">
                     <span>🗑️</span><span>删除</span>
                   </button>
                 </div>
               </div>
-              <figcaption class="px-4 py-2.5 text-center text-xs text-teal-300 font-bold bg-[#111C15] border-t border-white/10 flex items-center justify-center gap-1.5">
-                <span>📷</span>
-                <span contenteditable="true" onblur="syncCanvasToMarkdown()" class="outline-none hover:underline focus:underline cursor-text">${cap || '点击编辑图片说明'}</span>
-              </figcaption>
             </figure>
           `;
           return;
@@ -2787,14 +3046,10 @@ button:focus:not(:focus-visible),
             return `<h4 class="text-lg font-bold text-stone-200 mt-5 mb-2 flex items-center gap-1.5"><span>▸</span><span>${text}</span></h4>`;
           }
         };
-        renderer.image = function({ href, title, text }) {
-          const caption = text || title || '';
+        renderer.image = function({ href }) {
           return `
-            <figure class="my-6 rounded-2xl overflow-hidden bg-stone-900 border border-stone-800 text-center shadow-xl">
-              <div class="p-3 bg-stone-950 flex items-center justify-center">
-                <img src="${href}" alt="${caption}" class="max-w-full max-h-[520px] mx-auto object-contain rounded-xl shadow-md" onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80'" />
-              </div>
-              ${caption ? `<figcaption class="p-2 text-center text-xs text-teal-300 font-bold bg-[#111C15] border-t border-stone-800">📷 ${caption}</figcaption>` : ''}
+            <figure class="my-6">
+              <img src="${href}" alt="" class="block w-full h-auto object-contain" />
             </figure>
           `;
         };
@@ -2825,48 +3080,65 @@ button:focus:not(:focus-visible),
 
     async function handleSaveTheme(e) {
       e.preventDefault();
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+
+      if (adminThemeEditorCurrentMode === 'visual') {
+        syncCanvasToMarkdown();
+      }
+
       const id = document.getElementById('themeFormId').value;
       const title = document.getElementById('themeFormTitle').value.trim();
       const subTitle = document.getElementById('themeFormSubTitle').value.trim();
-      const tag = document.getElementById('themeFormTag').value.trim();
-      const date = document.getElementById('themeFormDate').value.trim();
-      const coverImage = document.getElementById('themeFormCover').value.trim();
-      const introSummary = document.getElementById('themeFormIntro').value.trim();
+      const tag = (document.getElementById('themeFormTag').value || '美育随笔').trim();
+      const curator = (document.getElementById('themeFormCurator') ? document.getElementById('themeFormCurator').value : '想吃梨美育团队').trim() || '想吃梨美育团队';
+      const date = (document.getElementById('themeFormDate').value || '2026.08').trim();
+      const coverImage = document.getElementById('themeFormCover').value.trim() || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85';
       const curatorNote = document.getElementById('themeFormCuratorNote').value.trim();
       const isInHero = document.getElementById('themeFormIsInHero').checked;
 
-      const selectedArtIds = Array.from(document.querySelectorAll('input[name="themeArtworks"]:checked')).map(c => c.value);
+      if (!curatorNote) {
+        showToast('❌ 请先填写文章正文，再保存发布');
+        document.getElementById('themeVisualCanvas')?.focus();
+        return;
+      }
 
       const themeData = {
         id: id || ('theme-' + Date.now()),
         title,
         subTitle,
         tag,
+        curator,
         date,
         coverImage,
-        introSummary,
         curatorStatement: curatorNote,
         curator_note: curatorNote,
-        artworkIds: selectedArtIds,
-        artworkCount: selectedArtIds.length,
+        artworkIds: [],
+        artworkCount: 0,
         isInHero,
         heroOrder: 1
       };
 
+      let savedTheme;
       if (id) {
-        if (window.galleryCloud) await window.galleryCloud.updateThematicExhibition(themeData);
+        savedTheme = await window.galleryCloud.updateThematicExhibition(themeData);
         const idx = adminThemes.findIndex(t => t.id === id);
-        if (idx !== -1) adminThemes[idx] = themeData;
-        showToast(`✨ 特展《${title}》已更新！`);
+        if (idx !== -1) adminThemes[idx] = savedTheme;
+        showToast(`✨ 专栏文章《${title}》已更新！`);
       } else {
-        if (window.galleryCloud) await window.galleryCloud.createThematicExhibition(themeData);
-        adminThemes.push(themeData);
-        showToast(`🎉 成功策划新特展《${title}》！`);
+        savedTheme = await window.galleryCloud.createThematicExhibition(themeData);
+        adminThemes.push(savedTheme);
+        showToast(`🎉 专栏文章《${title}》已发布！`);
       }
 
       renderAdminThemesGrid();
       renderOverviewStats();
+      syncAdminToLocalCache();
       switchAdminTab('themes');
+      } catch (err) {
+        console.error('保存特展失败:', err);
+        showToast('❌ 特展未保存到云端：' + (err.message || '请稍后重试'));
+      }
     }
 
     // =========================================================================
@@ -2915,13 +3187,18 @@ button:focus:not(:focus-visible),
 
     async function adminDeleteStickyNote(id) {
       if (confirm('【主理人管理】确定要从云端彻底删除此条便签吗？此操作无法撤销。')) {
-        adminNotes = adminNotes.filter(n => n.id !== id);
-        renderAdminNotesGrid();
-        renderOverviewStats();
-        if (window.galleryCloud) {
+        try {
+          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
           await window.galleryCloud.deleteStickyNote(id);
+          adminNotes = adminNotes.filter(n => n.id !== id);
+          renderAdminNotesGrid();
+          renderOverviewStats();
+          syncAdminToLocalCache();
+          showToast('🗑️ 已成功从云端删除该便签！');
+        } catch (err) {
+          console.error('删除便签失败:', err);
+          showToast('❌ 便签未从云端删除：' + (err.message || '请稍后重试'));
         }
-        showToast('🗑️ 已成功销毁该便签！');
       }
     }
 
@@ -2939,16 +3216,17 @@ button:focus:not(:focus-visible),
       setTimeout(() => { box.classList.add('opacity-0'); }, 2200);
     }
 
-    function checkCuratorAuth() {
+    async function checkCuratorAuth() {
       const isAuthed = localStorage.getItem('pear_curator_auth') === 'true';
       const overlay = document.getElementById('curatorAuthOverlay');
       if (isAuthed && overlay) {
         overlay.classList.add('hidden');
-        loadAllAdminData();
+        await loadAllAdminData();
+        applyAdminRouteFromUrl();
       }
     }
 
-    function handleCuratorLogin(e) {
+    async function handleCuratorLogin(e) {
       e.preventDefault();
       const pwd = document.getElementById('curatorPasswordInput').value.trim();
       if (pwd === 'pear2026' || pwd === '123456' || pwd === 'pear888' || pwd === 'linlaoshi' || pwd === 'chenzuo' || pwd === 'chenlaoshi') {
@@ -2956,7 +3234,8 @@ button:focus:not(:focus-visible),
         const overlay = document.getElementById('curatorAuthOverlay');
         if (overlay) overlay.classList.add('hidden');
         showToast('🔓 身份验证成功，欢迎陈昨！');
-        loadAllAdminData();
+        await loadAllAdminData();
+        applyAdminRouteFromUrl();
       } else {
         showToast('❌ 密码错误，请重新输入');
       }
@@ -3063,6 +3342,13 @@ button:focus:not(:focus-visible),
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+      initializeAdminTheme();
+      initializeAdminSidebar();
+      window.addEventListener('popstate', () => {
+        if (localStorage.getItem('pear_curator_auth') === 'true') {
+          applyAdminRouteFromUrl();
+        }
+      });
       checkCuratorAuth();
     });
   </script>

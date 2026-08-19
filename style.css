@@ -614,3 +614,16 @@ dialog[open]::backdrop {
 .album-art-card:hover {
   transform: translateY(-6px);
 }
+
+/* Mobile navigation keeps all six requested labels readable. */
+@media (max-width: 639px) {
+  .mob-nav-tab > span:first-child {
+    display: none;
+  }
+
+  .mob-nav-tab > span.truncate {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+}
