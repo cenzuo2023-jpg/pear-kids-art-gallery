@@ -1742,11 +1742,11 @@
       } catch (e) {}
     }
 
-    let artworks = loadCachedData('artworks', typeof initialArtworks !== 'undefined' ? initialArtworks : []);
-    let studentList = loadCachedData('students', typeof initialStudents !== 'undefined' ? initialStudents : []);
-    let themeExhibitions = loadCachedData('themes', typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : []);
-    let stickyNotes = loadCachedData('notes', typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : []);
-    let courseAlbums = loadCachedData('albums', typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : []);
+    let artworks = loadCachedData('artworks', []);
+    let studentList = loadCachedData('students', []);
+    let themeExhibitions = loadCachedData('themes', []);
+    let stickyNotes = loadCachedData('notes', []);
+    let courseAlbums = loadCachedData('albums', []);
 
     let currentView = 'gallery';
     let currentAgeFilter = 'all';
@@ -2082,9 +2082,7 @@
       const emptyBox = document.getElementById('emptyAlbumsState');
       const countEl = document.getElementById('allAlbumsCountSpan');
 
-      const allAlbums = (typeof courseAlbums !== 'undefined' && courseAlbums.length > 0)
-        ? courseAlbums
-        : (typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : []);
+      const allAlbums = courseAlbums || [];
 
       if (countEl) countEl.textContent = allAlbums.length;
 
@@ -2194,17 +2192,19 @@
       }
 
       if (homeGrid) {
-        homeGrid.innerHTML = allAlbums.slice(0, 3).map(generateCardHtml).join('');
+        const top3 = allAlbums.slice(0, 3);
+        if (top3.length > 0) {
+          homeGrid.innerHTML = top3.map(generateCardHtml).join('');
+        } else {
+          homeGrid.innerHTML = '<div class="col-span-full py-12 text-center text-xs text-stone-400">暂无课程作品集</div>';
+        }
       }
 
       lucide.createIcons();
     }
 
     function openCourseAlbumDetail(albumId) {
-      const allAlbums = (typeof courseAlbums !== 'undefined' && courseAlbums.length > 0)
-        ? courseAlbums
-        : (typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : []);
-
+      const allAlbums = courseAlbums || [];
       const album = allAlbums.find(a => String(a.id) === String(albumId));
       if (album) {
         navigateTo('album-detail', album);
@@ -2868,7 +2868,7 @@
       const worksSection = document.getElementById('themeWorksSection');
       const worksGrid = document.getElementById('themeWorksGrid');
       const rawArtworkIds = (theme.artworkIds || theme.artwork_ids || []).map(String);
-      const allAvailableArtworks = (artworks && artworks.length > 0) ? artworks : (typeof initialArtworks !== 'undefined' ? initialArtworks : []);
+      const allAvailableArtworks = artworks || [];
       
       let themeArtworks = allAvailableArtworks.filter(a => rawArtworkIds.includes(String(a.id)));
 
@@ -3395,15 +3395,15 @@
       const paramVal = decodeURIComponent(parts.slice(1).join('/'));
 
       if (prefix === 'album' || prefix === 'album-detail') {
-        const album = (courseAlbums || []).find(a => String(a.id) === String(paramVal)) || (initialCourseAlbums || []).find(a => String(a.id) === String(paramVal));
+        const album = (courseAlbums || []).find(a => String(a.id) === String(paramVal));
         return { view: 'album-detail', param: album || paramVal };
       }
       if (prefix === 'student') {
-        const student = (studentList || []).find(s => String(s.id) === String(paramVal) || s.name === paramVal) || (initialStudents || []).find(s => String(s.id) === String(paramVal) || s.name === paramVal);
+        const student = (studentList || []).find(s => String(s.id) === String(paramVal) || s.name === paramVal);
         return { view: 'student', param: student || paramVal };
       }
       if (prefix === 'theme') {
-        const theme = (themeExhibitions || []).find(t => String(t.id) === String(paramVal)) || (initialThematicExhibitions || []).find(t => String(t.id) === String(paramVal));
+        const theme = (themeExhibitions || []).find(t => String(t.id) === String(paramVal));
         return { view: 'theme', param: theme || paramVal };
       }
 
@@ -3475,7 +3475,7 @@
         document.getElementById('view-theme').classList.remove('hidden');
         let themeObj = paramData;
         if (typeof paramData !== 'object') {
-          themeObj = (themeExhibitions || []).find(t => String(t.id) === String(paramData)) || (initialThematicExhibitions || []).find(t => String(t.id) === String(paramData));
+          themeObj = (themeExhibitions || []).find(t => String(t.id) === String(paramData));
         }
         renderThemeExhibition(themeObj);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3489,7 +3489,7 @@
         document.getElementById('view-student').classList.remove('hidden');
         let studentObj = paramData;
         if (typeof paramData !== 'object') {
-          studentObj = (studentList || []).find(s => String(s.id) === String(paramData) || s.name === paramData) || (initialStudents || []).find(s => String(s.id) === String(paramData) || s.name === paramData);
+          studentObj = (studentList || []).find(s => String(s.id) === String(paramData) || s.name === paramData);
           if (!studentObj) {
             studentObj = {
               id: paramData,

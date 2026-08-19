@@ -304,7 +304,9 @@ class NativeSupabaseService {
       });
       if (!res.ok) return [];
       const data = await res.json();
-      return (data || []).map(item => this._fromDbTheme(item)).filter(Boolean);
+      const list = (data || []).map(item => this._fromDbTheme(item)).filter(Boolean);
+      try { localStorage.setItem('art_gallery_cache_themes', JSON.stringify(list)); } catch (e) {}
+      return list;
     } catch (e) {
       return [];
     }
@@ -353,7 +355,9 @@ class NativeSupabaseService {
       });
       if (!res.ok) return [];
       const data = await res.json();
-      return (data || []).map(item => this._fromDbNote(item)).filter(Boolean);
+      const list = (data || []).map(item => this._fromDbNote(item)).filter(Boolean);
+      try { localStorage.setItem('art_gallery_cache_notes', JSON.stringify(list)); } catch (e) {}
+      return list;
     } catch (e) {
       return [];
     }
@@ -403,7 +407,10 @@ class NativeSupabaseService {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           const list = data.map(item => this._fromDbAlbum(item)).filter(Boolean);
-          try { localStorage.setItem('pear_course_albums', JSON.stringify(list)); } catch (e) {}
+          try { 
+            localStorage.setItem('art_gallery_cache_albums', JSON.stringify(list)); 
+            localStorage.setItem('pear_course_albums', JSON.stringify(list)); 
+          } catch (e) {}
           return list;
         }
       }
@@ -411,14 +418,14 @@ class NativeSupabaseService {
 
     // 2. 本地持久化缓存兜底（确保后台录入后前台 100% 立即秒级可见）
     try {
-      const cached = localStorage.getItem('pear_course_albums');
+      const cached = localStorage.getItem('art_gallery_cache_albums') || localStorage.getItem('pear_course_albums');
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {}
 
-    return typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : [];
+    return [];
   }
 
   async createCourseAlbum(albumData) {

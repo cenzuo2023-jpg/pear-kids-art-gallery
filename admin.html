@@ -1294,12 +1294,13 @@ button:focus:not(:focus-visible),
           adminThemes = themes || [];
           adminNotes = notes || [];
           adminStudents = students || [];
-          adminAlbums = albums && albums.length > 0 ? albums : (typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : []);
+          adminAlbums = albums || [];
         } else {
-          adminArtworks = typeof initialArtworks !== 'undefined' ? initialArtworks : [];
-          adminThemes = typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : [];
-          adminNotes = typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : [];
-          adminStudents = typeof initialStudents !== 'undefined' ? initialStudents : [];
+          adminArtworks = [];
+          adminThemes = [];
+          adminNotes = [];
+          adminStudents = [];
+          adminAlbums = [];
         }
 
         renderOverviewStats();
@@ -1309,10 +1310,22 @@ button:focus:not(:focus-visible),
         renderAdminThemesGrid();
         renderAdminNotesGrid();
         updateAuthorDropdowns();
+        syncAdminToLocalCache();
         lucide.createIcons();
       } catch (e) {
         console.error('加载后台数据出错:', e);
       }
+    }
+
+    function syncAdminToLocalCache() {
+      try {
+        localStorage.setItem('art_gallery_cache_artworks', JSON.stringify(adminArtworks));
+        localStorage.setItem('art_gallery_cache_students', JSON.stringify(adminStudents));
+        localStorage.setItem('art_gallery_cache_themes', JSON.stringify(adminThemes));
+        localStorage.setItem('art_gallery_cache_albums', JSON.stringify(adminAlbums));
+        localStorage.setItem('art_gallery_cache_notes', JSON.stringify(adminNotes));
+        localStorage.setItem('pear_course_albums', JSON.stringify(adminAlbums));
+      } catch (e) {}
     }
 
     function switchAdminTab(tabName) {
@@ -1380,9 +1393,7 @@ button:focus:not(:focus-visible),
       const grid = document.getElementById('adminAlbumsGrid');
       if (!grid) return;
 
-      const albums = (adminAlbums && adminAlbums.length > 0)
-        ? adminAlbums
-        : (typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : []);
+      const albums = adminAlbums || [];
 
       if (albums.length === 0) {
         grid.innerHTML = '<div class="col-span-full p-8 text-center text-stone-500 bg-stone-900/40 rounded-2xl border border-white/5">暂无课程作品集，点击上方按钮批量录入第一套作品集</div>';
@@ -1434,7 +1445,7 @@ button:focus:not(:focus-visible),
       currentStudioAlbumArtworks = [];
 
       if (albumId) {
-        const albums = (adminAlbums && adminAlbums.length > 0) ? adminAlbums : (typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : []);
+        const albums = adminAlbums || [];
         const alb = albums.find(a => String(a.id) === String(albumId));
         if (alb) {
           document.getElementById('albumStudioTitle').textContent = `编辑课程作品集 · 《${alb.title}》`;
@@ -1684,6 +1695,7 @@ button:focus:not(:focus-visible),
 
       renderAdminAlbumsGrid();
       renderOverviewStats();
+      syncAdminToLocalCache();
       switchAdminTab('albums');
     }
 
@@ -1697,6 +1709,7 @@ button:focus:not(:focus-visible),
         showToast('🗑️ 作品集已删除');
         renderAdminAlbumsGrid();
         renderOverviewStats();
+        syncAdminToLocalCache();
       }
     }
 
@@ -2108,6 +2121,7 @@ button:focus:not(:focus-visible),
       renderAdminStudentsGrid();
       renderOverviewStats();
       updateAuthorDropdowns();
+      syncAdminToLocalCache();
     }
 
     async function adminDeleteStudent(id) {
@@ -2118,6 +2132,7 @@ button:focus:not(:focus-visible),
         renderAdminStudentsGrid();
         renderOverviewStats();
         updateAuthorDropdowns();
+        syncAdminToLocalCache();
         showToast('🗑️ 小艺术家档案已移除！');
       }
     }
@@ -2171,9 +2186,7 @@ button:focus:not(:focus-visible),
       const selectorBox = document.getElementById('themeArtworkSelectorBox');
       if (!selectorBox) return;
 
-      const arts = (adminArtworks && adminArtworks.length > 0) 
-        ? adminArtworks 
-        : (typeof initialArtworks !== 'undefined' ? initialArtworks : []);
+      const arts = adminArtworks || [];
 
       if (arts.length === 0) {
         selectorBox.innerHTML = '<div class="col-span-full py-4 text-center text-stone-500 text-xs">作品库中暂无画作，可在正文中直接插入画作照片</div>';
@@ -2816,6 +2829,7 @@ button:focus:not(:focus-visible),
 
       renderAdminThemesGrid();
       renderOverviewStats();
+      syncAdminToLocalCache();
       switchAdminTab('themes');
     }
 
@@ -2868,6 +2882,7 @@ button:focus:not(:focus-visible),
         adminNotes = adminNotes.filter(n => n.id !== id);
         renderAdminNotesGrid();
         renderOverviewStats();
+        syncAdminToLocalCache();
         if (window.galleryCloud) {
           await window.galleryCloud.deleteStickyNote(id);
         }
