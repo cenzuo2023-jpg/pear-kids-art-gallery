@@ -763,90 +763,71 @@
   <!-- ========================================================================= -->
   <!-- 页面视图：【课程作品集沉浸式画卷单篇详情】(Course Album Detail View) -->
   <!-- ========================================================================= -->
-  <div id="view-album-detail" class="view-page flex-1 flex flex-col z-10 hidden">
-    <!-- 1. 顶部返回栏 -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-8 pt-4 pb-2 w-full flex items-center justify-between">
+    <div id="view-album-detail" class="view-page flex-1 flex flex-col z-10 hidden">
+    <!-- 顶部返回条 -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-2 w-full">
       <button 
         onclick="navigateTo('albums')" 
-        class="inline-flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-[#10E57A] transition-colors cursor-pointer font-medium"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 hover:text-emerald-600 dark:hover:text-[#10E57A] text-xs sm:text-sm font-bold transition-all cursor-pointer border border-black/5 dark:border-white/10 shadow-sm"
       >
-        <span>← 返回全部课程作品集</span>
+        <span>←</span>
+        <span>返回全部课程作品集</span>
       </button>
+    </section>
 
-      <!-- 视图切换模式：风琴长卷连环 vs 课堂群展网格 -->
-      <div class="flex items-center gap-1 bg-white/60 dark:bg-[#111C15] p-1 rounded-xl border border-black/[0.04] dark:border-white/[0.08] text-xs">
-        <button id="albumViewModeStream" onclick="switchAlbumDetailViewMode('stream')" class="px-2.5 py-1 rounded-lg font-bold transition-all bg-emerald-500/15 text-emerald-800 dark:text-[#10E57A]">
-          📜 风琴长卷
-        </button>
-        <button id="albumViewModeGrid" onclick="switchAlbumDetailViewMode('grid')" class="px-2.5 py-1 rounded-lg font-bold transition-all text-stone-500 hover:text-stone-900 dark:hover:text-stone-100">
-          🖼️ 课堂群展
-        </button>
-      </div>
-    </div>
-
-    <!-- 2. 课题导言与课堂概览 -->
-    <section class="max-w-6xl mx-auto px-4 sm:px-8 pt-4 pb-6 w-full space-y-6">
-      <div class="space-y-3">
-        <div class="flex flex-wrap items-center gap-2">
-          <span id="albumDetailTagBadge" class="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/15 text-emerald-800 dark:text-[#10E57A]">
-            🎨 创想班 · 周末主题工坊
-          </span>
-          <span id="albumDetailDateBadge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-black/[0.04] dark:bg-white/[0.06] text-stone-600 dark:text-stone-300">
-            2026.08.16
-          </span>
-          <span id="albumDetailCountBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-black/[0.04] dark:bg-white/[0.06] text-stone-600 dark:text-stone-300">
-            共收录 6 幅共创画作
-          </span>
+    <!-- 课题核心信息 Banner -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 py-4 w-full">
+      <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-emerald-950/30 via-stone-900/40 to-teal-950/20 border border-emerald-500/20 backdrop-blur-xl relative overflow-hidden space-y-4">
+        <div class="flex flex-wrap items-center gap-2.5 text-xs font-bold text-emerald-400">
+          <span id="albumDetailClassName" class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300">创想班</span>
+          <span id="albumDetailDate" class="px-3 py-1 rounded-full bg-white/5 text-stone-300 font-mono">2026.08</span>
+          <span id="albumDetailAgeGroup" class="px-3 py-1 rounded-full bg-white/5 text-stone-300">6-8岁</span>
+          <span id="albumDetailCountBadge" class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 font-bold">共收录 6 幅画作</span>
         </div>
 
-        <h1 id="albumDetailTitle" class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-stone-950 dark:text-stone-50 leading-tight">
-          在莫奈的花园里：水粉光影与色彩实验
+        <h1 id="albumDetailTitle" class="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+          课程作品集标题
         </h1>
 
-        <p id="albumDetailSubTitle" class="text-sm sm:text-base font-mono text-stone-400">
-          Monet's Garden Color & Light Workshop
-        </p>
-      </div>
-
-      <!-- 课题教学目标与导语引言呼出框 -->
-      <div class="p-5 sm:p-6 rounded-3xl bg-emerald-50/60 dark:bg-[#111C15] border border-emerald-500/20 space-y-3 shadow-sm">
-        <div class="flex items-center gap-2 text-xs font-black text-emerald-800 dark:text-[#10E57A]">
-          <span>💡</span>
-          <span>美育课题探索导语与教学目标</span>
-        </div>
-        <p id="albumDetailIntro" class="text-sm sm:text-base leading-[1.9] text-stone-800 dark:text-stone-200 font-normal">
-          在这一堂课上，我们带着孩子们一起走进法国吉维尼小镇的莫奈花园。孩子们观察睡莲在不同光线下的跳跃，用大笔触的色彩并置感受印象派的呼吸与诗意。
-        </p>
-        <div id="albumDetailNotesBox" class="pt-3 border-t border-emerald-500/15 text-xs text-stone-600 dark:text-emerald-300/80 italic">
-          <span class="font-bold not-italic">👩‍🏫 导师课后手记：</span>
-          <span id="albumDetailNotes">本期学员对冷暖色调的过渡有了极具个性的直觉表达...</span>
+        <!-- 课题教学目标与导语引言 -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/10 space-y-2.5">
+          <div class="flex items-center gap-2 text-xs font-bold text-teal-300">
+            <span>💡</span>
+            <span>课题探索导语与美育目标：</span>
+          </div>
+          <p id="albumDetailIntro" class="text-xs sm:text-sm text-stone-200 leading-relaxed font-sans">
+            课程导语与教学目标说明...
+          </p>
+          <div id="albumDetailNotesBox" class="pt-2.5 border-t border-white/10 text-xs text-stone-400 italic hidden">
+            <span class="font-bold not-italic text-emerald-400">👩‍🏫 导师课后手记：</span>
+            <span id="albumDetailNotes" class="text-stone-300"></span>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- 3. 画作展示区：风琴长卷画廊 vs 课堂群展网格 -->
-    <main class="flex-1 max-w-6xl mx-auto px-4 sm:px-8 pb-24 w-full">
-      <!-- 模式一：顺滑横向风琴长卷画廊 -->
-      <div id="albumStreamView" class="w-full">
-        <div class="flex items-center justify-between pb-3 text-xs text-stone-500 font-bold">
-          <span>👈 左右横向滑动翻阅全部画作 👉</span>
-          <span id="albumStreamCounter">共 6 幅作品</span>
+    <!-- 🌟 画作展示区：每行 3 张、依次往下排的精美画作矩阵 (点击放大看大图) -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-8 pb-24 w-full">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 pb-2 border-b border-black/[0.05] dark:border-white/[0.08]">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🎨</span>
+          <h2 class="text-lg sm:text-xl font-black text-stone-950 dark:text-stone-50">本节课学员创作全集</h2>
+          <span class="text-xs text-emerald-600 dark:text-[#10E57A] font-bold font-mono" id="albumArtworksTotalBadge">(6 幅作品)</span>
         </div>
-        <div id="albumAccordionStream" class="accordion-stream-track no-scrollbar">
-          <!-- JS 动态渲染风琴折叠画卷卡片 -->
+        <div class="text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1.5 font-bold">
+          <span>🔍 点击任意单张作品即可全屏放大鉴赏</span>
         </div>
       </div>
 
-      <!-- 模式二：课堂群展矩阵大网格 -->
-      <div id="albumGridView" class="hidden w-full">
-        <div id="albumArtworksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
-          <!-- JS 动态渲染全部画作卡片 -->
-        </div>
+      <!-- 每行 3 张标准向下排列大网格 (大屏 3 列 / 平板 2 列 / 手机 1 列) -->
+      <div id="albumArtworksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
+        <!-- JS 动态渲染单幅画作卡片 -->
       </div>
     </main>
   </div>
 
-<!-- ========================================================================= -->
+  <!-- ========================================================================= -->
+  <!-- ========================================================================= -->
   <div id="view-themes" class="view-page flex-1 flex flex-col z-10 hidden">
     <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-6 sm:pt-10 pb-24 w-full space-y-8">
       
@@ -1971,77 +1952,96 @@
       });
 
       const generateCardHtml = (album) => {
-        const cover = album.coverImage || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1200&auto=format&fit=crop&q=85';
-        const artworksList = album.artworks || [];
+        const cover = album.coverImage || (album.artworks && album.artworks[0] ? album.artworks[0].image : 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1200&auto=format&fit=crop&q=85');
+        const artworksList = Array.isArray(album.artworks) ? album.artworks : [];
         const artCount = artworksList.length || (album.artworkCount || 0);
 
         // 提取参与该堂课的小朋友花名册（前4位）
         const authors = Array.from(new Set(artworksList.map(a => a.author))).filter(Boolean);
         const authorChips = authors.slice(0, 4).map(name => `
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
             <span>🎨</span><span>${name}</span>
           </span>
         `).join('') + (authors.length > 4 ? `<span class="text-[10px] text-stone-400 font-bold px-1">+${authors.length - 4}位</span>` : '');
 
-        // 风琴折页扇形预览图 (后层图)
-        const layer1Img = artworksList[1] ? artworksList[1].image : cover;
-        const layer2Img = artworksList[2] ? artworksList[2].image : cover;
+        // 提取底层折页预览图 (保证各层均有清晰画面)
+        const layer1Img = artworksList[1] ? artworksList[1].image : (artworksList[0] ? artworksList[0].image : cover);
+        const layer2Img = artworksList[2] ? artworksList[2].image : (artworksList[0] ? artworksList[0].image : cover);
 
         return `
           <article 
-            class="accordion-book-card relative rounded-3xl bg-white dark:bg-[#111D15] border border-black/[0.05] dark:border-white/10 p-4 sm:p-5 flex flex-col justify-between cursor-pointer group transition-all duration-500 hover:shadow-2xl hover:border-emerald-500/40"
+            class="accordion-book-card relative rounded-3xl bg-[#111D15] border border-white/10 p-4 sm:p-5 flex flex-col justify-between cursor-pointer group hover:border-emerald-500/50 shadow-lg hover:shadow-2xl h-full transition-all duration-300"
             onclick="openCourseAlbumDetail('${album.id}')"
           >
-            <!-- 顶部：风琴画册立体封面与折页微展图 -->
-            <div class="relative w-full aspect-[16/10] rounded-2xl mb-4 select-none">
-              <!-- 底层折页 2 -->
-              <div class="accordion-layer accordion-layer-2 bg-stone-900 border border-white/10">
-                <img src="${layer2Img}" class="w-full h-full object-cover" loading="lazy" />
+            <div>
+              <!-- 顶部：手风琴折页立体封面区 (严格固定 16:10 比例) -->
+              <div class="accordion-cover-wrapper mb-4 select-none">
+                <!-- 左侧风琴书脊折痕 -->
+                <div class="accordion-spine"></div>
+                
+                <!-- 底层折页 2 (后展) -->
+                <div class="accordion-layer accordion-layer-2 bg-stone-900">
+                  <img src="${layer2Img}" class="w-full h-full object-cover" loading="lazy" />
+                </div>
+
+                <!-- 中间折页 1 (中展) -->
+                <div class="accordion-layer accordion-layer-1 bg-stone-900">
+                  <img src="${layer1Img}" class="w-full h-full object-cover" loading="lazy" />
+                </div>
+
+                <!-- 主封面 (前盖) -->
+                <div class="accordion-main-cover">
+                  <img src="${cover}" alt="${album.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+                  
+                  <!-- 封面渐变遮罩与徽章 -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30 flex flex-col justify-between p-3.5 pl-6">
+                    <div class="flex items-center justify-between">
+                      <span class="px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-[10px] font-mono text-emerald-400 font-bold border border-white/15">
+                        📖 手风琴折页画册
+                      </span>
+                      <span class="px-2 py-0.5 rounded-md bg-[#10E57A] text-stone-950 text-[10px] font-black shadow-md">
+                        收录 ${artCount} 幅画作
+                      </span>
+                    </div>
+
+                    <div class="flex items-center justify-between text-white text-[11px] font-bold">
+                      <span class="px-2.5 py-0.5 rounded-full bg-black/70 backdrop-blur-md border border-white/15">
+                        ${album.className || '创想班'} · ${album.date || '2026'}
+                      </span>
+                      <span class="text-emerald-300 text-[10px] drop-shadow flex items-center gap-0.5">
+                        <span>展开画册</span><span>↗</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <!-- 中间折页 1 -->
-              <div class="accordion-layer accordion-layer-1 bg-stone-900 border border-white/10">
-                <img src="${layer1Img}" class="w-full h-full object-cover" loading="lazy" />
-              </div>
-              <!-- 主封面 -->
-              <div class="relative z-10 w-full h-full rounded-2xl overflow-hidden shadow-lg bg-stone-900 border border-black/[0.06] dark:border-white/15">
-                <img src="${cover}" alt="${album.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end justify-between p-3.5">
-                  <span class="px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-bold text-white border border-white/15">
-                    ${album.className || '创想班'} · ${album.date || ''}
-                  </span>
-                  <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/90 text-[10px] font-black text-stone-950 shadow">
-                    📚 ${artCount}幅画作
-                  </span>
+
+              <!-- 中间：课题标题与导语 (固定高度排版，确保整行三张卡片完全平齐工整) -->
+              <div class="space-y-2">
+                <h3 class="text-base sm:text-lg font-black text-white group-hover:text-emerald-400 transition-colors leading-snug line-clamp-1">
+                  ${album.title}
+                </h3>
+                <p class="text-xs text-stone-300 line-clamp-2 leading-relaxed min-h-[36px]">
+                  ${album.introSummary || '探索色彩与材料的奇妙实验，记录一堂课的童心创想与师生互动...'}
+                </p>
+
+                <!-- 学员共创花名册 -->
+                <div class="flex flex-wrap items-center gap-1 pt-1 min-h-[26px]">
+                  ${authorChips}
                 </div>
               </div>
             </div>
 
-            <!-- 中间：课题标题与导语 -->
-            <div class="space-y-2.5 flex-1">
-              <h3 class="text-base sm:text-lg font-black text-stone-950 dark:text-stone-50 group-hover:text-emerald-600 dark:group-hover:text-[#10E57A] transition-colors leading-snug line-clamp-2">
-                ${album.title}
-              </h3>
-              <p class="text-xs text-stone-500 dark:text-stone-400 line-clamp-2 leading-relaxed">
-                ${album.introSummary || '探索色彩与材料的奇妙实验...'}
-              </p>
-
-              <!-- 学员共创花名册 -->
-              <div class="flex flex-wrap items-center gap-1 pt-1">
-                ${authorChips}
-              </div>
-            </div>
-
             <!-- 底部操作按钮 -->
-            <div class="pt-4 mt-3 border-t border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between text-xs">
-              <span class="text-stone-400 font-mono text-[11px]">${album.tag || '课程作品集'}</span>
-              <span class="font-black text-emerald-600 dark:text-[#10E57A] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                <span>翻阅画册</span><span>→</span>
+            <div class="pt-3.5 mt-3 border-t border-white/[0.08] flex items-center justify-between text-xs">
+              <span class="text-stone-400 font-mono text-[11px]">${album.tag || '🎨 主题创作工坊'}</span>
+              <span class="font-black text-[#10E57A] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>翻阅风琴画卷</span><span>→</span>
               </span>
             </div>
           </article>
         `;
       };
-
       if (grid) {
         if (filtered.length === 0) {
           grid.innerHTML = '';
@@ -2092,216 +2092,126 @@
     }
 
     function renderAlbumDetail(album) {
-      currentActiveAlbum = album;
       if (!album) return;
+      currentActiveAlbumData = album;
 
-      document.getElementById('albumDetailTitle').textContent = album.title || '';
-      document.getElementById('albumDetailSubTitle').textContent = album.subTitle || album.subtitle || '';
-      document.getElementById('albumDetailTagBadge').textContent = album.tag || `${album.className || '美育班'} · 主题工坊`;
-      document.getElementById('albumDetailDateBadge').textContent = album.date || '2026';
+      document.getElementById('albumDetailTitle').textContent = album.title;
+      document.getElementById('albumDetailIntro').textContent = album.introSummary || album.intro || '本课题记录了孩子们在课堂上的灵感迸发与纯真探索。';
+      document.getElementById('albumDetailClassName').textContent = album.className || '创想班';
+      document.getElementById('albumDetailDate').textContent = album.date || '2026';
+      document.getElementById('albumDetailAgeGroup').textContent = (album.ageGroup ? album.ageGroup + '岁' : '全龄段');
       
-      const artworksList = album.artworks || [];
-      document.getElementById('albumDetailCountBadge').textContent = `共收录 ${artworksList.length} 幅共创画作`;
-      document.getElementById('albumStreamCounter').textContent = `共 ${artworksList.length} 幅作品`;
-      document.getElementById('albumDetailIntro').textContent = album.introSummary || '在这一堂课上，孩子们通过画笔释放无限创想...';
-      
-      const notesEl = document.getElementById('albumDetailNotes');
+      const countBadge = document.getElementById('albumDetailCountBadge');
+      const artworksList = Array.isArray(album.artworks) ? album.artworks : [];
+      if (countBadge) countBadge.textContent = `共收录 ${artworksList.length} 幅画作`;
+
+      const totalBadge = document.getElementById('albumArtworksTotalBadge');
+      if (totalBadge) totalBadge.textContent = `(${artworksList.length} 幅作品)`;
+
       const notesBox = document.getElementById('albumDetailNotesBox');
-      if (album.teacherNotes) {
-        if (notesEl) notesEl.textContent = album.teacherNotes;
-        if (notesBox) notesBox.classList.remove('hidden');
-      } else {
-        if (notesBox) notesBox.classList.add('hidden');
+      const notesEl = document.getElementById('albumDetailNotes');
+      if (album.teacherNotes && notesBox && notesEl) {
+        notesBox.classList.remove('hidden');
+        notesEl.textContent = album.teacherNotes;
+      } else if (notesBox) {
+        notesBox.classList.add('hidden');
       }
 
-      // 1. 渲染横向风琴翻折画卷 (Accordion Stream)
-      const streamTrack = document.getElementById('albumAccordionStream');
-      if (streamTrack) {
-        streamTrack.innerHTML = artworksList.map((art, idx) => `
-          <div class="accordion-stream-item contemporary-card p-3 rounded-2xl flex flex-col justify-between cursor-pointer group select-none" onclick="openAlbumArtworkModal('${art.id}', '${album.id}')">
-            <div class="artwork-frame aspect-[4/3] relative mb-2.5 rounded-xl overflow-hidden bg-stone-900">
-              <span class="artwork-category-badge text-[9px] px-1.5 py-0.5 bg-black/60 text-emerald-400">第 ${idx + 1} 幅 · ${art.author}</span>
-              <img src="${art.image}" alt="${art.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-            </div>
+      const grid = document.getElementById('albumArtworksGrid');
+      if (!grid) return;
 
-            <div class="space-y-1.5">
-              <div class="flex items-center justify-between">
-                <h4 class="font-black text-xs sm:text-sm text-stone-950 dark:text-stone-50 truncate group-hover:text-emerald-600 dark:group-hover:text-[#10E57A] transition-colors">${art.title}</h4>
-                <span class="text-[10px] font-bold text-teal-600 dark:text-[#10E57A] px-1.5 py-0.2 rounded bg-emerald-500/10">${art.author}</span>
-              </div>
-              <p class="text-[11px] text-stone-500 dark:text-stone-400 line-clamp-2 leading-relaxed italic">
-                “${art.comment || '色彩与线条充满童趣直觉表达'}”
-              </p>
-            </div>
-          </div>
-        `).join('');
+      if (artworksList.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-16 text-center text-stone-400 text-sm bg-stone-900/30 rounded-3xl border border-white/5">暂无画作照片</div>';
+        return;
       }
 
-      // 2. 渲染课堂群展矩阵网格 (Curated Grid)
-      const gridView = document.getElementById('albumArtworksGrid');
-      if (gridView) {
-        gridView.innerHTML = artworksList.map((art, idx) => `
-          <article class="contemporary-card p-3 sm:p-3.5 rounded-2xl flex flex-col justify-between cursor-pointer group select-none" onclick="openAlbumArtworkModal('${art.id}', '${album.id}')">
-            <div class="artwork-frame aspect-[4/3] relative mb-3 rounded-xl overflow-hidden bg-stone-900">
-              <span class="artwork-category-badge text-[9px] px-1.5 py-0.5">${art.author} (${art.ageGroup ? art.ageGroup + '岁' : '学员'})</span>
-              <img src="${art.image}" alt="${art.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+      // 渲染每行 3 张标准向下排列的画作卡片 (固定 4:3 比例，带专属深度说明与点击放大)
+      grid.innerHTML = artworksList.map((art, idx) => {
+        const title = art.title || `创作作品 #${idx + 1}`;
+        const author = art.author || '学员';
+        const comment = art.comment || '色彩饱满，线条富有自由创想。';
+        const imgUrl = art.image || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1200&auto=format&fit=crop&q=85';
+
+        return `
+          <article 
+            class="album-art-card group rounded-3xl bg-white dark:bg-[#111D15] border border-black/[0.06] dark:border-white/10 p-4 sm:p-5 flex flex-col justify-between cursor-pointer hover:border-emerald-500/40 shadow-sm hover:shadow-2xl transition-all duration-300"
+            onclick="openAlbumArtworkModal(${idx})"
+          >
+            <div>
+              <!-- 顶部：严格固定 4:3 比例的画作照片容器 -->
+              <div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-stone-900 border border-black/[0.05] dark:border-white/10 mb-3.5 group-hover:scale-[1.01] transition-transform duration-300 shadow">
+                <img src="${imgUrl}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+                
+                <!-- 序号徽章与学员标签 -->
+                <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                  <span class="w-6 h-6 rounded-full bg-black/75 backdrop-blur-md text-emerald-400 font-mono text-xs font-black flex items-center justify-center border border-white/15 shadow">
+                    ${idx + 1}
+                  </span>
+                  <span class="px-2.5 py-0.5 rounded-full bg-black/75 backdrop-blur-md text-white text-[11px] font-bold border border-white/15 shadow flex items-center gap-1">
+                    <span>🎨</span><span>${author}</span>
+                  </span>
+                </div>
+
+                <!-- 悬浮点击放大提示蒙层 -->
+                <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                  <span class="px-3.5 py-1.5 rounded-full bg-[#10E57A] text-stone-950 text-xs font-black shadow-lg flex items-center gap-1.5 transform scale-90 group-hover:scale-100 transition-transform">
+                    <span>🔍</span><span>点击放大全屏鉴赏</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- 中间：画作标题与导师观察说明 -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <h3 class="font-black text-base text-stone-950 dark:text-stone-50 group-hover:text-emerald-600 dark:group-hover:text-[#10E57A] transition-colors truncate">
+                    ${title}
+                  </h3>
+                  <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold flex-shrink-0">
+                    学员原作
+                  </span>
+                </div>
+
+                <!-- 单张作品专属深度说明与导师点评板块 -->
+                <div class="p-3 rounded-2xl bg-emerald-500/[0.06] dark:bg-stone-900/80 border border-emerald-500/15 dark:border-white/5 text-xs text-stone-700 dark:text-stone-300 leading-relaxed italic font-sans min-h-[58px]">
+                  “${comment}”
+                </div>
+              </div>
             </div>
 
-            <div class="space-y-1">
-              <div class="flex items-center justify-between">
-                <h4 class="font-black text-sm text-stone-950 dark:text-stone-50 truncate group-hover:text-emerald-600 dark:group-hover:text-[#10E57A] transition-colors">${art.title}</h4>
-                <span class="text-xs font-bold text-emerald-600 dark:text-[#10E57A]">${art.author}</span>
-              </div>
-              <p class="text-xs text-stone-500 dark:text-stone-400 line-clamp-2 leading-relaxed">
-                ${art.comment || '极具张力与感染力的少儿画作'}
-              </p>
+            <!-- 底部：点击放大交互条 -->
+            <div class="pt-3 mt-3 border-t border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between text-xs">
+              <span class="text-stone-400 text-[11px]">收录于《${album.title}》</span>
+              <span class="text-emerald-600 dark:text-[#10E57A] font-bold flex items-center gap-1 group-hover:underline">
+                <span>放大看大图</span><span>↗</span>
+              </span>
             </div>
           </article>
-        `).join('');
-      }
+        `;
+      }).join('');
 
-      switchAlbumDetailViewMode('stream');
       lucide.createIcons();
     }
 
-    function openAlbumArtworkModal(artId, albumId) {
-      if (!currentActiveAlbum) return;
-      const art = (currentActiveAlbum.artworks || []).find(a => String(a.id) === String(artId));
-      if (art) {
-        // 构造艺术品对象供通用 artModal 鉴赏
-        const tempArt = {
-          id: art.id,
-          title: art.title,
-          author: art.author,
-          ageGroup: art.ageGroup || currentActiveAlbum.ageGroup || '6-8',
-          categoryName: '课程探索作品',
-          date: currentActiveAlbum.date || '2026',
-          image: art.image,
-          images: [art.image],
-          story: `${currentActiveAlbum.title} · 课堂探索共创画作`,
-          teacherComment: art.comment || currentActiveAlbum.teacherNotes || '充满纯真灵气的美育表达。'
-        };
-        openCustomArtModal(tempArt);
-      }
+    function openAlbumArtworkModal(idx) {
+      if (!currentActiveAlbumData || !currentActiveAlbumData.artworks || !currentActiveAlbumData.artworks[idx]) return;
+      const art = currentActiveAlbumData.artworks[idx];
+      const customArtObj = {
+        id: art.id || ('alb-art-' + idx),
+        title: art.title || `画作 #${idx + 1}`,
+        author: art.author || '学员',
+        ageGroup: currentActiveAlbumData.ageGroup || '6-8',
+        date: currentActiveAlbumData.date || '2026',
+        categoryName: currentActiveAlbumData.title || '课程作品集',
+        image: art.image,
+        images: [art.image],
+        story: art.comment || '一堂充满惊喜的少儿美育艺术探索之旅。',
+        teacherComment: art.comment || (currentActiveAlbumData.teacherNotes || '用纯真笔触与独特视角表现出属于孩子的艺术世界。'),
+        audioDuration: '00:28'
+      };
+      openArtModal(customArtObj);
     }
 
-    function openCustomArtModal(art) {
-      const modal = document.getElementById('artModal');
-      if (!modal || !art) return;
-
-      document.getElementById('modalImage').src = art.image;
-      document.getElementById('modalTitle').textContent = art.title;
-      document.getElementById('modalAuthorName').textContent = art.author;
-      document.getElementById('modalAuthorAgeGroup').textContent = getAgeGroupTag(art.ageGroup);
-      document.getElementById('modalDate').textContent = art.date || '2026';
-      document.getElementById('modalTeacherComment').textContent = art.teacherComment || '纯真灵气的艺术表达。';
-
-      currentModalArtwork = art;
-      modal.showModal();
-      lucide.createIcons();
-    }
-
-async function syncDataFromCloud() {
-      if (!window.galleryCloud) return;
-      try {
-        const [cloudArts, cloudStudents, cloudThemes, cloudNotes, cloudAlbums] = await Promise.all([
-          window.galleryCloud.getArtworks(),
-          window.galleryCloud.getStudents(),
-          window.galleryCloud.getThematicExhibitions(),
-          window.galleryCloud.getStickyNotes(),
-          window.galleryCloud.getCourseAlbums ? window.galleryCloud.getCourseAlbums() : Promise.resolve([])
-        ]);
-
-        if (Array.isArray(cloudAlbums) && cloudAlbums.length > 0) courseAlbums = cloudAlbums;
-
-        if (Array.isArray(cloudArts)) artworks = cloudArts;
-        if (Array.isArray(cloudStudents)) studentList = cloudStudents;
-        if (Array.isArray(cloudThemes)) themeExhibitions = cloudThemes;
-        if (Array.isArray(cloudNotes)) stickyNotes = cloudNotes;
-
-        renderCuratedCarousel();
-        renderThemesArchive();
-        renderGallery();
-        renderAlbums();
-        renderHall();
-        renderStickyWall();
-        lucide.createIcons();
-        console.log('🖼️ 前台展厅已同步 Supabase 云端数据: 画作', artworks.length, '件, 小艺术家', studentList.length, '位');
-      } catch (err) {
-        console.warn('云端数据读取异常:', err);
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      initTheme();
-      initBgm();
-      initAdminGateway();
-      setupLightDismiss();
-      startCarouselTimer();
-
-      // 🌟 1. 0毫秒极速瞬时同步渲染全部页面与板块（确保页面打开立即可见，无需等待网络）
-      renderCuratedCarousel();
-      renderGallery();
-      renderAlbums();
-      renderHall();
-      renderThemesArchive();
-      renderStickyWall();
-      lucide.createIcons();
-
-      // 🌟 2. 异步拉取云端最新数据并无缝重绘
-      try {
-        await syncDataFromCloud();
-      } catch (e) {
-        console.error('前台同步云端数据异常:', e);
-      }
-      lucide.createIcons();
-
-      // 初始化便签墙扫码直达二维码
-      initStickyQrCode();
-
-      // 扫码直达深链接解析 (画作详情 / 扫码贴便签)
-      const urlParams = new URLSearchParams(window.location.search);
-      const targetArtId = urlParams.get('art');
-      const postMode = urlParams.get('post') || urlParams.get('action') || urlParams.get('note');
-
-      if (targetArtId) {
-        setTimeout(() => {
-          openArtModal(targetArtId);
-        }, 600);
-      } else if (postMode === 'sticky' || postMode === '1' || postMode === 'new') {
-        // 📱 手机扫码贴便签：自动切换至便签墙页面并立即秒级弹开输入编辑框！
-        navigateTo('notes');
-        setTimeout(() => {
-          openNewStickyModal();
-          const authorInput = document.getElementById('stickyAuthorInput');
-          if (authorInput) authorInput.focus();
-        }, 350);
-      }
-
-      // 键盘左右箭头支持快速切换弹窗多视角照片
-      document.addEventListener('keydown', (e) => {
-        const artModal = document.getElementById('artModal');
-        if (artModal && artModal.open) {
-          if (e.key === 'ArrowLeft') {
-            e.preventDefault();
-            prevModalPhoto();
-          } else if (e.key === 'ArrowRight') {
-            e.preventDefault();
-            nextModalPhoto();
-          }
-        }
-      });
-    });
-
-    // ==========================================
-    // 🌟 首页顶部：主题特展焦点大轮播 (Thematic Exhibition Carousel)
-    // ==========================================
-    function getFeaturedThemes() {
-      if (!Array.isArray(themeExhibitions)) return [];
-      return themeExhibitions.filter(t => t && t.isInHero !== false);
-    }
-
-    function renderCuratedCarousel() {
+        function renderCuratedCarousel() {
       const box = document.getElementById('carouselSlidesBox');
       const indBox = document.getElementById('carouselIndicatorsBox');
       const activeThemes = getFeaturedThemes();
