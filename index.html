@@ -346,49 +346,44 @@
   <!-- ========================================================================= -->
   <div id="view-gallery" class="view-page hidden flex-1 flex flex-col z-10">
     <!-- 画作展厅专属 Header -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-4 w-full">
-      <div class="space-y-2 mb-6">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 text-emerald-700 dark:text-[#10E57A] text-[11px] sm:text-xs font-bold font-mono tracking-wider">
-          <span>🎨 原创作品展厅</span>
-          <span class="opacity-40">•</span>
-          <span>CONTEMPORARY SOLO ARTWORKS GALLERY</span>
-        </div>
-        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-stone-50 tracking-tight flex items-center gap-2.5">
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-10 sm:pt-14 pb-6 w-full">
+      <div class="space-y-3.5 mb-8 text-left">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-stone-50 tracking-tight flex items-center gap-3">
           <span>少儿当代画作展厅</span>
           <span class="text-sm sm:text-base font-normal text-stone-400 font-mono" id="soloGalleryTotalBadge">(共 9 幅原作)</span>
         </h1>
-        <p class="text-xs sm:text-sm md:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed font-normal">
+        <p class="text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed font-normal">
           这里独立收录了小艺术家们在探索过程中创作的原生力作。不预设标准答案，不教成人化套路，每一幅画都是孩子与真实世界最纯粹、最珍贵的童心对话。
         </p>
       </div>
 
-      <!-- 控制栏：年龄段胶囊分段器 + 实时智能搜索框 -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-6 border-b border-black/[0.06] dark:border-white/[0.08]">
+      <!-- 控制栏：年龄段胶囊分段器 + 实时智能搜索框 (独立一行排布) -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 pb-6 border-b border-black/[0.05] dark:border-white/[0.08]">
         <!-- 年龄段分段控制器 4 格自适应排版 -->
-        <div class="grid grid-cols-4 sm:flex items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto py-1">
-          <button onclick="setAgeFilter('all')" class="age-tab active h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap font-extrabold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="all">
+        <div class="grid grid-cols-4 sm:flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto py-1">
+          <button onclick="setAgeFilter('all')" class="age-tab active h-9 flex items-center justify-center gap-1.5 px-3 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap font-extrabold text-xs focus:outline-none w-full sm:w-auto" data-age="all">
             <span>🌈 全部</span>
           </button>
-          <button onclick="setAgeFilter('3-5')" class="age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="3-5">
+          <button onclick="setAgeFilter('3-5')" class="age-tab h-9 flex items-center justify-center gap-1.5 px-3 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-xs focus:outline-none w-full sm:w-auto" data-age="3-5">
             <span>🐣 3-5岁<span class="hidden md:inline"> · 启蒙</span></span>
           </button>
-          <button onclick="setAgeFilter('6-8')" class="age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="6-8">
+          <button onclick="setAgeFilter('6-8')" class="age-tab h-9 flex items-center justify-center gap-1.5 px-3 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-xs focus:outline-none w-full sm:w-auto" data-age="6-8">
             <span>🚀 6-8岁<span class="hidden md:inline"> · 创想</span></span>
           </button>
-          <button onclick="setAgeFilter('9-12')" class="age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="9-12">
+          <button onclick="setAgeFilter('9-12')" class="age-tab h-9 flex items-center justify-center gap-1.5 px-3 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-xs focus:outline-none w-full sm:w-auto" data-age="9-12">
             <span>🎨 9-12岁<span class="hidden md:inline"> · 创作</span></span>
           </button>
         </div>
 
         <!-- 极简精巧搜索框 -->
         <div class="relative w-full sm:w-auto flex items-center">
-          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500"></i>
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-500"></i>
           <input 
             type="text" 
             id="searchInput" 
             placeholder="🔍 搜索小作者名字、画作标题..." 
             oninput="handleSearch(this.value)"
-            class="w-full sm:w-64 pl-8 pr-3.5 h-9 bg-white dark:bg-[#15241B] border border-black/[0.06] dark:border-emerald-500/20 rounded-full text-xs text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all shadow-sm flex items-center"
+            class="w-full sm:w-64 pl-9 pr-4 h-9 bg-white dark:bg-[#15241B] border border-black/[0.06] dark:border-emerald-500/20 rounded-full text-xs text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all shadow-sm flex items-center"
           />
         </div>
       </div>
@@ -412,39 +407,31 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 页面视图二：>
-  <!-- 页面视图二：🌟【小艺术家名人堂 (Hall of Fame View)】 -->
-  <!-- ========================================================================= -->
   <!-- ========================================================================= -->
   <!-- 页面视图二：🌟【小艺术家名人堂 (Hall of Fame View)】 -->
   <!-- ========================================================================= -->
   <div id="view-hall" class="view-page hidden flex-1 flex flex-col z-10">
     <!-- 小艺术家名人堂专属 Header -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-4 w-full">
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-black/[0.05] dark:border-white/[0.08]">
-        <div class="space-y-2">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 text-emerald-700 dark:text-[#10E57A] text-[11px] sm:text-xs font-bold font-mono tracking-wider">
-            <span>👑 个人成长画廊</span>
-            <span class="opacity-40">•</span>
-            <span>LITTLE ARTISTS HALL OF FAME</span>
-          </div>
-          <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-stone-50 tracking-tight flex items-center gap-3">
-            <span>小艺术家名人堂</span>
-          </h1>
-          <p class="text-xs sm:text-sm md:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed font-normal">
-            每一位孩子都是天生的创想家！点击小画家的专属头像，即可进入他/她的个人成长画廊与作品集。
-          </p>
-        </div>
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-10 sm:pt-14 pb-6 w-full">
+      <div class="space-y-3.5 mb-8 text-left">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-stone-50 tracking-tight flex items-center gap-3">
+          <span>小艺术家名人堂</span>
+        </h1>
+        <p class="text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed font-normal">
+          每一位孩子都是天生的创想家！点击小画家的专属头像，即可进入他/她的个人成长画廊与作品集。
+        </p>
+      </div>
 
-        <!-- 名人堂内部按姓名搜索 -->
-        <div class="relative flex-shrink-0 w-full sm:w-auto">
-          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-500"></i>
+      <!-- 名人堂搜索控制栏 (独立一行排布) -->
+      <div class="flex items-center justify-between gap-4 pt-2 pb-6 border-b border-black/[0.05] dark:border-white/[0.08]">
+        <div class="relative w-full sm:w-auto">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-500"></i>
           <input 
             type="text" 
             id="hallSearchInput" 
             placeholder="🔍 寻找小画家名字..." 
             oninput="handleHallSearch(this.value)"
-            class="w-full sm:w-64 pl-9 pr-4 h-9 bg-white dark:bg-[#15241B] border border-black/[0.06] dark:border-emerald-500/20 rounded-full text-xs text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all shadow-sm flex items-center"
+            class="w-full sm:w-72 pl-9 pr-4 h-9 bg-white dark:bg-[#15241B] border border-black/[0.06] dark:border-emerald-500/20 rounded-full text-xs text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all shadow-sm flex items-center"
           />
         </div>
       </div>
@@ -694,52 +681,45 @@
   <!-- ========================================================================= -->
   <div id="view-notes" class="view-page flex-1 flex flex-col z-10 hidden">
     <!-- 美育便签墙专属 Header -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-4 w-full">
-      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-black/[0.05] dark:border-white/[0.08]">
-        <div class="space-y-2">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 text-emerald-700 dark:text-[#10E57A] text-[11px] sm:text-xs font-bold font-mono tracking-wider">
-            <span>🌈 自由共创社区</span>
-            <span class="opacity-40">•</span>
-            <span>PUBLIC COMMUNITY STICKY WALL</span>
-          </div>
-          <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-stone-50 tracking-tight">
-            留下一张童心便签，与艺术温暖相遇
-          </h1>
-          <p class="text-xs sm:text-sm md:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed font-normal">
-            这里是对所有家长、孩子与艺术爱好者完全开放的自由角。写下对少儿美育的感悟、给老师的寄语，或记录纯真童言，随时贴上大屏！
-          </p>
-        </div>
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-10 sm:pt-14 pb-6 w-full">
+      <div class="space-y-3.5 mb-8 text-left">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-stone-50 tracking-tight">
+          留下一张童心便签，与艺术温暖相遇
+        </h1>
+        <p class="text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed font-normal">
+          这里是对所有家长、孩子与艺术爱好者完全开放的自由角。写下对少儿美育的感悟、给老师的寄语，或记录纯真童言，随时贴上大屏！
+        </p>
+      </div>
 
-        <!-- 右侧操作区：📱 手机微信扫码直达 + 💻 网页直接贴便签 -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-shrink-0 w-full lg:w-auto">
-          <!-- 📱 手机扫码直达卡片 -->
-          <div class="flex items-center gap-3 p-2 rounded-2xl bg-white dark:bg-[#15241B] border border-black/[0.06] dark:border-emerald-500/20 shadow-sm">
-            <div class="w-14 h-14 rounded-xl bg-white p-1 shadow-sm border border-stone-200 dark:border-stone-700 flex-shrink-0 flex items-center justify-center overflow-hidden">
-              <img id="stickyWallQrCode" src="" alt="手机扫码贴便签" class="w-full h-full object-contain select-none" crossOrigin="anonymous">
+      <!-- 操作区：📱 手机微信扫码直达 + 💻 网页直接贴便签 (独立一行排布) -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2 pb-6 border-b border-black/[0.05] dark:border-white/[0.08]">
+        <!-- 📱 手机扫码直达卡片 -->
+        <div class="flex items-center gap-3.5 p-2.5 rounded-2xl bg-white dark:bg-[#15241B] border border-black/[0.06] dark:border-emerald-500/20 shadow-sm">
+          <div class="w-14 h-14 rounded-xl bg-white p-1 shadow-sm border border-stone-200 dark:border-stone-700 flex-shrink-0 flex items-center justify-center overflow-hidden">
+            <img id="stickyWallQrCode" src="" alt="手机扫码贴便签" class="w-full h-full object-contain select-none" crossOrigin="anonymous">
+          </div>
+          <div class="space-y-0.5 text-left pr-3">
+            <div class="text-xs font-black text-stone-900 dark:text-stone-100 flex items-center gap-1">
+              <span>📱 手机扫码贴便签</span>
             </div>
-            <div class="space-y-0.5 text-left pr-2">
-              <div class="text-xs font-black text-stone-900 dark:text-stone-100 flex items-center gap-1">
-                <span>📱 手机扫码贴便签</span>
-              </div>
-              <div class="text-[10px] text-emerald-600 dark:text-[#10E57A] font-bold">
-                扫码直接弹出输入框
-              </div>
-              <div class="text-[9px] text-stone-400 font-mono">
-                无需翻找 · 1秒实时上墙
-              </div>
+            <div class="text-[11px] text-emerald-600 dark:text-[#10E57A] font-bold">
+              扫码直接弹出输入框
+            </div>
+            <div class="text-[10px] text-stone-400 font-mono">
+              无需翻找 · 1秒实时上墙
             </div>
           </div>
-
-          <!-- 💻 网页端直接点击贴便签按钮 -->
-          <button 
-            onclick="openNewStickyModal()" 
-            class="h-14 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 font-black text-xs sm:text-sm shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 flex-shrink-0 cursor-pointer"
-          >
-            <span>✍️</span>
-            <span>网页直接贴便签</span>
-            <span>📌</span>
-          </button>
         </div>
+
+        <!-- 💻 网页端直接点击贴便签按钮 -->
+        <button 
+          onclick="openNewStickyModal()" 
+          class="h-14 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 font-black text-xs sm:text-sm shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer flex-shrink-0"
+        >
+          <span>✍️</span>
+          <span>网页直接贴便签</span>
+          <span>📌</span>
+        </button>
       </div>
     </section>
 
@@ -770,35 +750,30 @@
   <!-- 页面视图：【课程作品集大展厅】(Course Albums / Portfolios View) -->
   <!-- ========================================================================= -->
   <div id="view-albums" class="view-page flex-1 flex flex-col z-10 hidden">
-    <!-- 顶部横幅：风琴画册典藏库导言 -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-4 w-full">
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-black/[0.05] dark:border-white/[0.08]">
-        <div class="space-y-2">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 text-emerald-700 dark:text-[#10E57A] text-[11px] sm:text-xs font-bold font-mono tracking-wider">
-            <span>📚 课程作品集画册</span>
-            <span class="opacity-40">•</span>
-            <span>THEMATIC COURSE ALBUMS</span>
-          </div>
-          <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-stone-950 dark:text-stone-50">
-            一堂课的艺术探索画卷
-          </h1>
-          <p class="text-xs sm:text-sm md:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed font-normal">
-            以一堂课为一个探索单元，收录每期课题中学员们的集体画作。记录师生共创的场域氛围与百花齐放的童心奇想。
-          </p>
-        </div>
+    <!-- 课程作品集专属 Header -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-10 sm:pt-14 pb-6 w-full">
+      <div class="space-y-3.5 mb-8 text-left">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-stone-950 dark:text-stone-50">
+          一堂课的艺术探索画卷
+        </h1>
+        <p class="text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed font-normal">
+          以一堂课为一个探索单元，收录每期课题中学员们的集体画作。记录师生共创的场域氛围与百花齐放的童心奇想。
+        </p>
+      </div>
 
-        <!-- 课程作品集年龄段筛选控制器 -->
-        <div class="grid grid-cols-4 sm:flex items-center gap-1.5 sm:gap-2.5 w-full md:w-auto py-1">
-          <button onclick="setAlbumAgeFilter('all')" class="album-age-tab active h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap font-extrabold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="all">
+      <!-- 课程作品集年龄段筛选控制器 (独立一行排布) -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 pb-6 border-b border-black/[0.05] dark:border-white/[0.08]">
+        <div class="grid grid-cols-4 sm:flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto py-1">
+          <button onclick="setAlbumAgeFilter('all')" class="album-age-tab active h-9 flex items-center justify-center gap-1.5 px-3 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap font-extrabold text-xs focus:outline-none w-full sm:w-auto" data-age="all">
             <span>🌈 全部 (<span id="allAlbumsCountSpan">3</span>)</span>
           </button>
-          <button onclick="setAlbumAgeFilter('3-5')" class="album-age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="3-5">
+          <button onclick="setAlbumAgeFilter('3-5')" class="album-age-tab h-9 flex items-center justify-center gap-1.5 px-3 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-xs focus:outline-none w-full sm:w-auto" data-age="3-5">
             <span>🐣 3-5岁<span class="hidden md:inline"> · 启蒙</span></span>
           </button>
-          <button onclick="setAlbumAgeFilter('6-8')" class="album-age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="6-8">
+          <button onclick="setAlbumAgeFilter('6-8')" class="album-age-tab h-9 flex items-center justify-center gap-1.5 px-3 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-xs focus:outline-none w-full sm:w-auto" data-age="6-8">
             <span>🚀 6-8岁<span class="hidden md:inline"> · 创想</span></span>
           </button>
-          <button onclick="setAlbumAgeFilter('9-12')" class="album-age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="9-12">
+          <button onclick="setAlbumAgeFilter('9-12')" class="album-age-tab h-9 flex items-center justify-center gap-1.5 px-3 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-xs focus:outline-none w-full sm:w-auto" data-age="9-12">
             <span>🎨 9-12岁<span class="hidden md:inline"> · 创作</span></span>
           </button>
         </div>
@@ -892,24 +867,20 @@
   <!-- ========================================================================= -->
   <div id="view-themes" class="view-page flex-1 flex flex-col z-10 hidden">
     <!-- 特展专栏专属 Header -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-4 w-full">
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-black/[0.05] dark:border-white/[0.08]">
-        <div class="space-y-2">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 text-emerald-700 dark:text-[#10E57A] text-[11px] sm:text-xs font-bold font-mono tracking-wider">
-            <span>🏛️ 深度美育文库</span>
-            <span class="opacity-40">•</span>
-            <span>EXHIBITION ESSAYS & CURATORIAL ARCHIVE</span>
-          </div>
-          <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-stone-50 tracking-tight">
-            历期儿童美育主题特展与策展手记
-          </h1>
-          <p class="text-xs sm:text-sm md:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed font-normal">
-            记录每一个阶段孩子的创想脉络、探索主题与美育成长。每一期特展，都是一次关于自由与童真的艺术盛宴，所有特展文章均在此永久收录与沉淀。
-          </p>
-        </div>
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-10 sm:pt-14 pb-6 w-full">
+      <div class="space-y-3.5 mb-8 text-left">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-stone-50 tracking-tight">
+          历期儿童美育主题特展与策展手记
+        </h1>
+        <p class="text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed font-normal">
+          记录每一个阶段孩子的创想脉络、探索主题与美育成长。每一期特展，都是一次关于自由与童真的艺术盛宴，所有特展文章均在此永久收录与沉淀。
+        </p>
+      </div>
 
+      <!-- 控制操作栏 (独立一行排布) -->
+      <div class="flex items-center justify-between gap-4 pt-2 pb-6 border-b border-black/[0.05] dark:border-white/[0.08]">
         <!-- 主理人专属策划特展按键 (管理模式下可见) -->
-        <div class="flex items-center gap-3 flex-shrink-0">
+        <div class="flex items-center gap-3">
           <button 
             id="themeArchiveAdminBtn" 
             onclick="openThemeEditModal()" 
