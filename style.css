@@ -43,6 +43,64 @@ html.dark {
   box-sizing: border-box;
 }
 
+/* =========================================================================
+   🚫 彻底消除点击与聚焦时的浏览器默认黑边/黑框线 (No Black Focus Ring / Outline)
+   ========================================================================= */
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+*:focus {
+  outline: none !important;
+}
+
+*:focus-visible {
+  outline: none !important;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+summary,
+[role="button"],
+[tabindex] {
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  user-select: none;
+}
+
+button:focus,
+button:active,
+button:focus-visible,
+a:focus,
+a:active,
+a:focus-visible,
+.nav-tab:focus,
+.nav-tab:active,
+.nav-tab:focus-visible,
+.age-tab:focus,
+.age-tab:active,
+.age-tab:focus-visible,
+.contemporary-card:focus,
+.contemporary-card:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+button:focus:not(:focus-visible),
+.nav-tab:focus:not(:focus-visible),
+.age-tab:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
 body {
   background-color: var(--bg-main);
   color: var(--text-title);
