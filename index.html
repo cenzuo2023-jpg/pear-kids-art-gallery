@@ -277,10 +277,10 @@
       </div>
     </section>
 
-    <!-- 名人堂圆形头像网格展示区 (4列紧凑精致卡片排版) -->
+    <!-- 名人堂圆形头像网格展示区 (高密度多列精致紧凑卡片排版，单屏展示更多小艺术家) -->
     <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-8 pb-24 w-full">
-      <!-- 名人堂卡片网格 -->
-      <div id="hallGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+      <!-- 名人堂卡片网格 (大屏5~6列，平板3~4列，移动端2列) -->
+      <div id="hallGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5 sm:gap-4.5">
         <!-- 由 JS 渲染小艺术家名人堂卡片 -->
       </div>
     </main>
@@ -2822,42 +2822,42 @@
       grid.innerHTML = filtered.map(s => `
         <div 
           onclick="openStudentById('${s.id}')"
-          class="contemporary-card p-5 sm:p-6 flex flex-col items-center text-center cursor-pointer group"
+          class="contemporary-card p-3.5 sm:p-4 flex flex-col items-center text-center cursor-pointer group hover:-translate-y-1 transition-all duration-300"
         >
-          <!-- 1. 持续旋转青柠彩虹光环动态肖像 (无缝紧贴无留白，大尺寸清晰吸睛) -->
-          <div class="relative mb-4">
+          <!-- 1. 持续旋转青柠彩虹光环动态肖像 (严格保持原大尺寸头像不变) -->
+          <div class="relative mb-2.5">
             <div class="avatar-spinner-wrap w-24 h-24 sm:w-28 sm:h-28 shadow-lg">
               <div class="avatar-spinner-ring"></div>
               <div class="avatar-inner-box">
                 <img src="${s.avatar}" alt="${s.name}" class="avatar-inner-img">
               </div>
             </div>
-            <span class="avatar-crown-badge w-7 h-7 bg-gradient-to-tr from-emerald-400 via-teal-400 to-[#10E57A] text-stone-950 text-xs shadow-md ring-2 ring-white dark:ring-stone-900 font-bold">
+            <span class="avatar-crown-badge w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-tr from-emerald-400 via-teal-400 to-[#10E57A] text-stone-950 text-xs shadow-md ring-2 ring-white dark:ring-stone-900 font-bold flex items-center justify-center">
               👑
             </span>
           </div>
 
-          <!-- 2. 小艺术家姓名与年龄班级 -->
-          <h3 class="font-black text-lg text-stone-950 dark:text-stone-100 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors flex items-center gap-1">
+          <!-- 2. 小艺术家姓名与年龄班级 (严格保持姓名 text-lg 大小不变) -->
+          <h3 class="font-black text-lg text-stone-950 dark:text-stone-100 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors flex items-center justify-center gap-1">
             <span>${s.name}</span>
             <span class="text-xs">✨</span>
           </h3>
 
-          <div class="flex items-center gap-1.5 mt-1.5 text-xs">
-            <span class="bg-emerald-500/15 text-emerald-800 dark:bg-emerald-500/20 dark:text-[#10E57A] px-2.5 py-0.5 rounded-full font-extrabold text-[11px]">${s.age}</span>
-            <span class="text-stone-400 font-mono text-[11px]">${s.className}</span>
+          <div class="flex items-center justify-center gap-1 mt-1 text-xs flex-wrap">
+            <span class="bg-emerald-500/15 text-emerald-800 dark:bg-emerald-500/20 dark:text-[#10E57A] px-2 py-0.5 rounded-full font-extrabold text-[10px] whitespace-nowrap">${s.age}</span>
+            <span class="text-stone-400 font-mono text-[10px] truncate max-w-[100px]">${s.className}</span>
           </div>
 
-          <!-- 3. 艺术家简介/名言 (深翠温润气泡框，与绿色主题高度统一) -->
-          <p class="text-[11px] sm:text-xs text-stone-700 dark:text-emerald-100/90 line-clamp-2 mt-3 leading-relaxed italic font-medium bg-emerald-50/70 dark:bg-emerald-950/40 dark:border dark:border-emerald-500/20 p-2.5 rounded-xl">
-            “${s.bio}”
+          <!-- 3. 艺术家简介/名言 (紧凑型气泡框，保持精致不占用过多垂直空间) -->
+          <p class="text-[10px] text-stone-600 dark:text-emerald-100/80 line-clamp-1 mt-2 leading-tight italic font-medium bg-emerald-50/70 dark:bg-emerald-950/40 dark:border dark:border-emerald-500/15 px-2 py-1 rounded-lg w-full text-center truncate">
+            “${s.bio || '小小创想家'}”
           </p>
 
-          <!-- 4. 关联作品按钮 -->
-          <div class="mt-4 pt-3 w-full flex items-center justify-between text-xs font-bold">
-            <span class="text-stone-400 dark:text-stone-400 font-mono text-[10px]">收录 ${s.actualCount} 幅画作</span>
-            <span class="text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-all flex items-center gap-0.5 font-extrabold text-xs">
-              进入展厅 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          <!-- 4. 关联作品底部栏 -->
+          <div class="mt-2.5 pt-2 border-t border-black/[0.04] dark:border-white/[0.06] w-full flex items-center justify-between text-xs font-bold">
+            <span class="text-stone-400 dark:text-stone-400 font-mono text-[9px]">收录 ${s.actualCount} 幅</span>
+            <span class="text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-all flex items-center gap-0.5 font-extrabold text-[10px]">
+              进入展厅 <i data-lucide="arrow-right" class="w-3 h-3"></i>
             </span>
           </div>
         </div>
