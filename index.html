@@ -75,37 +75,45 @@
       <!-- 右侧整体操作区：核心导航按钮 + 🎵背景音乐 + 🌓模式切换 (全部靠右紧密排布) -->
       <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0 overflow-x-auto no-scrollbar py-1">
         <!-- 核心页面独立分体式导航按钮 -->
-        <nav class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        <nav class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <button 
             id="nav-tab-gallery" 
             onclick="navigateTo('gallery')" 
-            class="nav-tab active flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4.5 py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
+            class="nav-tab active flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
-            <span class="text-sm">🖼️</span>
+            <span class="text-xs sm:text-sm">🖼️</span>
             <span><span class="hidden sm:inline">作品</span>展厅</span>
+          </button>
+          <button 
+            id="nav-tab-themes" 
+            onclick="navigateTo('themes')" 
+            class="nav-tab flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
+          >
+            <span class="text-xs sm:text-sm">🎨</span>
+            <span><span class="hidden sm:inline">特展</span>专栏</span>
           </button>
           <button 
             id="nav-tab-hall" 
             onclick="navigateTo('hall')" 
-            class="nav-tab flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4.5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
+            class="nav-tab flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
-            <span class="text-sm">👑</span>
+            <span class="text-xs sm:text-sm">👑</span>
             <span><span class="hidden sm:inline">小艺术家</span>名人堂</span>
           </button>
           <button 
             id="nav-tab-notes" 
             onclick="navigateTo('notes')" 
-            class="nav-tab flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4.5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
+            class="nav-tab flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
-            <span class="text-sm">📝</span>
+            <span class="text-xs sm:text-sm">📝</span>
             <span><span class="hidden sm:inline">美育</span>便签墙</span>
           </button>
           <button 
             id="nav-tab-teacher" 
             onclick="navigateTo('teacher')" 
-            class="nav-tab flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4.5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
+            class="nav-tab flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
-            <span class="text-sm">👩‍🏫</span>
+            <span class="text-xs sm:text-sm">👩‍🏫</span>
             <span><span class="hidden sm:inline">关于</span>老师</span>
           </button>
         </nav>
@@ -602,16 +610,77 @@
   <!-- ========================================================================= -->
   <!-- 页面视图五：【世界级少儿当代美术馆·特展深度期刊专页 (Thematic Exhibition Article View)】 -->
   <!-- ========================================================================= -->
+  <!-- ========================================================================= -->
+  <!-- 页面视图五：【历期美育主题特展专栏文库 (Thematic Exhibition Essays Collection)】 -->
+  <!-- ========================================================================= -->
+  <div id="view-themes" class="view-page flex-1 flex flex-col z-10 hidden">
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-6 sm:pt-10 pb-24 w-full space-y-8">
+      
+      <!-- 1. 专栏文库头部 Banner -->
+      <div class="relative p-6 sm:p-10 rounded-[32px] bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent dark:from-emerald-950/40 dark:via-[#15241B] dark:to-[#0E1711] border border-emerald-500/20 dark:border-emerald-500/15 shadow-sm overflow-hidden">
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div class="space-y-2.5 max-w-2xl text-left">
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 rounded-full bg-[#10E57A] text-stone-950 font-black text-xs uppercase tracking-wider shadow-sm">
+                📚 策展专栏 · 深度美育文库
+              </span>
+              <span class="text-xs text-stone-400 font-mono">EXHIBITION ESSAYS</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-stone-950 dark:text-stone-50 tracking-tight">
+              🏛️ 历期儿童美育主题特展与策展手记
+            </h1>
+            <p class="text-xs sm:text-sm text-stone-600 dark:text-emerald-100/80 leading-relaxed font-normal">
+              记录每一个阶段孩子的创想脉络、探索主题与美育成长。每一期特展，都是一次关于自由与童真的艺术盛宴，所有特展文章均在此永久收录与沉淀。
+            </p>
+          </div>
+
+          <!-- 主理人专属策划特展按键 (管理模式下可见) -->
+          <div class="flex items-center gap-3 flex-shrink-0">
+            <button 
+              id="themeArchiveAdminBtn" 
+              onclick="openThemeEditModal()" 
+              class="hidden px-5 py-3 rounded-2xl bg-stone-900 dark:bg-stone-800 text-white hover:bg-[#10E57A] hover:text-stone-950 font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 items-center gap-2 cursor-pointer"
+            >
+              <span>⚙️</span>
+              <span>策划与排期特展</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 背景装饰图标 -->
+        <div class="absolute -right-6 -bottom-6 text-8xl opacity-10 select-none pointer-events-none">
+          📖
+        </div>
+      </div>
+
+      <!-- 2. 特展文章卡片网格 (Card-based exhibition list) -->
+      <div id="themesArchiveGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
+        <!-- JS 动态渲染各期特展卡片 -->
+      </div>
+
+      <!-- 空状态 -->
+      <div id="themesArchiveEmpty" class="hidden py-16 text-center text-stone-400">
+        <div class="text-4xl mb-2">🎨</div>
+        <p class="text-sm font-bold">暂无已收录的主题特展</p>
+        <p class="text-xs text-emerald-500 hover:text-emerald-400 mt-1 cursor-pointer font-bold" onclick="openThemeEditModal()">点击策划第一期特展吧！✨</p>
+      </div>
+
+    </section>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 页面视图六：【世界级少儿当代美术馆·特展深度单篇专栏 (Thematic Single Article View)】 -->
+  <!-- ========================================================================= -->
   <div id="view-theme" class="view-page flex-1 flex flex-col z-10 hidden">
     
     <!-- 顶部极简导航与返回 (完全公开纯净，编辑按钮默认隐藏) -->
     <div class="max-w-5xl mx-auto px-4 sm:px-8 pt-6 pb-2 w-full flex items-center justify-between">
       <button 
-        onclick="navigateTo('gallery')" 
-        class="inline-flex items-center gap-2 text-xs font-extrabold text-stone-700 dark:text-emerald-300 hover:text-emerald-600 dark:hover:text-[#10E57A] px-4 py-2 rounded-full bg-white dark:bg-[#15241B] shadow-sm border border-black/[0.04] dark:border-emerald-500/20 active:scale-95 transition-all"
+        onclick="navigateTo('themes')" 
+        class="inline-flex items-center gap-2 text-xs font-extrabold text-stone-700 dark:text-emerald-300 hover:text-emerald-600 dark:hover:text-[#10E57A] px-4 py-2 rounded-full bg-white dark:bg-[#15241B] shadow-sm border border-black/[0.04] dark:border-emerald-500/20 active:scale-95 transition-all cursor-pointer"
       >
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
-        <span>返回展厅首页</span>
+        <span>返回全部特展专栏</span>
       </button>
 
       <div class="flex items-center gap-2.5">
@@ -1634,6 +1703,11 @@
       const carouselAdminBtn = document.getElementById('carouselAdminBtn');
       if (carouselAdminBtn) carouselAdminBtn.classList.remove('hidden');
 
+      const themeArchiveAdminBtn = document.getElementById('themeArchiveAdminBtn');
+      if (themeArchiveAdminBtn) {
+        themeArchiveAdminBtn.className = 'inline-flex px-5 py-3 rounded-2xl bg-stone-900 dark:bg-stone-800 text-white hover:bg-[#10E57A] hover:text-stone-950 font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 items-center gap-2 cursor-pointer';
+      }
+
       // 展现便签墙上的主理人专属删除按键
       document.querySelectorAll('.admin-sticky-del').forEach(el => {
         el.classList.remove('hidden');
@@ -1700,6 +1774,7 @@
         if (Array.isArray(cloudNotes)) stickyNotes = cloudNotes;
 
         renderCuratedCarousel();
+        renderThemesArchive();
         renderGallery();
         renderHall();
         renderStickyWall();
@@ -1824,16 +1899,24 @@
               ${theme.introSummary}
             </p>
 
-            <div class="mt-3.5 sm:mt-4 flex items-center gap-3">
+            <div class="mt-3.5 sm:mt-4 flex flex-wrap items-center gap-2.5 sm:gap-3">
               <button 
                 onclick="openThemeById('${theme.id}')" 
                 class="inline-flex items-center gap-2 text-xs font-extrabold px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-[#10E57A] text-stone-950 transition-all active:scale-95 shadow-lg shadow-emerald-500/25 cursor-pointer"
               >
-                <span>📖 阅览本期主题特展文章</span>
+                <span>📖 阅览本期特展文章</span>
                 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
               </button>
 
-              <span class="text-xs text-stone-300 font-mono hidden md:inline">
+              <button 
+                onclick="navigateTo('themes')" 
+                class="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-white/15 hover:bg-white/25 text-white backdrop-blur-md transition-all active:scale-95 border border-white/20 cursor-pointer"
+                title="查看历期全部特展文章文库"
+              >
+                <span>📚 历期特展专栏</span>
+              </button>
+
+              <span class="text-xs text-stone-300 font-mono hidden md:inline ml-1">
                 收录 ${theme.artworkCount} 件精选参展力作
               </span>
             </div>
@@ -1896,6 +1979,107 @@
 
     function resumeCarousel() {
       startCarouselTimer();
+    }
+
+    // ==========================================
+    // 📚 视图：历期美育主题特展专栏文库卡片网格渲染 (Thematic Exhibition Essays Collection)
+    // ==========================================
+    function renderThemesArchive() {
+      const grid = document.getElementById('themesArchiveGrid');
+      const empty = document.getElementById('themesArchiveEmpty');
+      const adminBtn = document.getElementById('themeArchiveAdminBtn');
+      if (adminBtn) {
+        adminBtn.className = isCuratorAdminUnlocked 
+          ? 'inline-flex px-5 py-3 rounded-2xl bg-stone-900 dark:bg-stone-800 text-white hover:bg-[#10E57A] hover:text-stone-950 font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 items-center gap-2 cursor-pointer'
+          : 'hidden';
+      }
+
+      if (!Array.isArray(themeExhibitions) || themeExhibitions.length === 0) {
+        if (grid) grid.innerHTML = '';
+        if (empty) empty.classList.remove('hidden');
+        return;
+      }
+      if (empty) empty.classList.add('hidden');
+
+      grid.innerHTML = themeExhibitions.map((theme, idx) => {
+        const coverImg = theme.coverImage || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80';
+        const highlightsHtml = (theme.keyHighlights || []).slice(0, 3).map(h => `
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-800 dark:text-[#10E57A] text-[10px] font-bold">
+            <span>${h.icon || '✨'}</span>
+            <span class="truncate max-w-[90px]">${h.title}</span>
+          </span>
+        `).join('');
+
+        return `
+          <article 
+            onclick="openThemeById('${theme.id}')"
+            class="contemporary-card overflow-hidden rounded-[28px] p-0 flex flex-col justify-between cursor-pointer group hover:-translate-y-1.5 transition-all duration-300 border border-black/[0.04] dark:border-emerald-500/15"
+          >
+            <!-- 封面大图与角标 -->
+            <div class="relative w-full aspect-[16/10] overflow-hidden bg-stone-900">
+              <img 
+                src="${coverImg}" 
+                alt="${theme.title}" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 select-none"
+                onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80'"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/20 to-transparent"></div>
+              
+              <!-- 顶部标签 -->
+              <div class="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between z-10">
+                <span class="px-3 py-1 rounded-full bg-emerald-500/90 text-stone-950 text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-md">
+                  ${theme.tag || '主题特展'}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full bg-stone-950/75 text-white/90 font-mono text-[9px] font-bold backdrop-blur-md">
+                  第 ${idx + 1} 期 · 特展专栏
+                </span>
+              </div>
+
+              <!-- 底部期次与策展人 -->
+              <div class="absolute bottom-3 left-3.5 right-3.5 z-10 flex items-center justify-between text-white text-[11px] font-bold">
+                <span class="flex items-center gap-1 text-emerald-300">
+                  <span>👩‍🎨</span><span>策展：${theme.curator || '陈昨'}</span>
+                </span>
+                <span class="font-mono text-[10px] text-stone-300">收录 ${theme.artworkCount || 0} 幅画作</span>
+              </div>
+            </div>
+
+            <!-- 卡片正文主体 -->
+            <div class="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center gap-2 text-[10px] font-mono text-stone-400">
+                  <span>📅 ${theme.date || '展期进行中'}</span>
+                </div>
+                <h3 class="font-black text-lg sm:text-xl text-stone-950 dark:text-stone-50 group-hover:text-emerald-600 dark:group-hover:text-[#10E57A] transition-colors leading-snug">
+                  ${theme.title}
+                </h3>
+                <p class="text-xs text-emerald-700 dark:text-[#10E57A] font-bold font-mono tracking-wide line-clamp-1">
+                  ${theme.subTitle || ''}
+                </p>
+                <p class="text-xs text-stone-600 dark:text-emerald-100/80 leading-relaxed line-clamp-2 pt-1 font-normal">
+                  ${theme.introSummary || (theme.curatorStatement && theme.curatorStatement[0]) || '记录孩子们自由探索的艺术时光...'}
+                </p>
+              </div>
+
+              <!-- 亮点标签与底部阅读按键 -->
+              <div class="pt-3 border-t border-black/[0.04] dark:border-white/[0.06] space-y-3">
+                <div class="flex flex-wrap gap-1.5">
+                  ${highlightsHtml}
+                </div>
+                <div class="flex items-center justify-between text-xs font-bold pt-1">
+                  <span class="text-stone-400 dark:text-stone-500 font-mono text-[11px]">深度阅读与观展</span>
+                  <span class="text-emerald-600 dark:text-[#10E57A] group-hover:translate-x-1 transition-all flex items-center gap-1 font-extrabold text-xs">
+                    进入特展 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </article>
+        `;
+      }).join('');
+
+      lucide.createIcons();
     }
 
     // ==========================================
@@ -2351,25 +2535,38 @@
       document.querySelectorAll('.view-page').forEach(el => el.classList.add('hidden'));
 
       const tabGallery = document.getElementById('nav-tab-gallery');
+      const tabThemes = document.getElementById('nav-tab-themes');
       const tabHall = document.getElementById('nav-tab-hall');
       const tabNotes = document.getElementById('nav-tab-notes');
       const tabTeacher = document.getElementById('nav-tab-teacher');
 
-      const TAB_ACTIVE = 'nav-tab active flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4.5 py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none';
-      const TAB_INACTIVE = 'nav-tab flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4.5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none';
+      const TAB_ACTIVE = 'nav-tab active flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none';
+      const TAB_INACTIVE = 'nav-tab flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none';
 
       if (viewName === 'gallery') {
         document.getElementById('view-gallery').classList.remove('hidden');
         if (tabGallery) tabGallery.className = TAB_ACTIVE;
+        if (tabThemes) tabThemes.className = TAB_INACTIVE;
         if (tabHall) tabHall.className = TAB_INACTIVE;
         if (tabNotes) tabNotes.className = TAB_INACTIVE;
         if (tabTeacher) tabTeacher.className = TAB_INACTIVE;
         resumeCarousel();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (viewName === 'themes') {
+        pauseCarousel();
+        document.getElementById('view-themes').classList.remove('hidden');
+        if (tabGallery) tabGallery.className = TAB_INACTIVE;
+        if (tabThemes) tabThemes.className = TAB_ACTIVE;
+        if (tabHall) tabHall.className = TAB_INACTIVE;
+        if (tabNotes) tabNotes.className = TAB_INACTIVE;
+        if (tabTeacher) tabTeacher.className = TAB_INACTIVE;
+        renderThemesArchive();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'hall') {
         pauseCarousel();
         document.getElementById('view-hall').classList.remove('hidden');
         if (tabGallery) tabGallery.className = TAB_INACTIVE;
+        if (tabThemes) tabThemes.className = TAB_INACTIVE;
         if (tabHall) tabHall.className = TAB_ACTIVE;
         if (tabNotes) tabNotes.className = TAB_INACTIVE;
         if (tabTeacher) tabTeacher.className = TAB_INACTIVE;
@@ -2379,6 +2576,7 @@
         pauseCarousel();
         document.getElementById('view-notes').classList.remove('hidden');
         if (tabGallery) tabGallery.className = TAB_INACTIVE;
+        if (tabThemes) tabThemes.className = TAB_INACTIVE;
         if (tabHall) tabHall.className = TAB_INACTIVE;
         if (tabNotes) tabNotes.className = TAB_ACTIVE;
         if (tabTeacher) tabTeacher.className = TAB_INACTIVE;
@@ -2388,6 +2586,7 @@
         pauseCarousel();
         document.getElementById('view-teacher').classList.remove('hidden');
         if (tabGallery) tabGallery.className = TAB_INACTIVE;
+        if (tabThemes) tabThemes.className = TAB_INACTIVE;
         if (tabHall) tabHall.className = TAB_INACTIVE;
         if (tabNotes) tabNotes.className = TAB_INACTIVE;
         if (tabTeacher) tabTeacher.className = TAB_ACTIVE;
@@ -2396,6 +2595,7 @@
         pauseCarousel();
         document.getElementById('view-student').classList.remove('hidden');
         if (tabGallery) tabGallery.className = TAB_INACTIVE;
+        if (tabThemes) tabThemes.className = TAB_INACTIVE;
         if (tabHall) tabHall.className = TAB_INACTIVE;
         if (tabNotes) tabNotes.className = TAB_INACTIVE;
         if (tabTeacher) tabTeacher.className = TAB_INACTIVE;
@@ -2405,6 +2605,7 @@
         pauseCarousel();
         document.getElementById('view-theme').classList.remove('hidden');
         if (tabGallery) tabGallery.className = TAB_INACTIVE;
+        if (tabThemes) tabThemes.className = TAB_INACTIVE;
         if (tabHall) tabHall.className = TAB_INACTIVE;
         if (tabNotes) tabNotes.className = TAB_INACTIVE;
         if (tabTeacher) tabTeacher.className = TAB_INACTIVE;
