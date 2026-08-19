@@ -58,13 +58,13 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-8 hidden sm:flex h-16 sm:h-20 items-center justify-between gap-4 sm:gap-6">
       
       <!-- 品牌标识 (🍐 梨子卡通徽标 + 想吃梨儿童艺术启蒙，内置主理人专属暗门) -->
-      <div class="flex items-center gap-2.5 sm:gap-3.5 cursor-pointer group flex-shrink-0" onclick="navigateTo('home')">
-        <div 
-          id="brandLogoSecretBtn"
-          onclick="handleBrandSecretClick(event)"
-          class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-[#10E57A] flex items-center justify-center text-stone-950 font-bold shadow-md shadow-emerald-500/25 group-hover:rotate-12 active:scale-90 transition-transform flex-shrink-0 text-base sm:text-lg select-none"
-          title="想吃梨美育（快速连击3次开启录入通道）"
-        >
+      <!-- 左侧品牌标识 (整体为一个完整统一的首页点击入口，点击直接返回综合首页) -->
+      <div 
+        class="flex items-center gap-2.5 sm:gap-3.5 cursor-pointer group flex-shrink-0 select-none" 
+        onclick="navigateTo('home')"
+        title="想吃梨儿童艺术启蒙 · 返回首页"
+      >
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-[#10E57A] flex items-center justify-center text-stone-950 font-bold shadow-md shadow-emerald-500/25 group-hover:rotate-12 active:scale-90 transition-transform flex-shrink-0 text-base sm:text-lg">
           🍐
         </div>
         <div class="flex flex-col">
@@ -78,12 +78,13 @@
         </div>
       </div>
 
+
       <!-- 右侧桌面端导航组 (包含新增的【📚 课程作品集】) -->
       <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
         <nav class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
           <button 
             id="nav-tab-gallery" 
-            onclick="navigateTo('home')" 
+            onclick="navigateTo('gallery')" 
             class="nav-tab active flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">🖼️</span>
@@ -185,7 +186,7 @@
 
       <!-- 移动端顶部第二行：全宽等分6格导航胶囊 (完美容纳全部6大核心板块) -->
       <div class="grid grid-cols-6 gap-0.5 w-full py-0.5 text-center">
-        <button id="nav-tab-gallery-mob" onclick="navigateTo('home')" class="mob-nav-tab active flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-black transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-sm w-full">
+        <button id="nav-tab-gallery-mob" onclick="navigateTo('gallery')" class="mob-nav-tab active flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-black transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-sm w-full">
           <span>🖼️</span><span class="truncate">展厅</span>
         </button>
         <button id="nav-tab-albums-mob" onclick="navigateTo('albums')" class="mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full">
@@ -261,10 +262,12 @@
       </div>
     </section>
 
-    <!-- 首页主内容区：课程作品集在上方 + 学员个人作品在下方 -->
+    <!-- 首页核心板块：1. 课程作品集(展示3套) 2. 学员个人作品(展示3幅) -->
     <main class="flex-1 max-w-7xl mx-auto px-3 sm:px-8 pb-20 w-full space-y-14 sm:space-y-16">
       
-      <!-- 🌟 上方板块：📚 课程作品集专区 -->
+      <!-- ========================================================================= -->
+      <!-- 🌟 板块一 (上方)：📚 课程作品集精选专区 (展示 3 套精选画册) -->
+      <!-- ========================================================================= -->
       <section>
         <div class="flex items-end justify-between gap-4 mb-6">
           <div class="space-y-1">
@@ -287,8 +290,9 @@
           </button>
         </div>
 
+        <!-- 首页精选 3 套课程作品集卡片 -->
         <div id="homeFeaturedAlbumsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          <!-- JS 动态渲染首页精选风琴画册卡片 -->
+          <!-- JS 动态渲染首页精选 3 套风琴画册卡片 -->
         </div>
 
         <div class="sm:hidden text-center mt-6">
@@ -298,7 +302,9 @@
         </div>
       </section>
 
-      <!-- 🌟 下方板块：🎨 学员个人画作精选 -->
+      <!-- ========================================================================= -->
+      <!-- 🌟 板块二 (下方)：🎨 学员个人画作精选 (展示 3 幅学员作品，与上方课程作品集对称，点击右侧绿色按钮进入单独展厅) -->
+      <!-- ========================================================================= -->
       <section class="pt-10 sm:pt-12 border-t border-black/[0.06] dark:border-white/[0.08]">
         <div class="flex items-end justify-between gap-4 mb-6">
           <div class="space-y-1">
@@ -321,22 +327,17 @@
           </button>
         </div>
 
-        <!-- 首页精选画作网格 (精选前6幅) -->
-        <div id="homeFeaturedGalleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
-          <!-- JS 动态渲染首页精选画作卡片 -->
+        <!-- 首页精选 3 幅学员画作网格 (与上方课程作品集 3 张卡片完全对称) -->
+        <div id="homeFeaturedGalleryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <!-- JS 动态渲染首页精选 3 幅画作卡片 -->
         </div>
 
-        <div class="text-center mt-8">
-          <button 
-            onclick="navigateTo('gallery')" 
-            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-stone-900 dark:bg-emerald-500 text-white dark:text-stone-950 font-black text-xs sm:text-sm hover:scale-105 transition-all shadow-lg cursor-pointer"
-          >
-            <span>🎨 浏览全部学员个人作品</span>
-            <span>→</span>
+        <div class="sm:hidden text-center mt-6">
+          <button onclick="navigateTo('gallery')" class="w-full py-2.5 rounded-2xl bg-emerald-500/10 text-emerald-700 dark:text-[#10E57A] text-xs font-bold">
+            进入全部画作展厅 →
           </button>
         </div>
       </section>
-
     </main>
   </div>
 
@@ -1790,6 +1791,7 @@
 
     let currentView = 'gallery';
     let currentAgeFilter = 'all';
+    let currentAlbumAgeFilter = 'all';
     let currentSearchTerm = '';
     let currentHallSearch = '';
     let currentStickyFilter = 'all';
@@ -2006,28 +2008,116 @@
 
     
     // ==========================================
-    // 📚 课程作品集 · 风琴折页画册核心渲染引擎 (Course Albums Engine)
-    // ==========================================
-    let currentAlbumAgeFilter = 'all';
-    let currentActiveAlbum = null;
-    let albumDetailCurrentViewMode = 'stream'; // 'stream' | 'grid'
+    
+    // =========================================================================
+    // 🎨 学员个人画作展厅 · 核心渲染引擎 (Solo Artworks Gallery Engine)
+    // =========================================================================
 
-    function setAlbumAgeFilter(ageGroup) {
-      currentAlbumAgeFilter = ageGroup;
-      const ACTIVE_CLASSES = 'album-age-tab active h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap font-extrabold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto';
-      const INACTIVE_CLASSES = 'album-age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto';
 
-      document.querySelectorAll('.album-age-tab').forEach(b => {
-        if (b.dataset.age === ageGroup) {
-          b.className = ACTIVE_CLASSES;
-        } else {
-          b.className = INACTIVE_CLASSES;
-        }
-      });
-      renderAlbums();
+    function generateArtworkCardHtml(item) {
+      const itemJson = JSON.stringify(item).replace(/'/g, "&#39;");
+      const categoryTag = item.categoryName || '少儿当代艺术';
+      const ageTag = getAgeGroupTag(item.ageGroup || item.age);
+
+      return `
+        <article 
+          class="contemporary-card group flex flex-col bg-white dark:bg-[#111D15] rounded-3xl overflow-hidden border border-stone-200/80 dark:border-white/10 shadow-sm hover:shadow-xl dark:shadow-none transition-all duration-300 cursor-pointer h-full"
+          onclick='openArtModal(${itemJson})'
+        >
+          <!-- 画作照片区 (4:3 比例) -->
+          <div class="artwork-frame relative aspect-[4/3] w-full overflow-hidden bg-stone-100 dark:bg-stone-900">
+            <span class="artwork-category-badge">
+              ${categoryTag}
+            </span>
+            <img 
+              src="${item.image}" 
+              alt="${item.title}" 
+              loading="lazy" 
+              class="artwork-img w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 select-none"
+            />
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+              <span class="px-3.5 py-1.5 rounded-full bg-[#10E57A] text-stone-950 text-xs font-black shadow-lg flex items-center gap-1 transform scale-90 group-hover:scale-100 transition-transform">
+                <span>🔍</span><span>放大鉴赏</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- 卡片信息区 -->
+          <div class="p-4 flex flex-col justify-between flex-1 space-y-3">
+            <div>
+              <div class="flex items-baseline justify-between gap-2 mb-1.5">
+                <h3 class="font-black text-base text-stone-900 dark:text-stone-100 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
+                  ${item.title}
+                </h3>
+                <span class="text-[10px] font-mono text-stone-400 dark:text-stone-500 whitespace-nowrap">${item.date || '2026'}</span>
+              </div>
+              <p class="text-xs text-stone-500 dark:text-stone-400 line-clamp-2 italic leading-relaxed min-h-[36px]">
+                “${item.story || item.teacherComment || '纯真童心艺术探索。'}”
+              </p>
+            </div>
+
+            <!-- 底栏：作者与赏析入口 -->
+            <div class="flex items-center justify-between text-xs pt-2.5 border-t border-stone-100 dark:border-white/5">
+              <span class="font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1" onclick="event.stopPropagation(); openStudentByName('${item.author}')">
+                <span>🎨</span><span class="hover:underline">${item.author}</span>
+                <span class="text-[10px] text-stone-400 font-normal">(${ageTag})</span>
+              </span>
+              <span class="text-xs text-emerald-600 dark:text-[#10E57A] font-extrabold flex items-center gap-0.5 group-hover:underline">
+                <span>鉴赏大图</span>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+          </div>
+        </article>
+      `;
     }
 
-    function renderAlbums() {
+    function renderGallery() {
+      const soloGrid = document.getElementById('galleryGrid');
+      const homeFeaturedGrid = document.getElementById('homeFeaturedGalleryGrid');
+      const empty = document.getElementById('emptyState');
+      const totalBadge = document.getElementById('soloGalleryTotalBadge');
+
+      const allItems = artworks || [];
+      if (totalBadge) totalBadge.textContent = `(共 ${allItems.length} 幅原作)`;
+
+      // 1. 渲染【综合主页】下方的 3 幅精选学员力作 (与上方课程作品集 3 张卡片完全对称)
+      if (homeFeaturedGrid) {
+        const top3Arts = allItems.slice(0, 3);
+        if (top3Arts.length > 0) {
+          homeFeaturedGrid.innerHTML = top3Arts.map(item => generateArtworkCardHtml(item)).join('');
+        } else {
+          homeFeaturedGrid.innerHTML = '<div class="col-span-full py-12 text-center text-xs text-stone-400">暂无精选学员画作</div>';
+        }
+      }
+
+      // 2. 渲染【作品展厅专属页】的大网格 (带筛选与搜索)
+      if (soloGrid) {
+        let filtered = allItems.filter(item => {
+          if (!item) return false;
+          const matchAge = (currentAgeFilter === 'all') || String(item.ageGroup || item.age || '').includes(currentAgeFilter);
+          const sTerm = (typeof currentSearchTerm !== 'undefined' ? currentSearchTerm : '').toLowerCase().trim();
+          if (!sTerm) return matchAge;
+          const titleMatch = (item.title || '').toLowerCase().includes(sTerm);
+          const authorMatch = (item.author || '').toLowerCase().includes(sTerm);
+          const storyMatch = (item.story || item.teacherComment || '').toLowerCase().includes(sTerm);
+          return matchAge && (titleMatch || authorMatch || storyMatch);
+        });
+
+        if (filtered.length === 0) {
+          soloGrid.innerHTML = '';
+          if (empty) empty.classList.remove('hidden');
+        } else {
+          if (empty) empty.classList.add('hidden');
+          soloGrid.innerHTML = filtered.map(item => generateArtworkCardHtml(item)).join('');
+        }
+      }
+
+      lucide.createIcons();
+    }
+
+
+        function renderAlbums() {
       const grid = document.getElementById('albumsGrid');
       const homeGrid = document.getElementById('homeFeaturedAlbumsGrid');
       const emptyBox = document.getElementById('emptyAlbumsState');
@@ -3771,87 +3861,6 @@
     // ==========================================
     // 🏛️ 视图一：主展厅逻辑 (Playful Artwork Cards)
     // ==========================================
-    function renderGallery() {
-      const grid = document.getElementById('galleryGrid');
-      const empty = document.getElementById('emptyState');
-      
-      let filtered = artworks.filter(item => {
-        if (!item) return false;
-        const matchAge = currentAgeFilter === 'all' || (item.ageGroup || '') === currentAgeFilter;
-        const sTerm = (currentSearchTerm || '').toLowerCase().trim();
-        if (!sTerm) return matchAge;
-        const titleMatch = (item.title || '').toLowerCase().includes(sTerm);
-        const authorMatch = (item.author || '').toLowerCase().includes(sTerm);
-        const commentMatch = (item.teacherComment || '').toLowerCase().includes(sTerm);
-        return matchAge && (titleMatch || authorMatch || commentMatch);
-      });
-
-      if (filtered.length === 0) {
-        grid.innerHTML = '';
-        empty.classList.remove('hidden');
-        return;
-      }
-
-      empty.classList.add('hidden');
-      grid.innerHTML = filtered.map(item => `
-        <article class="contemporary-card p-3.5 cursor-pointer group" onclick="openArtModal('${item.id}')">
-          <!-- 装裱画框 + 右上角材质胶囊标签 (纯白实心底色 + 深黑高清晰字体) -->
-          <div class="artwork-frame aspect-[4/3] relative">
-            <span class="artwork-category-badge">
-              ${item.categoryName}
-            </span>
-            <img 
-              src="${item.image}" 
-              alt="${item.title}" 
-              loading="lazy" 
-              class="artwork-img"
-            />
-          </div>
-
-          <!-- 卡片文字信息与小作者徽章 -->
-          <div class="px-2 pt-4 pb-2">
-            <div class="flex items-baseline justify-between gap-2 mb-2">
-              <h3 class="font-black text-base text-stone-900 dark:text-stone-100 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
-                ${item.title}
-              </h3>
-              <span class="text-[10px] font-mono text-stone-400 dark:text-stone-500 whitespace-nowrap">${item.date}</span>
-            </div>
-
-            <div class="flex items-center justify-between text-xs pt-1.5 border-t border-emerald-200/40 dark:border-white/[0.08]">
-              <div class="flex items-center gap-2">
-                <span class="font-extrabold text-stone-800 dark:text-stone-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors flex items-center gap-1" onclick="event.stopPropagation(); openStudentByName('${item.author}')">
-                  <span>🎨</span>
-                  <span>${item.author}</span>
-                </span>
-                <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/20">${item.age}</span>
-              </div>
-              <span class="text-xs text-emerald-600 dark:text-emerald-400 font-extrabold group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
-                <span>看故事</span>
-                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-              </span>
-            </div>
-          </div>
-        </article>
-      `).join('');
-
-      lucide.createIcons();
-    }
-
-    function setAgeFilter(age) {
-      currentAgeFilter = age;
-      const ACTIVE_CLASSES = 'age-tab active h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap font-extrabold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto';
-      const INACTIVE_CLASSES = 'age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto';
-
-      document.querySelectorAll('.age-tab').forEach(b => {
-        if (b.dataset.age === age) {
-          b.className = ACTIVE_CLASSES;
-        } else {
-          b.className = INACTIVE_CLASSES;
-        }
-      });
-      renderGallery();
-    }
-
     function handleSearch(val) {
       currentSearchTerm = val.trim();
       renderGallery();
