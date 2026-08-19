@@ -18,7 +18,7 @@
   <!-- html2canvas 用于保存高清小画家海报卡片 -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <!-- 活力青柠与少儿美育设计语言样式表 -->
-  <link rel="stylesheet" href="style.css?v=20260819_noborder">
+  <link rel="stylesheet" href="style.css?v=20260819_nav_sync_v2">
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -42,7 +42,7 @@
   <!-- 🍐 默认本地基础数据集 (含全部画作、学员、特展及课程作品集) -->
   <script src="data.js?v=20260819_v3"></script>
   <!-- 🍐 纯原生零依赖 Supabase 云数据库直连引擎 -->
-  <script src="cloudConfig.js?v=20260819_v3"></script>
+  <script src="cloudConfig.js?v=20260819_cloud_authority_v1"></script>
 </head>
 <body class="min-h-screen antialiased flex flex-col selection:bg-[#10E57A] selection:text-stone-950">
 
@@ -88,7 +88,7 @@
             class="nav-tab flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">📚</span>
-            <span>课程作品集</span>
+            <span>作品集</span>
           </button>
           <button 
             id="nav-tab-gallery" 
@@ -96,7 +96,7 @@
             class="nav-tab active flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">🖼️</span>
-            <span>作品展厅</span>
+            <span>作品展</span>
           </button>
           <button 
             id="nav-tab-themes" 
@@ -104,7 +104,7 @@
             class="nav-tab flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">🎨</span>
-            <span>特展专栏</span>
+            <span>专栏</span>
           </button>
           <button 
             id="nav-tab-hall" 
@@ -112,7 +112,7 @@
             class="nav-tab flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">👑</span>
-            <span>小艺术家名人堂</span>
+            <span>小艺术家</span>
           </button>
           <button 
             id="nav-tab-notes" 
@@ -120,7 +120,7 @@
             class="nav-tab flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">📝</span>
-            <span>美育便签墙</span>
+            <span>便签墙</span>
           </button>
           <button 
             id="nav-tab-teacher" 
@@ -128,7 +128,7 @@
             class="nav-tab flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">👩‍🏫</span>
-            <span>关于老师</span>
+            <span>关于</span>
           </button>
         </nav>
 
@@ -190,19 +190,19 @@
           <span>📚</span><span class="truncate">作品集</span>
         </button>
         <button id="nav-tab-gallery-mob" onclick="navigateTo('gallery')" class="mob-nav-tab active flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-black transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-sm w-full">
-          <span>🖼️</span><span class="truncate">展厅</span>
+          <span>🖼️</span><span class="truncate">作品展</span>
         </button>
         <button id="nav-tab-themes-mob" onclick="navigateTo('themes')" class="mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full">
           <span>🎨</span><span class="truncate">专栏</span>
         </button>
         <button id="nav-tab-hall-mob" onclick="navigateTo('hall')" class="mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full">
-          <span>👑</span><span class="truncate">名人堂</span>
+          <span>👑</span><span class="truncate">小艺术家</span>
         </button>
         <button id="nav-tab-notes-mob" onclick="navigateTo('notes')" class="mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full">
           <span>📝</span><span class="truncate">便签墙</span>
         </button>
         <button id="nav-tab-teacher-mob" onclick="navigateTo('teacher')" class="mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full">
-          <span>👩‍🏫</span><span class="truncate">老师</span>
+          <span>👩‍🏫</span><span class="truncate">关于</span>
         </button>
       </div>
     </div>
@@ -915,7 +915,7 @@
   <div id="view-theme" class="view-page flex-1 flex flex-col z-10 hidden">
     
     <!-- 顶部极简返回链接 -->
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-3 w-full flex items-center justify-between">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-3 w-full flex items-center justify-between">
       <button 
         onclick="navigateTo('themes')" 
         class="inline-flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-[#10E57A] transition-colors cursor-pointer font-bold"
@@ -937,7 +937,7 @@
     <article class="w-full pb-20">
       
       <!-- 头部：标题与发布信息 -->
-      <div class="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-6 w-full space-y-3">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-6 w-full space-y-3">
         <div class="flex items-center gap-2 text-xs font-mono text-stone-400 flex-wrap">
           <span id="themeTagBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-[#10E57A] font-bold text-[11px]">
             🌟 美育专栏
@@ -947,18 +947,18 @@
           <span id="themeAuthorBadge" class="text-stone-500 font-medium">想吃梨美育团队</span>
         </div>
 
-        <h1 id="themeMainTitle" class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-stone-950 dark:text-stone-50 leading-snug">
+        <h1 id="themeMainTitle" class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-stone-950 dark:text-stone-50 leading-tight">
           文章标题
         </h1>
 
-        <p id="themeSubTitle" class="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-serif leading-relaxed">
+        <p id="themeSubTitle" class="text-sm sm:text-base text-stone-500 dark:text-stone-400 font-serif leading-relaxed">
           副标题或引言概述
         </p>
       </div>
 
       <!-- 首图展示 (宽幅高清封面) -->
-      <div class="max-w-3xl mx-auto px-4 sm:px-6 w-full mb-8">
-        <div class="relative w-full aspect-[16/9] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border border-black/[0.04] dark:border-white/[0.08] bg-stone-100 dark:bg-stone-900">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 w-full mb-8">
+        <div class="relative w-full aspect-[16/8] sm:aspect-[16/7] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border border-black/[0.04] dark:border-white/[0.08] bg-stone-100 dark:bg-stone-900">
           <img 
             id="themeHeroCover" 
             src="" 
@@ -969,14 +969,27 @@
         </div>
       </div>
 
-      <!-- 导读金句引言 (优雅内嵌引语) -->
-      <blockquote id="themeQuoteBox" class="max-w-3xl mx-auto px-4 sm:px-6 my-6 text-stone-700 dark:text-emerald-100/90 italic font-serif text-base sm:text-lg border-l-4 border-[#10E57A] pl-4 py-1 leading-relaxed">
-        “引言短句...”
-      </blockquote>
+      <!-- 博客正文与文章目录 -->
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 w-full grid grid-cols-1 lg:grid-cols-[minmax(0,780px)_220px] gap-10 lg:gap-16 justify-center items-start">
+        <div class="min-w-0">
+          <blockquote id="themeQuoteBox" class="my-6 text-stone-700 dark:text-emerald-100/90 italic font-serif text-base sm:text-lg border-l-4 border-[#10E57A] pl-4 py-1 leading-relaxed">
+            “引言短句...”
+          </blockquote>
 
-      <!-- 文章正文内容 (纯粹杂志长文排版，大字距与行高，支持图文混排) -->
-      <div id="themeArticleParagraphs" class="max-w-3xl mx-auto px-4 sm:px-6 space-y-6 text-base sm:text-lg leading-[1.85] text-stone-800 dark:text-stone-200 font-normal">
-        <!-- JS 动态注入文章正文 -->
+          <div id="themeArticleParagraphs" class="space-y-6 text-base sm:text-lg leading-[1.9] text-stone-800 dark:text-stone-200 font-normal">
+            <!-- JS 动态注入文章正文 -->
+          </div>
+        </div>
+
+        <aside class="hidden lg:block border-l border-black/[0.06] dark:border-white/[0.08] pl-6">
+          <div class="sticky top-28 space-y-4">
+            <h2 class="text-sm font-black text-stone-900 dark:text-white">目录</h2>
+            <nav id="themeArticleToc" class="space-y-2 text-xs text-stone-500 dark:text-stone-400"></nav>
+            <button onclick="navigateTo('themes')" class="pt-4 mt-3 border-t border-black/[0.06] dark:border-white/[0.08] w-full text-left text-xs font-bold text-emerald-600 dark:text-[#10E57A] hover:underline">
+              返回专栏
+            </button>
+          </div>
+        </aside>
       </div>
 
       <!-- 文章尾部：作者签名卡片与返回按钮 -->
@@ -1704,8 +1717,8 @@
 
   <script>
         // =========================================================================
-    // 🌟 本地优先零闪烁缓存引擎 (Local-First Zero-Flicker Cache Engine)
-    // 页面刷新 0 毫秒直接加载用户真实数据库缓存，彻底告别模板数据闪跳！
+    // 🌟 上次成功云端快照用于首屏即时绘制；随后始终由 Supabase 最新结果覆盖
+    // 缓存不是权威数据源，只负责避免刷新时错误展示“暂无作品”。
     // =========================================================================
     function loadCachedData(key, fallback) {
       try {
@@ -1733,6 +1746,7 @@
     let themeExhibitions = loadCachedData('themes', []);
     let stickyNotes = loadCachedData('notes', []);
     let courseAlbums = loadCachedData('albums', []);
+    let cloudSnapshotReady = false;
 
     let currentView = 'gallery';
     let currentAgeFilter = 'all';
@@ -2016,6 +2030,18 @@
         </article>
       `;
     }
+    function renderCloudLoadingCards(count = 3) {
+      return Array.from({ length: count }, () => `
+        <div class="rounded-3xl border border-black/[0.04] dark:border-white/[0.08] bg-white dark:bg-[#111D15] overflow-hidden animate-pulse" aria-hidden="true">
+          <div class="aspect-[4/3] bg-stone-200/80 dark:bg-white/[0.06]"></div>
+          <div class="p-5 space-y-3">
+            <div class="h-4 w-2/3 rounded bg-stone-200 dark:bg-white/[0.08]"></div>
+            <div class="h-3 w-full rounded bg-stone-100 dark:bg-white/[0.05]"></div>
+            <div class="h-3 w-4/5 rounded bg-stone-100 dark:bg-white/[0.05]"></div>
+          </div>
+        </div>
+      `).join('');
+    }
 
     function renderGallery() {
       const soloGrid = document.getElementById('galleryGrid');
@@ -2031,6 +2057,8 @@
         const top3Arts = allItems.slice(0, 3);
         if (top3Arts.length > 0) {
           homeFeaturedGrid.innerHTML = top3Arts.map(item => generateArtworkCardHtml(item)).join('');
+        } else if (!cloudSnapshotReady) {
+          homeFeaturedGrid.innerHTML = renderCloudLoadingCards(3);
         } else {
           homeFeaturedGrid.innerHTML = '<div class="col-span-full py-12 text-center text-xs text-stone-400">暂无精选学员画作</div>';
         }
@@ -2049,7 +2077,10 @@
           return matchAge && (titleMatch || authorMatch || storyMatch);
         });
 
-        if (filtered.length === 0) {
+        if (filtered.length === 0 && !cloudSnapshotReady) {
+          soloGrid.innerHTML = renderCloudLoadingCards(6);
+          if (empty) empty.classList.add('hidden');
+        } else if (filtered.length === 0) {
           soloGrid.innerHTML = '';
           if (empty) empty.classList.remove('hidden');
         } else {
@@ -2168,7 +2199,10 @@
         `;
       };
       if (grid) {
-        if (filtered.length === 0) {
+        if (filtered.length === 0 && !cloudSnapshotReady) {
+          grid.innerHTML = renderCloudLoadingCards(3);
+          if (emptyBox) emptyBox.classList.add('hidden');
+        } else if (filtered.length === 0) {
           grid.innerHTML = '';
           if (emptyBox) emptyBox.classList.remove('hidden');
         } else {
@@ -2181,6 +2215,8 @@
         const top3 = allAlbums.slice(0, 3);
         if (top3.length > 0) {
           homeGrid.innerHTML = top3.map(generateCardHtml).join('');
+        } else if (!cloudSnapshotReady) {
+          homeGrid.innerHTML = renderCloudLoadingCards(3);
         } else {
           homeGrid.innerHTML = '<div class="col-span-full py-12 text-center text-xs text-stone-400">暂无课程作品集</div>';
         }
@@ -2361,8 +2397,14 @@
       lucide.createIcons();
     }
 
+    let cloudSyncInFlight = false;
+
     async function syncDataFromCloud() {
-      if (!window.galleryCloud) return;
+      if (cloudSyncInFlight) return;
+      if (!window.galleryCloud) {
+        throw new Error('云端数据服务尚未加载');
+      }
+      cloudSyncInFlight = true;
       try {
         const [cloudArts, cloudStudents, cloudThemes, cloudNotes, cloudAlbums] = await Promise.all([
           window.galleryCloud.getArtworks ? window.galleryCloud.getArtworks() : Promise.resolve([]),
@@ -2372,27 +2414,28 @@
           window.galleryCloud.getCourseAlbums ? window.galleryCloud.getCourseAlbums() : Promise.resolve([])
         ]);
 
-        if (Array.isArray(cloudArts) && cloudArts.length > 0) {
+        if (Array.isArray(cloudArts)) {
           artworks = cloudArts;
           saveCachedData('artworks', cloudArts);
         }
-        if (Array.isArray(cloudStudents) && cloudStudents.length > 0) {
+        if (Array.isArray(cloudStudents)) {
           studentList = cloudStudents;
           saveCachedData('students', cloudStudents);
         }
-        if (Array.isArray(cloudThemes) && cloudThemes.length > 0) {
+        if (Array.isArray(cloudThemes)) {
           themeExhibitions = cloudThemes;
           saveCachedData('themes', cloudThemes);
         }
-        if (Array.isArray(cloudNotes) && cloudNotes.length > 0) {
+        if (Array.isArray(cloudNotes)) {
           stickyNotes = cloudNotes;
           saveCachedData('notes', cloudNotes);
         }
-        if (Array.isArray(cloudAlbums) && cloudAlbums.length > 0) {
+        if (Array.isArray(cloudAlbums)) {
           courseAlbums = cloudAlbums;
           saveCachedData('albums', cloudAlbums);
         }
 
+        cloudSnapshotReady = true;
         // 重新渲染全部视图
         renderCuratedCarousel();
         renderThemesArchive();
@@ -2410,7 +2453,11 @@
         lucide.createIcons();
         console.log('🖼️ 展厅数据同步完毕: 画作', artworks.length, '件, 小艺术家', studentList.length, '位, 作品集', courseAlbums.length, '套');
       } catch (err) {
-        console.warn('云端数据读取异常:', err);
+        console.error('云端数据读取异常:', err);
+        showToast('⚠️ 云端数据暂时无法加载，请检查网络后刷新');
+        throw err;
+      } finally {
+        cloudSyncInFlight = false;
       }
     }
 
@@ -2442,6 +2489,16 @@
         console.error('前台同步云端数据异常:', e);
       }
       lucide.createIcons();
+
+      window.addEventListener('focus', () => {
+        syncDataFromCloud().catch((err) => console.warn('窗口恢复时同步失败:', err));
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          syncDataFromCloud().catch((err) => console.warn('页面恢复时同步失败:', err));
+        }
+      });
 
 
             // 初始化便签墙扫码直达二维码
@@ -2625,6 +2682,13 @@
         const coverImg = theme.coverImage || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80';
         const tagText = theme.tag || '美育随笔';
         const authorText = theme.curator || '想吃梨美育团队';
+        const highlightsHtml = (Array.isArray(theme.keyHighlights) ? theme.keyHighlights : [])
+          .slice(0, 3)
+          .map(item => {
+            const label = typeof item === 'string' ? item : [item && item.icon, item && item.title].filter(Boolean).join(' ');
+            return label ? `<span class="px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">${label}</span>` : '';
+          })
+          .join('');
 
         return `
           <article 
@@ -2643,7 +2707,8 @@
               
               <!-- 顶部标签与日期 -->
               <div class="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between z-10">
-                  ${theme.tag || '主题特展'}
+                <span class="px-2.5 py-0.5 rounded-full bg-white/90 text-stone-800 font-bold text-[9px] backdrop-blur-md">
+                  ${tagText}
                 </span>
                 <span class="px-2.5 py-0.5 rounded-full bg-stone-950/75 text-white/90 font-mono text-[9px] font-bold backdrop-blur-md">
                   第 ${idx + 1} 期 · 特展专栏
@@ -2714,9 +2779,44 @@
     // ==========================================
     // 📖 特展深度文章图文智能解析器 (Rich Media & Markdown Parser)
     // ==========================================
+    function escapeArticleHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderArticleImageFigure(href, caption = '') {
+      const source = String(href || '').trim();
+      if (!/^(?:data:image\/[a-z0-9.+-]+;base64,|https?:\/\/)/i.test(source)) return '';
+      const safeSource = source.replace(/"/g, '&quot;');
+      const safeCaption = escapeArticleHtml(caption);
+      return `
+        <figure class="my-8 sm:my-10 rounded-3xl overflow-hidden shadow-xl border border-black/[0.05] dark:border-white/[0.08] bg-stone-950/60 text-center">
+          <div class="relative max-h-[640px] overflow-hidden flex items-center justify-center p-2 sm:p-4 bg-stone-950/80">
+            <img src="${safeSource}" alt="${safeCaption}" class="max-w-full max-h-[580px] object-contain rounded-2xl shadow-md select-none" loading="lazy" />
+          </div>
+          ${safeCaption ? `<figcaption class="px-4 py-2.5 text-center text-xs sm:text-sm font-bold text-stone-600 dark:text-emerald-300/90 bg-stone-50/90 dark:bg-[#111C15] border-t border-black/[0.04] dark:border-white/[0.06]">📷 ${safeCaption}</figcaption>` : ''}
+        </figure>
+      `.trim();
+    }
+
     function parseRichCuratorArticle(statement) {
       if (!statement) return '<p class="text-stone-400 italic py-6 text-center">暂无策展手记内容...</p>';
-      const rawText = Array.isArray(statement) ? statement.join('\n\n') : String(statement);
+      const sourceParts = Array.isArray(statement) ? statement : [String(statement)];
+      const rawText = sourceParts
+        .map(part => String(part || ''))
+        .filter(part => {
+          const compact = part.replace(/\s+/g, '');
+          const withoutLegacyUi = compact.replace(/(?:\u{1F5D1}\uFE0F?\u5220\u9664|\u{1F4F7}|\d+)/gu, '');
+          return compact && withoutLegacyUi !== '' && withoutLegacyUi !== '****';
+        })
+        .join('\n\n');
+      const normalizedText = rawText.replace(
+        /^!\[([^\]]*)\]\((data:image\/[^;]+;base64,[A-Za-z0-9+/=]+)\)$/gm,
+        (_, caption, href) => renderArticleImageFigure(href, caption)
+      );
 
       if (typeof marked !== 'undefined') {
         const renderer = new marked.Renderer();
@@ -2784,12 +2884,40 @@
         };
 
         marked.setOptions({ gfm: true, breaks: true, renderer: renderer });
-        return marked.parse(rawText);
+        return marked.parse(normalizedText);
       } else {
         return rawText.split('\n\n').map(p => `<p class="my-5 text-base sm:text-lg leading-[1.9] text-stone-800 dark:text-stone-200">${p}</p>`).join('');
       }
     }
 
+    function renderThemeArticleToc() {
+      const article = document.getElementById('themeArticleParagraphs');
+      const toc = document.getElementById('themeArticleToc');
+      if (!article || !toc) return;
+
+      const headings = Array.from(article.querySelectorAll('h2, h3, h4'));
+      toc.innerHTML = '';
+
+      if (headings.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'text-stone-400 dark:text-stone-500';
+        empty.textContent = '本文暂无章节';
+        toc.appendChild(empty);
+        return;
+      }
+
+      headings.forEach((heading, index) => {
+        heading.id = `article-section-${index + 1}`;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `block w-full text-left leading-relaxed hover:text-emerald-600 dark:hover:text-[#10E57A] transition-colors ${heading.tagName === 'H2' ? 'font-bold' : 'pl-3'}`;
+        button.textContent = heading.textContent.replace(/^[✦▸#\s]+/, '');
+        button.addEventListener('click', () => {
+          heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        toc.appendChild(button);
+      });
+    }
     function renderThemeExhibition(theme) {
       if (!theme) return;
       currentActiveThemeId = theme.id;
@@ -2832,6 +2960,7 @@
       const paragraphsBox = document.getElementById('themeArticleParagraphs');
       if (paragraphsBox) {
         paragraphsBox.innerHTML = parseRichCuratorArticle(theme.curatorStatement || theme.curator_note);
+        renderThemeArticleToc();
       }
       lucide.createIcons();
     }
@@ -2949,24 +3078,40 @@
       }).join('');
     }
 
-    function toggleThemeHeroStatus(themeId) {
+    async function toggleThemeHeroStatus(themeId) {
       const theme = themeExhibitions.find(t => t.id === themeId);
       if (theme) {
-        theme.isInHero = theme.isInHero === false ? true : false;
-        renderThemeCardsList();
-        renderCuratedCarousel();
-        showToast(theme.isInHero ? `🌟 已将《${theme.title}》上线至首页焦点轮播！` : `⏸️ 已将《${theme.title}》从首页轮播下线。`);
+        const nextTheme = { ...theme, isInHero: theme.isInHero === false };
+        try {
+          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+          const savedTheme = await window.galleryCloud.updateThematicExhibition(nextTheme);
+          const index = themeExhibitions.findIndex(t => t.id === themeId);
+          if (index >= 0) themeExhibitions[index] = savedTheme;
+          renderThemeCardsList();
+          renderCuratedCarousel();
+          showToast(savedTheme.isInHero ? `🌟 已将《${savedTheme.title}》上线至首页焦点轮播！` : `⏸️ 已将《${savedTheme.title}》从首页轮播下线。`);
+        } catch (err) {
+          console.error('更新特展轮播状态失败:', err);
+          showToast('❌ 轮播状态未保存到云端：' + (err.message || '请稍后重试'));
+        }
       }
     }
 
-    function deleteThemeAction(themeId) {
+    async function deleteThemeAction(themeId) {
       const theme = themeExhibitions.find(t => t.id === themeId);
       if (!theme) return;
       if (confirm(`确定要删除主题特展《${theme.title}》吗？`)) {
-        themeExhibitions = themeExhibitions.filter(t => t.id !== themeId);
-        renderThemeCardsList();
-        renderCuratedCarousel();
-        showToast(`🗑️ 已删除特展《${theme.title}》`);
+        try {
+          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+          await window.galleryCloud.deleteThematicExhibition(themeId);
+          themeExhibitions = themeExhibitions.filter(t => t.id !== themeId);
+          renderThemeCardsList();
+          renderCuratedCarousel();
+          showToast(`🗑️ 已从云端删除特展《${theme.title}》`);
+        } catch (err) {
+          console.error('删除特展失败:', err);
+          showToast('❌ 特展未从云端删除：' + (err.message || '请稍后重试'));
+        }
       }
     }
 
@@ -3197,7 +3342,7 @@
       }
     }
 
-    function handleThemeEditSubmit(e) {
+    async function handleThemeEditSubmit(e) {
       e.preventDefault();
 
       const themeId = document.getElementById('themeEditId').value;
@@ -3250,19 +3395,29 @@
         isInHero: true
       };
 
-      if (existingIndex >= 0) {
-        themeExhibitions[existingIndex] = updatedTheme;
-      } else {
-        themeExhibitions.unshift(updatedTheme);
-      }
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+        const savedTheme = existingIndex >= 0
+          ? await window.galleryCloud.updateThematicExhibition(updatedTheme)
+          : await window.galleryCloud.createThematicExhibition(updatedTheme);
 
-      renderCuratedCarousel();
-      if (currentView === 'theme' && currentActiveThemeId === themeId) {
-        renderThemeExhibition(updatedTheme);
-      }
+        if (existingIndex >= 0) {
+          themeExhibitions[existingIndex] = savedTheme;
+        } else {
+          themeExhibitions.unshift(savedTheme);
+        }
 
-      switchThemeManagerTab('list');
-      showToast(`🎉 成功保存特展《${updatedTheme.title}》！已实时同步到首页轮播与特展专页！`);
+        renderCuratedCarousel();
+        if (currentView === 'theme' && currentActiveThemeId === themeId) {
+          renderThemeExhibition(savedTheme);
+        }
+
+        switchThemeManagerTab('list');
+        showToast(`🎉 成功保存特展《${savedTheme.title}》！已同步到云端。`);
+      } catch (err) {
+        console.error('保存特展失败:', err);
+        showToast('❌ 特展未保存到云端：' + (err.message || '请稍后重试'));
+      }
     }
 
 
@@ -3555,43 +3710,47 @@
       }).join('');
     }
 
-    function deleteStickyNote(noteId, event) {
+    async function deleteStickyNote(noteId, event) {
       if (event) event.stopPropagation();
       const noteIndex = stickyNotes.findIndex(n => n.id === noteId);
       if (noteIndex === -1) return;
       const targetNote = stickyNotes[noteIndex];
 
       if (confirm(`【主理人管理】确定要从便签墙上彻底移除由“${targetNote.author}”发布的这张便签吗？`)) {
-        stickyNotes.splice(noteIndex, 1);
-        renderStickyWall();
-        if (window.galleryCloud) {
-          window.galleryCloud.deleteStickyNote(noteId);
+        try {
+          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+          await window.galleryCloud.deleteStickyNote(noteId);
+          stickyNotes.splice(noteIndex, 1);
+          renderStickyWall();
+          showToast('🗑️ 已成功从云端移除该条便签！');
+        } catch (err) {
+          console.error('删除便签失败:', err);
+          showToast('❌ 便签未从云端删除：' + (err.message || '请稍后重试'));
         }
-        showToast(`🗑️ 已成功从便签墙上移除该条便签！`);
       }
     }
 
-    function toggleStickyLike(noteId, event) {
+    async function toggleStickyLike(noteId, event) {
       if (event) event.stopPropagation();
       const note = stickyNotes.find(n => n.id === noteId);
       if (!note) return;
 
       if (note.isLiked) {
-        note.likes = Math.max(0, (note.likes || 1) - 1);
-        note.isLiked = false;
-      } else {
-        note.likes = (note.likes || 0) + 1;
-        note.isLiked = true;
-        if (window.galleryCloud) {
-          window.galleryCloud.likeStickyNote(noteId);
-        }
-        showToast(`❤️ 感谢您的喜爱与支持！已为 ${note.author} 的便签点赞！`);
+        showToast('❤️ 您已经为这条便签点过赞了');
+        return;
       }
 
-      const countEl = document.getElementById(`like-count-${noteId}`);
-      if (countEl) countEl.textContent = note.likes;
-
-      renderStickyWall();
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+        await window.galleryCloud.likeStickyNote(noteId);
+        note.likes = (note.likes || 0) + 1;
+        note.isLiked = true;
+        showToast(`❤️ 感谢您的喜爱与支持！已为 ${note.author} 的便签点赞！`);
+        renderStickyWall();
+      } catch (err) {
+        console.error('便签点赞失败:', err);
+        showToast('❌ 点赞未保存到云端：' + (err.message || '请稍后重试'));
+      }
     }
 
     function initStickyQrCode() {
@@ -3671,7 +3830,7 @@
       }
     }
 
-    function handleNewStickySubmit(e) {
+    async function handleNewStickySubmit(e) {
       e.preventDefault();
 
       const isAnon = document.getElementById('stickyAnonymousCheck') ? document.getElementById('stickyAnonymousCheck').checked : false;
@@ -3707,12 +3866,17 @@
         artworkImage: type === 'artwork' ? artworkImage : ''
       };
 
-      stickyNotes.unshift(newNote);
-      renderStickyWall();
-      closeNewStickyModal();
-
-      if (window.galleryCloud) {
-        window.galleryCloud.createStickyNote(newNote);
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+        showToast('☁️ 正在将便签保存到云端...');
+        const savedNote = await window.galleryCloud.createStickyNote(newNote);
+        stickyNotes.unshift(savedNote);
+        renderStickyWall();
+        closeNewStickyModal();
+      } catch (err) {
+        console.error('发布便签失败:', err);
+        showToast('❌ 便签未保存到云端：' + (err.message || '请稍后重试'));
+        return;
       }
 
       // 重置表单
@@ -4441,7 +4605,7 @@
       }
     }
 
-    function handleUploadSubmit(e) {
+    async function handleUploadSubmit(e) {
       e.preventDefault();
       
       const authorFromInput = document.getElementById('inputAuthor').value.trim();
@@ -4475,36 +4639,47 @@
       };
 
       const existingStudent = studentList.find(s => s.name === authorName);
-      if (!existingStudent) {
-        studentList.push({
-          id: 's-' + Date.now(),
-          name: authorName,
-          age: newArt.age,
-          ageGroup: newArt.ageGroup,
-          className: '想吃梨启蒙学员班',
-          avatar: newArt.image,
-          bio: '热爱绘画与自由想象的新生代小艺术家。',
-          featuredArtCount: 1
-        });
-      } else {
-        existingStudent.featuredArtCount = (existingStudent.featuredArtCount || 1) + 1;
-        existingStudent.age = newArt.age;
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+        showToast('☁️ 正在将画作保存到云端...');
+        const savedArt = await window.galleryCloud.createArtwork(newArt);
+
+        let studentWarning = '';
+        try {
+          if (!existingStudent) {
+            await window.galleryCloud.createStudent({
+              id: 's-' + Date.now(),
+              name: authorName,
+              age: savedArt.age,
+              ageGroup: savedArt.ageGroup,
+              className: '想吃梨启蒙学员班',
+              avatar: savedArt.image,
+              bio: '热爱绘画与自由想象的新生代小艺术家。',
+              featuredArtCount: 1
+            });
+          } else {
+            await window.galleryCloud.updateStudent({
+              ...existingStudent,
+              age: savedArt.age,
+              featuredArtCount: (existingStudent.featuredArtCount || 0) + 1
+            });
+          }
+        } catch (studentErr) {
+          console.warn('画作已保存，但学员档案联动失败:', studentErr);
+          studentWarning = '；学员档案联动失败，请到后台检查';
+        }
+
+        await syncDataFromCloud();
+        closeUploadModal();
+        document.getElementById('uploadForm').reset();
+        uploadedImagesBase64 = [];
+        renderUploadThumbs();
+
+        showToast(`🎉 成功收录《${savedArt.title}》（共 ${allImages.length} 张照片）并保存到云端${studentWarning}`);
+      } catch (err) {
+        console.error('保存画作失败:', err);
+        showToast('❌ 画作未保存到云端：' + (err.message || '请稍后重试'));
       }
-
-      artworks.unshift(newArt);
-      closeUploadModal();
-      renderGallery();
-      renderHall();
-      
-      if (window.galleryCloud) {
-        window.galleryCloud.createArtwork(newArt);
-      }
-
-      document.getElementById('uploadForm').reset();
-      uploadedImagesBase64 = [];
-      renderUploadThumbs();
-
-      showToast(`🎉 成功收录《${newArt.title}》（共 ${allImages.length} 个视角视角照片）！已同步上线！`);
     }
 
     function setupLightDismiss() {

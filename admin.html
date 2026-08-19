@@ -17,7 +17,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- 🍐 纯原生零依赖 Supabase 云数据库直连引擎 -->
   <script src="data.js?v=20260819"></script>
-  <script src="cloudConfig.js?v=20260818"></script>
+  <script src="cloudConfig.js?v=20260819_cloud_authority_v1"></script>
   <link rel="stylesheet" href="style.css?v=20260818">
   <script>
     tailwind.config = {
@@ -132,9 +132,12 @@
   <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
     
     <!-- 左侧导航菜单 -->
-    <aside id="adminSidebar" class="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#0A100C]/70 p-4 flex md:flex-col gap-1.5 overflow-x-auto md:overflow-visible flex-shrink-0">
-      <div class="hidden md:block text-[10px] font-mono text-stone-400 uppercase tracking-wider px-3 mb-1">
-        Management Modules
+    <aside id="adminSidebar" class="admin-sidebar w-full md:w-64 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#0A100C]/70 p-4 flex md:flex-col gap-1.5 overflow-x-auto md:overflow-visible flex-shrink-0">
+      <div class="admin-sidebar-heading hidden md:flex items-center justify-between gap-2 px-3 mb-1">
+        <span class="sidebar-label text-[10px] font-mono text-stone-400 uppercase tracking-wider">管理目录</span>
+        <button id="adminSidebarToggle" type="button" onclick="toggleAdminSidebar()" class="w-8 h-8 rounded-xl border border-white/10 text-stone-400 hover:text-[#10E57A] hover:bg-white/5 inline-flex items-center justify-center transition-all" title="折叠管理目录" aria-label="折叠管理目录" aria-expanded="true">
+          <i data-lucide="panel-left-close" class="w-4 h-4"></i>
+        </button>
       </div>
 
       <button 
@@ -143,7 +146,7 @@
         class="admin-nav-item active flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
       >
         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-        <span>📊 展厅数据总览</span>
+        <span class="sidebar-label">总览</span>
       </button>
 
       <button 
@@ -152,7 +155,7 @@
         class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
       >
         <i data-lucide="image" class="w-4 h-4"></i>
-        <span>🎨 少儿作品档案库</span>
+        <span class="sidebar-label">作品展</span>
       </button>
 
       <button 
@@ -161,7 +164,7 @@
         class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
       >
         <i data-lucide="users" class="w-4 h-4"></i>
-        <span>🌟 小艺术家名人堂</span>
+        <span class="sidebar-label">小艺术家</span>
       </button>
 
       <button 
@@ -170,7 +173,7 @@
         class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
       >
         <i data-lucide="book-open" class="w-4 h-4"></i>
-        <span>📚 课程作品集</span>
+        <span class="sidebar-label">作品集</span>
       </button>
 
       <button 
@@ -179,7 +182,7 @@
         class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
       >
         <i data-lucide="sparkles" class="w-4 h-4"></i>
-        <span>📝 美育专栏文章</span>
+        <span class="sidebar-label">专栏</span>
       </button>
 
       <button 
@@ -188,7 +191,7 @@
         class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap"
       >
         <i data-lucide="message-square" class="w-4 h-4"></i>
-        <span>💬 美育便签墙审核</span>
+        <span class="sidebar-label">便签墙</span>
       </button>
 
       <button 
@@ -197,10 +200,10 @@
         class="admin-nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left whitespace-nowrap text-emerald-400"
       >
         <i data-lucide="shield-check" class="w-4 h-4 text-[#10E57A]"></i>
-        <span class="text-emerald-300 font-black">🛡️ 数据固化与安全</span>
+        <span class="sidebar-label text-emerald-300 font-black">数据</span>
       </button>
 
-      <div class="mt-auto hidden md:block pt-6 border-t border-white/[0.06]">
+      <div class="admin-sidebar-info mt-auto hidden md:block pt-6 border-t border-white/[0.06]">
         <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-300 space-y-1">
           <div class="font-black flex items-center gap-1">
             <span>🛡️ 数据实时同步</span>
@@ -751,16 +754,13 @@
               </div>
             </div>
 
-            <!-- 中间：三种视图切换 -->
-            <div class="flex items-center gap-1 p-1 bg-stone-900/90 rounded-2xl border border-white/10 text-xs">
-              <button type="button" id="adminThemeTabVisual" onclick="switchAdminThemeEditorMode('visual')" class="px-3 py-1.5 rounded-xl font-bold transition-all bg-teal-500/20 text-teal-300 border border-teal-500/30 shadow-sm">
-                ✨ 所见即所得编辑
+            <!-- 博客编辑器：只保留写作与预览两个清晰状态 -->
+            <div class="flex items-center gap-1 p-1 bg-stone-900/90 rounded-xl border border-white/10 text-xs">
+              <button type="button" id="adminThemeTabVisual" onclick="switchAdminThemeEditorMode('visual')" class="px-3 py-1.5 rounded-lg font-bold transition-all bg-teal-500/20 text-teal-300 border border-teal-500/30 shadow-sm">
+                编辑
               </button>
-              <button type="button" id="adminThemeTabEdit" onclick="switchAdminThemeEditorMode('edit')" class="px-3 py-1.5 rounded-xl font-bold transition-all bg-transparent text-stone-400 hover:text-white">
-                📝 Markdown 源码
-              </button>
-              <button type="button" id="adminThemeTabPreview" onclick="switchAdminThemeEditorMode('preview')" class="px-3 py-1.5 rounded-xl font-bold transition-all bg-transparent text-stone-400 hover:text-white">
-                👁️ 真机排版预览
+              <button type="button" id="adminThemeTabPreview" onclick="switchAdminThemeEditorMode('preview')" class="px-3 py-1.5 rounded-lg font-bold transition-all bg-transparent text-stone-400 hover:text-white">
+                预览
               </button>
             </div>
 
@@ -895,40 +895,25 @@
               </div>
             </div>
 
-            <!-- 🛠️ 悬浮 Markdown 写作排版工具栏 -->
-            <div class="sticky top-20 z-20 flex flex-wrap items-center gap-1.5 p-2.5 rounded-2xl bg-[#111D15]/95 backdrop-blur-xl border border-teal-500/30 shadow-xl text-xs">
-              <button type="button" onclick="document.getElementById('adminThemeInlineImageFileInput').click()" class="px-2.5 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm" title="上传本地照片插入文章">
-                <span>📷 本地插图</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeWebImagePrompt()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入网络图片">
-                <span>🌐 网络图片</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeLinkPrompt()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入外部超链接">
-                <span>🔗 超链接</span>
-              </button>
-              <div class="h-4 w-[1px] bg-white/10 mx-0.5"></div>
-              <button type="button" onclick="insertAdminThemeHeading(2)" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入二级大标题">
-                <span>📌 H2 标题</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeHeading(3)" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入三级小标题">
-                <span>▸ H3 标题</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeBold()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="加粗文字">
-                <span><strong>B</strong> 加粗</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeQuote()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入金句引用">
-                <span>💬 引用</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeList()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入列表">
-                <span>• 列表</span>
-              </button>
-              <button type="button" onclick="insertAdminThemeDivider()" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer" title="插入分割线">
-                <span>--- 分割线</span>
-              </button>
-              <div class="h-4 w-[1px] bg-white/10 mx-0.5"></div>
-              <button type="button" onclick="pasteFromClipboardToEditor()" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold flex items-center gap-1 transition-all cursor-pointer ml-auto" title="一键粘贴剪贴板 Markdown">
-                <span>📋 粘贴剪贴板</span>
-              </button>
+            <!-- 简洁博客写作工具栏 -->
+            <div class="sticky top-20 z-20 flex flex-wrap items-center gap-1 p-2 rounded-xl bg-[#111D15]/95 backdrop-blur-xl border border-white/15 shadow-lg text-xs" role="toolbar" aria-label="文章格式工具">
+              <select onchange="formatAdminThemeBlock(this.value); this.value='p';" class="h-8 px-2 rounded-lg bg-stone-900 border border-white/10 text-stone-200 font-bold focus:outline-none focus:border-teal-400" aria-label="段落样式">
+                <option value="p">段落</option>
+                <option value="h2">大标题</option>
+                <option value="h3">小标题</option>
+              </select>
+              <div class="h-5 w-px bg-white/10 mx-1"></div>
+              <button type="button" onclick="formatAdminThemeCommand('bold')" class="editor-tool-btn" title="加粗" aria-label="加粗"><strong>B</strong></button>
+              <button type="button" onclick="formatAdminThemeCommand('italic')" class="editor-tool-btn italic" title="斜体" aria-label="斜体">I</button>
+              <button type="button" onclick="insertAdminThemeLinkPrompt()" class="editor-tool-btn" title="链接" aria-label="插入链接"><i data-lucide="link" class="w-4 h-4"></i></button>
+              <button type="button" onclick="insertAdminThemeQuote()" class="editor-tool-btn" title="引用" aria-label="插入引用"><i data-lucide="quote" class="w-4 h-4"></i></button>
+              <div class="h-5 w-px bg-white/10 mx-1"></div>
+              <button type="button" onclick="formatAdminThemeCommand('insertUnorderedList')" class="editor-tool-btn" title="项目列表" aria-label="项目列表"><i data-lucide="list" class="w-4 h-4"></i></button>
+              <button type="button" onclick="formatAdminThemeCommand('insertOrderedList')" class="editor-tool-btn" title="编号列表" aria-label="编号列表"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
+              <button type="button" onclick="document.getElementById('adminThemeInlineImageFileInput').click()" class="editor-tool-btn" title="插入图片" aria-label="插入图片"><i data-lucide="image-plus" class="w-4 h-4"></i></button>
+              <div class="h-5 w-px bg-white/10 mx-1"></div>
+              <button type="button" onclick="formatAdminThemeCommand('undo')" class="editor-tool-btn" title="撤销" aria-label="撤销"><i data-lucide="undo-2" class="w-4 h-4"></i></button>
+              <button type="button" onclick="formatAdminThemeCommand('redo')" class="editor-tool-btn" title="重做" aria-label="重做"><i data-lucide="redo-2" class="w-4 h-4"></i></button>
               <input type="file" id="adminThemeInlineImageFileInput" accept="image/*" class="hidden" onchange="handleAdminThemeInlineImageSelected(event)">
             </div>
 
@@ -939,8 +924,8 @@
                 <div 
                   id="themeVisualCanvas" 
                   contenteditable="true" 
-                  class="w-full min-h-[550px] p-6 sm:p-10 bg-stone-900/70 border border-white/15 rounded-3xl text-stone-100 focus:outline-none focus:border-teal-400/80 leading-[1.9] text-base sm:text-lg shadow-2xl transition-all select-text space-y-4"
-                  placeholder="在此直接输入正文内容，点击上方按钮或直接粘贴图片（Ctrl+V），图片将立即在画布中高清呈现..."
+                  class="w-full min-h-[520px] p-6 sm:p-8 bg-stone-900/70 border border-white/15 rounded-2xl text-stone-100 focus:outline-none focus:border-teal-400/80 leading-[1.9] text-base shadow-xl transition-all select-text"
+                  data-placeholder="开始写文章正文…可直接粘贴文字或图片"
                   oninput="handleVisualCanvasInput()"
                 >
                 </div>
@@ -1252,6 +1237,66 @@ button:focus:not(:focus-visible),
       background: #10E57A;
       font-weight: 900;
     }
+    .admin-sidebar {
+      transition: width 220ms ease, padding 220ms ease;
+    }
+
+    .admin-sidebar .sidebar-label,
+    .admin-sidebar .admin-sidebar-info {
+      transition: opacity 160ms ease, width 220ms ease;
+    }
+
+    @media (min-width: 768px) {
+      .admin-sidebar.is-collapsed {
+        width: 4.75rem !important;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+
+      .admin-sidebar.is-collapsed .sidebar-label,
+      .admin-sidebar.is-collapsed .admin-sidebar-info {
+        width: 0;
+        opacity: 0;
+        overflow: hidden;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+
+      .admin-sidebar.is-collapsed .admin-nav-item {
+        justify-content: center;
+        gap: 0;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+
+      .admin-sidebar.is-collapsed .admin-sidebar-heading {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    #themeVisualCanvas:empty::before {
+      content: attr(data-placeholder);
+      color: #57534e;
+      pointer-events: none;
+    }
+
+    #themeVisualCanvas h2 { font-size: 1.5rem; font-weight: 900; margin: 2rem 0 0.75rem; color: #fff; }
+    #themeVisualCanvas h3 { font-size: 1.2rem; font-weight: 800; margin: 1.5rem 0 0.5rem; color: #6ee7b7; }
+    #themeVisualCanvas p { margin: 0.75rem 0; }
+    #themeVisualCanvas blockquote { margin: 1.25rem 0; padding: 1rem 1.25rem; border-left: 3px solid #10E57A; background: rgba(16, 229, 122, 0.08); color: #d1fae5; }
+    .editor-tool-btn {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #d6d3d1;
+      transition: color 150ms ease, background 150ms ease;
+    }
+    .editor-tool-btn:hover { color: #10E57A; background: rgba(255, 255, 255, 0.07); }
   </style>
 
   <!-- 核心交互脚本 -->
@@ -1265,26 +1310,22 @@ button:focus:not(:focus-visible),
     // --- 数据加载与渲染 ---
     async function loadAllAdminData() {
       try {
-        if (window.galleryCloud) {
-          const [arts, themes, notes, students, albums] = await Promise.all([
-            window.galleryCloud.getArtworks(),
-            window.galleryCloud.getThematicExhibitions(),
-            window.galleryCloud.getStickyNotes(),
-            window.galleryCloud.getStudents(),
-            window.galleryCloud.getCourseAlbums ? window.galleryCloud.getCourseAlbums() : Promise.resolve([])
-          ]);
-          adminArtworks = arts || [];
-          adminThemes = themes || [];
-          adminNotes = notes || [];
-          adminStudents = students || [];
-          adminAlbums = albums || [];
-        } else {
-          adminArtworks = [];
-          adminThemes = [];
-          adminNotes = [];
-          adminStudents = [];
-          adminAlbums = [];
+        if (!window.galleryCloud) {
+          throw new Error('云端数据服务尚未加载');
         }
+
+        const [arts, themes, notes, students, albums] = await Promise.all([
+          window.galleryCloud.getArtworks(),
+          window.galleryCloud.getThematicExhibitions(),
+          window.galleryCloud.getStickyNotes(),
+          window.galleryCloud.getStudents(),
+          window.galleryCloud.getCourseAlbums ? window.galleryCloud.getCourseAlbums() : Promise.resolve([])
+        ]);
+        adminArtworks = arts || [];
+        adminThemes = themes || [];
+        adminNotes = notes || [];
+        adminStudents = students || [];
+        adminAlbums = albums || [];
 
         renderOverviewStats();
         renderAdminArtworksTable();
@@ -1297,6 +1338,7 @@ button:focus:not(:focus-visible),
         lucide.createIcons();
       } catch (e) {
         console.error('加载后台数据出错:', e);
+        showToast('❌ 云端数据加载失败：' + (e.message || '请稍后重试'));
       }
     }
 
@@ -1311,9 +1353,74 @@ button:focus:not(:focus-visible),
       } catch (e) {}
     }
 
-    function switchAdminTab(tabName) {
-      const allTabs = ['overview', 'artworks', 'albums', 'album-studio', 'themes', 'notes', 'students', 'backup', 'theme-studio'];
-      allTabs.forEach(tab => {
+    const ADMIN_TABS = ['overview', 'artworks', 'albums', 'album-studio', 'themes', 'notes', 'students', 'backup', 'theme-studio'];
+    const ADMIN_TAB_TITLES = {
+      overview: '总览',
+      artworks: '作品展',
+      albums: '作品集',
+      'album-studio': '编辑作品集',
+      themes: '专栏',
+      'theme-studio': '编辑专栏',
+      students: '小艺术家',
+      notes: '便签墙',
+      backup: '数据'
+    };
+
+    function getAdminTabFromUrl() {
+      const requested = new URL(window.location.href).searchParams.get('section') || 'overview';
+      return ADMIN_TABS.includes(requested) ? requested : 'overview';
+    }
+
+    function updateAdminUrl(tabName, replaceState = false) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('section', tabName);
+      url.searchParams.delete('id');
+
+      const editorId = tabName === 'theme-studio'
+        ? document.getElementById('themeFormId')?.value
+        : (tabName === 'album-studio' ? document.getElementById('albumFormId')?.value : '');
+
+      if (editorId) url.searchParams.set('id', editorId);
+
+      const nextUrl = url.pathname + url.search + url.hash;
+      const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+      if (nextUrl !== currentUrl) {
+        history[replaceState ? 'replaceState' : 'pushState']({ adminTab: tabName }, '', nextUrl);
+      }
+    }
+
+    function setAdminSidebarCollapsed(collapsed, persist = false) {
+      const sidebar = document.getElementById('adminSidebar');
+      const toggle = document.getElementById('adminSidebarToggle');
+      if (!sidebar) return;
+
+      sidebar.classList.toggle('is-collapsed', Boolean(collapsed));
+      if (toggle) {
+        toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        toggle.setAttribute('aria-label', collapsed ? '展开管理目录' : '折叠管理目录');
+        toggle.title = collapsed ? '展开管理目录' : '折叠管理目录';
+        toggle.innerHTML = `<i data-lucide="${collapsed ? 'panel-left-open' : 'panel-left-close'}" class="w-4 h-4"></i>`;
+      }
+      if (persist) {
+        localStorage.setItem('pear_admin_sidebar_collapsed', collapsed ? 'true' : 'false');
+      }
+      lucide.createIcons();
+    }
+
+    function initializeAdminSidebar() {
+      setAdminSidebarCollapsed(localStorage.getItem('pear_admin_sidebar_collapsed') === 'true');
+    }
+
+    function toggleAdminSidebar() {
+      const sidebar = document.getElementById('adminSidebar');
+      if (!sidebar) return;
+      setAdminSidebarCollapsed(!sidebar.classList.contains('is-collapsed'), true);
+    }
+
+    function switchAdminTab(tabName, updateUrl = true, replaceState = false) {
+      if (!ADMIN_TABS.includes(tabName)) tabName = 'overview';
+
+      ADMIN_TABS.forEach(tab => {
         const viewEl = document.getElementById(`admin-view-${tab}`);
         const btnEl = document.getElementById(`tab-btn-${tab}`);
         if (viewEl) viewEl.classList.add('hidden');
@@ -1321,22 +1428,36 @@ button:focus:not(:focus-visible),
       });
 
       const activeView = document.getElementById(`admin-view-${tabName}`);
-      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      const navTab = tabName === 'theme-studio' ? 'themes' : (tabName === 'album-studio' ? 'albums' : tabName);
+      const activeBtn = document.getElementById(`tab-btn-${navTab}`);
       if (activeView) activeView.classList.remove('hidden');
       if (activeBtn) activeBtn.classList.add('active');
 
-      // 如果进入策展工作台，隐藏左侧边栏提供 100% 全宽沉浸式画布
-      const sidebar = document.getElementById('adminSidebar');
-      if (sidebar) {
-        if (tabName === 'theme-studio' || tabName === 'album-studio') {
-          sidebar.classList.add('hidden');
-        } else {
-          sidebar.classList.remove('hidden');
-        }
+      const isStudio = tabName === 'theme-studio' || tabName === 'album-studio';
+      const savedCollapsed = localStorage.getItem('pear_admin_sidebar_collapsed') === 'true';
+      setAdminSidebarCollapsed(isStudio ? true : savedCollapsed);
+
+      if (updateUrl) updateAdminUrl(tabName, replaceState);
+      document.title = `${ADMIN_TAB_TITLES[tabName] || '后台'} · 想吃梨管理后台`;
+      window.scrollTo({ top: 0, behavior: updateUrl ? 'smooth' : 'auto' });
+      lucide.createIcons();
+    }
+
+    function applyAdminRouteFromUrl() {
+      const tabName = getAdminTabFromUrl();
+      const id = new URL(window.location.href).searchParams.get('id');
+
+      if (tabName === 'theme-studio') {
+        openThemeStudio(id || null, false);
+      } else if (tabName === 'album-studio') {
+        openAlbumStudio(id || null, false);
+      } else {
+        switchAdminTab(tabName, false);
       }
 
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      lucide.createIcons();
+      if (!new URL(window.location.href).searchParams.has('section')) {
+        updateAdminUrl(tabName, true);
+      }
     }
 
     function renderOverviewStats() {
@@ -1422,7 +1543,7 @@ button:focus:not(:focus-visible),
       lucide.createIcons();
     }
 
-    function openAlbumStudio(albumId = null) {
+    function openAlbumStudio(albumId = null, updateUrl = true) {
       const form = document.getElementById('albumForm');
       if (form) form.reset();
       currentStudioAlbumArtworks = [];
@@ -1465,7 +1586,7 @@ button:focus:not(:focus-visible),
       }
 
       renderAlbumStudioArtworks();
-      switchAdminTab('album-studio');
+      switchAdminTab('album-studio', updateUrl);
       lucide.createIcons();
     }
 
@@ -1658,22 +1779,22 @@ button:focus:not(:focus-visible),
 
       showToast('💾 正在保存课程作品集...');
       try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+        let savedAlbum;
         if (id) {
-          if (window.galleryCloud && window.galleryCloud.updateCourseAlbum) {
-            await window.galleryCloud.updateCourseAlbum(albumData);
-          }
+          savedAlbum = await window.galleryCloud.updateCourseAlbum(albumData);
           const idx = adminAlbums.findIndex(a => a.id === id);
-          if (idx !== -1) adminAlbums[idx] = albumData;
+          if (idx !== -1) adminAlbums[idx] = savedAlbum;
           showToast(`🎉 成功更新作品集《${title}》！`);
         } else {
-          if (window.galleryCloud && window.galleryCloud.createCourseAlbum) {
-            await window.galleryCloud.createCourseAlbum(albumData);
-          }
-          adminAlbums.unshift(albumData);
+          savedAlbum = await window.galleryCloud.createCourseAlbum(albumData);
+          adminAlbums.unshift(savedAlbum);
           showToast(`🎉 成功发布新作品集《${title}》！`);
         }
       } catch (err) {
         console.error('保存作品集失败:', err);
+        showToast(`❌ 作品集未保存到云端：${err.message || '请稍后重试'}`);
+        return;
       }
 
       renderAdminAlbumsGrid();
@@ -1685,14 +1806,18 @@ button:focus:not(:focus-visible),
     async function adminDeleteAlbum(id) {
       const alb = adminAlbums.find(a => a.id === id);
       if (confirm(`⚠️ 确定要删除课程作品集《${alb ? alb.title : id}》吗？`)) {
-        if (window.galleryCloud && window.galleryCloud.deleteCourseAlbum) {
+        try {
+          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
           await window.galleryCloud.deleteCourseAlbum(id);
+          adminAlbums = adminAlbums.filter(a => a.id !== id);
+          showToast('🗑️ 作品集已从云端删除');
+          renderAdminAlbumsGrid();
+          renderOverviewStats();
+          syncAdminToLocalCache();
+        } catch (err) {
+          console.error('删除作品集失败:', err);
+          showToast('❌ 作品集未从云端删除：' + (err.message || '请稍后重试'));
         }
-        adminAlbums = adminAlbums.filter(a => a.id !== id);
-        showToast('🗑️ 作品集已删除');
-        renderAdminAlbumsGrid();
-        renderOverviewStats();
-        syncAdminToLocalCache();
       }
     }
 
@@ -1891,6 +2016,9 @@ button:focus:not(:focus-visible),
 
     async function handleSaveArtwork(e) {
       e.preventDefault();
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+
       const id = document.getElementById('artFormId').value;
       const title = document.getElementById('artFormTitle').value.trim();
       const author = document.getElementById('artFormAuthor').value.trim();
@@ -1935,29 +2063,44 @@ button:focus:not(:focus-visible),
       // 联动检查小艺术家是否已存在
       const studentExists = adminStudents.find(s => s.name === author);
       if (!studentExists) {
-        const newStudent = {
-          id: 's-' + Date.now(),
-          name: author,
-          age,
-          ageGroup,
-          className: '想吃梨启蒙学员班',
-          avatar: mainImage,
-          bio: '热爱绘画与自由想象的新生代小艺术家。',
-          featuredArtCount: 1
-        };
-        if (window.galleryCloud) await window.galleryCloud.createStudent(newStudent);
+        try {
+          const newStudent = {
+            id: 's-' + Date.now(),
+            name: author,
+            age,
+            ageGroup,
+            className: '想吃梨启蒙学员班',
+            avatar: mainImage,
+            bio: '热爱绘画与自由想象的新生代小艺术家。',
+            featuredArtCount: 1
+          };
+          await window.galleryCloud.createStudent(newStudent);
+        } catch (studentErr) {
+          console.warn('画作已保存，但自动创建学员档案失败:', studentErr);
+          showToast('⚠️ 画作已保存；学员档案联动失败，请稍后在学员管理中补录');
+        }
       }
 
       closeArtworkModal();
       await loadAllAdminData();
+      } catch (err) {
+        console.error('保存画作失败:', err);
+        showToast('❌ 画作未保存到云端：' + (err.message || '请稍后重试'));
+      }
     }
 
     async function adminDeleteArtwork(id) {
       const art = adminArtworks.find(a => a.id === id);
       if (confirm(`【主理人管理】确定要删除画作《${art ? art.title : id}》吗？`)) {
-        if (window.galleryCloud) await window.galleryCloud.deleteArtwork(id);
-        showToast('🗑️ 画作已下架删除！');
-        await loadAllAdminData();
+        try {
+          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+          await window.galleryCloud.deleteArtwork(id);
+          showToast('🗑️ 画作已从云端删除！');
+          await loadAllAdminData();
+        } catch (err) {
+          console.error('删除画作失败:', err);
+          showToast('❌ 画作未从云端删除：' + (err.message || '请稍后重试'));
+        }
       }
     }
 
@@ -2056,6 +2199,9 @@ button:focus:not(:focus-visible),
 
     async function handleSaveStudent(e) {
       e.preventDefault();
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+
       const id = document.getElementById('studentFormId').value;
       const name = document.getElementById('studentFormName').value.trim();
       const ageGroup = document.getElementById('studentFormAgeGroup').value;
@@ -2089,14 +2235,15 @@ button:focus:not(:focus-visible),
         featuredArtCount: artCount
       };
 
+      let savedStudent;
       if (id) {
-        if (window.galleryCloud) await window.galleryCloud.updateStudent(studentData);
+        savedStudent = await window.galleryCloud.updateStudent(studentData);
         const idx = adminStudents.findIndex(s => s.id === id);
-        if (idx !== -1) adminStudents[idx] = studentData;
+        if (idx !== -1) adminStudents[idx] = savedStudent;
         showToast(`✨ 小艺术家 ${name} 的档案已更新！`);
       } else {
-        if (window.galleryCloud) await window.galleryCloud.createStudent(studentData);
-        adminStudents.unshift(studentData);
+        savedStudent = await window.galleryCloud.createStudent(studentData);
+        adminStudents.unshift(savedStudent);
         showToast(`🎉 成功添加小艺术家 ${name} 到名人堂！`);
       }
 
@@ -2105,18 +2252,28 @@ button:focus:not(:focus-visible),
       renderOverviewStats();
       updateAuthorDropdowns();
       syncAdminToLocalCache();
+      } catch (err) {
+        console.error('保存小艺术家失败:', err);
+        showToast('❌ 小艺术家档案未保存到云端：' + (err.message || '请稍后重试'));
+      }
     }
 
     async function adminDeleteStudent(id) {
       const s = adminStudents.find(item => item.id === id);
       if (confirm(`【主理人管理】确定要从小艺术家名人堂移除 ${s ? s.name : ''} 吗？`)) {
-        if (window.galleryCloud) await window.galleryCloud.deleteStudent(id);
-        adminStudents = adminStudents.filter(item => item.id !== id);
-        renderAdminStudentsGrid();
-        renderOverviewStats();
-        updateAuthorDropdowns();
-        syncAdminToLocalCache();
-        showToast('🗑️ 小艺术家档案已移除！');
+        try {
+          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+          await window.galleryCloud.deleteStudent(id);
+          adminStudents = adminStudents.filter(item => item.id !== id);
+          renderAdminStudentsGrid();
+          renderOverviewStats();
+          updateAuthorDropdowns();
+          syncAdminToLocalCache();
+          showToast('🗑️ 小艺术家档案已从云端移除！');
+        } catch (err) {
+          console.error('删除小艺术家失败:', err);
+          showToast('❌ 小艺术家档案未从云端删除：' + (err.message || '请稍后重试'));
+        }
       }
     }
 
@@ -2166,11 +2323,52 @@ button:focus:not(:focus-visible),
       lucide.createIcons();
     }
 
+    async function toggleThemeHero(id, checked) {
+      const theme = adminThemes.find(item => item.id === id);
+      if (!theme) return;
+
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+        const savedTheme = await window.galleryCloud.updateThematicExhibition({
+          ...theme,
+          isInHero: checked
+        });
+        const index = adminThemes.findIndex(item => item.id === id);
+        if (index >= 0) adminThemes[index] = savedTheme;
+        renderAdminThemesGrid();
+        syncAdminToLocalCache();
+        showToast(checked ? '🌟 已保存到首页轮播' : '⏸️ 已从首页轮播下线');
+      } catch (err) {
+        console.error('更新特展轮播状态失败:', err);
+        renderAdminThemesGrid();
+        showToast('❌ 轮播状态未保存到云端：' + (err.message || '请稍后重试'));
+      }
+    }
+
+    async function adminDeleteTheme(id) {
+      const theme = adminThemes.find(item => item.id === id);
+      if (!theme) return;
+      if (!confirm('确定要从云端删除特展《' + theme.title + '》吗？')) return;
+
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+        await window.galleryCloud.deleteThematicExhibition(id);
+        adminThemes = adminThemes.filter(item => item.id !== id);
+        renderAdminThemesGrid();
+        renderOverviewStats();
+        syncAdminToLocalCache();
+        showToast('🗑️ 特展已从云端删除');
+      } catch (err) {
+        console.error('删除特展失败:', err);
+        showToast('❌ 特展未从云端删除：' + (err.message || '请稍后重试'));
+      }
+    }
+
     function openThemeCreateModal(themeId = null) {
       openThemeStudio(themeId);
     }
 
-    function openThemeStudio(themeId = null) {
+    function openThemeStudio(themeId = null, updateUrl = true) {
       const form = document.getElementById('themeForm');
       if (form) form.reset();
 
@@ -2223,7 +2421,7 @@ button:focus:not(:focus-visible),
         if (canvas) canvas.innerHTML = '<p><br></p>';
       }
 
-      switchAdminTab('theme-studio');
+      switchAdminTab('theme-studio', updateUrl);
       lucide.createIcons();
     }
 
@@ -2386,6 +2584,18 @@ button:focus:not(:focus-visible),
       }
     }
 
+    function formatAdminThemeBlock(tagName) {
+      formatAdminThemeCommand('formatBlock', tagName || 'p');
+    }
+
+    function formatAdminThemeCommand(command, value = null) {
+      const canvas = document.getElementById('themeVisualCanvas');
+      if (!canvas) return;
+      canvas.focus();
+      document.execCommand(command, false, value);
+      syncCanvasToMarkdown();
+    }
+
     function insertAdminThemeHeading(level = 2) {
       if (adminThemeEditorCurrentMode === 'visual') {
         if (level === 2) {
@@ -2542,6 +2752,8 @@ button:focus:not(:focus-visible),
             const cap = figcap ? figcap.textContent.replace('📷', '').trim() : '';
             if (src) markdown += `![${cap}](${src})\n\n`;
           } else if (tag === 'h1' || tag === 'h2') {
+            htmlContent = htmlContent.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
+            htmlContent = htmlContent.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
             markdown += `## ${node.textContent.replace('✦', '').trim()}\n\n`;
           } else if (tag === 'h3' || tag === 'h4') {
             markdown += `### ${node.textContent.replace('▸', '').trim()}\n\n`;
@@ -2732,6 +2944,9 @@ button:focus:not(:focus-visible),
 
     async function handleSaveTheme(e) {
       e.preventDefault();
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+
       const id = document.getElementById('themeFormId').value;
       const title = document.getElementById('themeFormTitle').value.trim();
       const subTitle = document.getElementById('themeFormSubTitle').value.trim();
@@ -2760,14 +2975,15 @@ button:focus:not(:focus-visible),
         heroOrder: 1
       };
 
+      let savedTheme;
       if (id) {
-        if (window.galleryCloud) await window.galleryCloud.updateThematicExhibition(themeData);
+        savedTheme = await window.galleryCloud.updateThematicExhibition(themeData);
         const idx = adminThemes.findIndex(t => t.id === id);
-        if (idx !== -1) adminThemes[idx] = themeData;
+        if (idx !== -1) adminThemes[idx] = savedTheme;
         showToast(`✨ 专栏文章《${title}》已更新！`);
       } else {
-        if (window.galleryCloud) await window.galleryCloud.createThematicExhibition(themeData);
-        adminThemes.push(themeData);
+        savedTheme = await window.galleryCloud.createThematicExhibition(themeData);
+        adminThemes.push(savedTheme);
         showToast(`🎉 专栏文章《${title}》已发布！`);
       }
 
@@ -2775,6 +2991,10 @@ button:focus:not(:focus-visible),
       renderOverviewStats();
       syncAdminToLocalCache();
       switchAdminTab('themes');
+      } catch (err) {
+        console.error('保存特展失败:', err);
+        showToast('❌ 特展未保存到云端：' + (err.message || '请稍后重试'));
+      }
     }
 
     // =========================================================================
@@ -2823,14 +3043,18 @@ button:focus:not(:focus-visible),
 
     async function adminDeleteStickyNote(id) {
       if (confirm('【主理人管理】确定要从云端彻底删除此条便签吗？此操作无法撤销。')) {
-        adminNotes = adminNotes.filter(n => n.id !== id);
-        renderAdminNotesGrid();
-        renderOverviewStats();
-        syncAdminToLocalCache();
-        if (window.galleryCloud) {
+        try {
+          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
           await window.galleryCloud.deleteStickyNote(id);
+          adminNotes = adminNotes.filter(n => n.id !== id);
+          renderAdminNotesGrid();
+          renderOverviewStats();
+          syncAdminToLocalCache();
+          showToast('🗑️ 已成功从云端删除该便签！');
+        } catch (err) {
+          console.error('删除便签失败:', err);
+          showToast('❌ 便签未从云端删除：' + (err.message || '请稍后重试'));
         }
-        showToast('🗑️ 已成功销毁该便签！');
       }
     }
 
@@ -2848,16 +3072,17 @@ button:focus:not(:focus-visible),
       setTimeout(() => { box.classList.add('opacity-0'); }, 2200);
     }
 
-    function checkCuratorAuth() {
+    async function checkCuratorAuth() {
       const isAuthed = localStorage.getItem('pear_curator_auth') === 'true';
       const overlay = document.getElementById('curatorAuthOverlay');
       if (isAuthed && overlay) {
         overlay.classList.add('hidden');
-        loadAllAdminData();
+        await loadAllAdminData();
+        applyAdminRouteFromUrl();
       }
     }
 
-    function handleCuratorLogin(e) {
+    async function handleCuratorLogin(e) {
       e.preventDefault();
       const pwd = document.getElementById('curatorPasswordInput').value.trim();
       if (pwd === 'pear2026' || pwd === '123456' || pwd === 'pear888' || pwd === 'linlaoshi' || pwd === 'chenzuo' || pwd === 'chenlaoshi') {
@@ -2865,7 +3090,8 @@ button:focus:not(:focus-visible),
         const overlay = document.getElementById('curatorAuthOverlay');
         if (overlay) overlay.classList.add('hidden');
         showToast('🔓 身份验证成功，欢迎陈昨！');
-        loadAllAdminData();
+        await loadAllAdminData();
+        applyAdminRouteFromUrl();
       } else {
         showToast('❌ 密码错误，请重新输入');
       }
@@ -2972,6 +3198,12 @@ button:focus:not(:focus-visible),
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+      initializeAdminSidebar();
+      window.addEventListener('popstate', () => {
+        if (localStorage.getItem('pear_curator_auth') === 'true') {
+          applyAdminRouteFromUrl();
+        }
+      });
       checkCuratorAuth();
     });
   </script>

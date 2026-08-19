@@ -123,3 +123,19 @@ ALTER TABLE IF EXISTS artworks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS students DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS thematic_exhibitions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS sticky_notes DISABLE ROW LEVEL SECURITY;
+
+-- 便签点赞使用数据库原子更新，避免不同设备同时点赞时互相覆盖
+CREATE OR REPLACE FUNCTION public.increment_note_likes(row_id TEXT)
+RETURNS INTEGER
+LANGUAGE SQL
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  UPDATE public.sticky_notes
+  SET likes = COALESCE(likes, 0) + 1
+  WHERE id::TEXT = row_id
+  RETURNING likes;
+$$;
+
+REVOKE ALL ON FUNCTION public.increment_note_likes(TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.increment_note_likes(TEXT) TO anon, authenticated;

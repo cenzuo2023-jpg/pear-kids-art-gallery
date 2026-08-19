@@ -22,6 +22,61 @@ class NativeSupabaseService {
     console.log('🚀 原生 Supabase REST 引擎已就绪:', SUPABASE_URL);
   }
 
+  async _request(path, options = {}, label = '云端请求') {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}${path}`, {
+        ...options,
+        headers: {
+          ...REST_HEADERS,
+          ...(options.headers || {})
+        },
+        cache: 'no-store',
+        signal: controller.signal
+      });
+
+      const responseText = await res.text();
+      if (!res.ok) {
+        let detail = responseText;
+        try {
+          const parsed = responseText ? JSON.parse(responseText) : null;
+          detail = parsed?.message || parsed?.details || parsed?.hint || responseText;
+        } catch (e) {}
+        throw new Error(`${label}失败（HTTP ${res.status}）${detail ? `：${detail}` : ''}`);
+      }
+
+      if (!responseText) return null;
+      try {
+        return JSON.parse(responseText);
+      } catch (e) {
+        return responseText;
+      }
+    } catch (error) {
+      if (error && error.name === 'AbortError') {
+        throw new Error(`${label}超时，请检查网络后重试`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  _writeCache(key, list) {
+    try {
+      localStorage.setItem(`art_gallery_cache_${key}`, JSON.stringify(Array.isArray(list) ? list : []));
+    } catch (e) {}
+  }
+
+  _singleRow(data, label) {
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row || typeof row !== 'object') {
+      throw new Error(label + '失败：云端没有返回已写入的记录');
+    }
+    return row;
+  }
+
   // --- 字段映射 (DB -> Frontend) ---
   _fromDbArtwork(a) {
     if (!a) return null;
@@ -129,6 +184,7 @@ class NativeSupabaseService {
       intro: String(t.introSummary || t.intro || ''),
       curator_note: Array.isArray(t.curatorStatement) ? t.curatorStatement.join('\n\n') : String(t.curatorStatement || t.curator_note || ''),
       artwork_ids: rawIds,
+      sections: Array.isArray(t.keyHighlights) ? t.keyHighlights : (Array.isArray(t.sections) ? t.sections : []),
       is_in_hero: Boolean(t.isInHero !== false),
       hero_order: parseInt(t.heroOrder || t.hero_order || 1)
     };
@@ -220,41 +276,25 @@ class NativeSupabaseService {
   // 1. 少儿画作 (Artworks REST API)
   // =========================================================================
   async getArtworks() {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/artworks?select=*&order=created_at.desc`, {
-        method: 'GET',
-        headers: REST_HEADERS
-      });
-      if (!res.ok) return [];
-      const data = await res.json();
-      const list = (data || []).map(item => this._fromDbArtwork(item)).filter(Boolean);
-      try { localStorage.setItem('art_gallery_cache_artworks', JSON.stringify(list)); } catch (e) {}
-      console.log('🖼️ 成功直连 Supabase 拉取画作:', list.length, '件');
-      return list;
-    } catch (e) {
-      console.error('❌ getArtworks 网络异常:', e);
-      try {
-        const cached = localStorage.getItem('art_gallery_cache_artworks');
-        if (cached) return JSON.parse(cached);
-      } catch (err) {}
-      return [];
-    }
+    const data = await this._request(
+      '/rest/v1/artworks?select=*&order=created_at.desc',
+      { method: 'GET' },
+      '读取画作'
+    );
+    const list = (data || []).map(item => this._fromDbArtwork(item)).filter(Boolean);
+    this._writeCache('artworks', list);
+    console.log('🖼️ 成功直连 Supabase 拉取画作:', list.length, '件');
+    return list;
   }
 
   async createArtwork(artData) {
     const payload = this._toDbArtwork(artData);
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/artworks`, {
-      method: 'POST',
-      headers: REST_HEADERS,
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error('❌ 写入 Supabase 失败:', res.status, errText);
-      throw new Error(errText);
-    }
-    const data = await res.json();
-    const created = this._fromDbArtwork(Array.isArray(data) ? data[0] : data);
+    const data = await this._request(
+      '/rest/v1/artworks',
+      { method: 'POST', body: JSON.stringify(payload) },
+      '保存画作'
+    );
+    const created = this._fromDbArtwork(this._singleRow(data, '保存画作'));
     try {
       const cached = localStorage.getItem('art_gallery_cache_artworks');
       let list = cached ? JSON.parse(cached) : [];
@@ -267,18 +307,12 @@ class NativeSupabaseService {
 
   async updateArtwork(artData) {
     const payload = this._toDbArtwork(artData);
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/artworks?id=eq.${encodeURIComponent(payload.id)}`, {
-      method: 'PATCH',
-      headers: REST_HEADERS,
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error('❌ 更新 Supabase 失败:', res.status, errText);
-      throw new Error(errText);
-    }
-    const data = await res.json();
-    const updated = this._fromDbArtwork(Array.isArray(data) ? data[0] : data);
+    const data = await this._request(
+      `/rest/v1/artworks?id=eq.${encodeURIComponent(payload.id)}`,
+      { method: 'PATCH', body: JSON.stringify(payload) },
+      '更新画作'
+    );
+    const updated = this._fromDbArtwork(this._singleRow(data, '更新画作'));
     try {
       const cached = localStorage.getItem('art_gallery_cache_artworks');
       let list = cached ? JSON.parse(cached) : [];
@@ -291,6 +325,13 @@ class NativeSupabaseService {
   }
 
   async deleteArtwork(artId) {
+    const deleted = await this._request(
+      `/rest/v1/artworks?id=eq.${encodeURIComponent(artId)}`,
+      { method: 'DELETE' },
+      '删除画作'
+    );
+    this._singleRow(deleted, '删除画作');
+
     try {
       const cached = localStorage.getItem('art_gallery_cache_artworks');
       if (cached) {
@@ -300,47 +341,32 @@ class NativeSupabaseService {
       }
     } catch (e) {}
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/artworks?id=eq.${encodeURIComponent(artId)}`, {
-      method: 'DELETE',
-      headers: REST_HEADERS
-    });
-    return res.ok;
+    return true;
   }
 
   // =========================================================================
   // 2. 小艺术家名人堂 (Students REST API)
   // =========================================================================
   async getStudents() {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/students?select=*&order=created_at.desc`, {
-        method: 'GET',
-        headers: REST_HEADERS
-      });
-      if (!res.ok) return [];
-      const data = await res.json();
-      const list = (data || []).map(item => this._fromDbStudent(item)).filter(Boolean);
-      try { localStorage.setItem('art_gallery_cache_students', JSON.stringify(list)); } catch (e) {}
-      console.log('👑 成功直连 Supabase 拉取小艺术家:', list.length, '位');
-      return list;
-    } catch (e) {
-      try {
-        const cached = localStorage.getItem('art_gallery_cache_students');
-        if (cached) return JSON.parse(cached);
-      } catch (err) {}
-      return [];
-    }
+    const data = await this._request(
+      '/rest/v1/students?select=*&order=created_at.desc',
+      { method: 'GET' },
+      '读取小艺术家'
+    );
+    const list = (data || []).map(item => this._fromDbStudent(item)).filter(Boolean);
+    this._writeCache('students', list);
+    console.log('👑 成功直连 Supabase 拉取小艺术家:', list.length, '位');
+    return list;
   }
 
   async createStudent(studentData) {
     const payload = this._toDbStudent(studentData);
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/students`, {
-      method: 'POST',
-      headers: REST_HEADERS,
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    const created = this._fromDbStudent(Array.isArray(data) ? data[0] : data);
+    const data = await this._request(
+      '/rest/v1/students',
+      { method: 'POST', body: JSON.stringify(payload) },
+      '保存小艺术家'
+    );
+    const created = this._fromDbStudent(this._singleRow(data, '保存小艺术家'));
     try {
       const cached = localStorage.getItem('art_gallery_cache_students');
       let list = cached ? JSON.parse(cached) : [];
@@ -353,14 +379,12 @@ class NativeSupabaseService {
 
   async updateStudent(studentData) {
     const payload = this._toDbStudent(studentData);
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/students?id=eq.${encodeURIComponent(payload.id)}`, {
-      method: 'PATCH',
-      headers: REST_HEADERS,
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    const updated = this._fromDbStudent(Array.isArray(data) ? data[0] : data);
+    const data = await this._request(
+      `/rest/v1/students?id=eq.${encodeURIComponent(payload.id)}`,
+      { method: 'PATCH', body: JSON.stringify(payload) },
+      '更新小艺术家'
+    );
+    const updated = this._fromDbStudent(this._singleRow(data, '更新小艺术家'));
     try {
       const cached = localStorage.getItem('art_gallery_cache_students');
       let list = cached ? JSON.parse(cached) : [];
@@ -373,6 +397,13 @@ class NativeSupabaseService {
   }
 
   async deleteStudent(studentId) {
+    const deleted = await this._request(
+      `/rest/v1/students?id=eq.${encodeURIComponent(studentId)}`,
+      { method: 'DELETE' },
+      '删除小艺术家'
+    );
+    this._singleRow(deleted, '删除小艺术家');
+
     try {
       const cached = localStorage.getItem('art_gallery_cache_students');
       if (cached) {
@@ -382,50 +413,34 @@ class NativeSupabaseService {
       }
     } catch (e) {}
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/students?id=eq.${encodeURIComponent(studentId)}`, {
-      method: 'DELETE',
-      headers: REST_HEADERS
-    });
-    return res.ok;
+    return true;
   }
 
   // =========================================================================
   // 3. 美育专栏 / 博客文章 (Thematic Articles REST API)
   // =========================================================================
   async getThematicExhibitions() {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?select=*&order=created_at.desc`, {
-        method: 'GET',
-        headers: REST_HEADERS
-      });
-      if (!res.ok) return [];
-      const data = await res.json();
-      // 过滤掉课程画册 (课程画册 id 以 album- 开头或 tag 以 album: 开头)
-      const list = (data || [])
-        .filter(item => !String(item.id).startsWith('album-') && !String(item.tag || '').startsWith('album:'))
-        .map(item => this._fromDbTheme(item))
-        .filter(Boolean);
-      try { localStorage.setItem('art_gallery_cache_themes', JSON.stringify(list)); } catch (e) {}
-      return list;
-    } catch (e) {
-      try {
-        const cached = localStorage.getItem('art_gallery_cache_themes');
-        if (cached) return JSON.parse(cached);
-      } catch (err) {}
-      return [];
-    }
+    const data = await this._request(
+      '/rest/v1/thematic_exhibitions?select=*&order=created_at.desc',
+      { method: 'GET' },
+      '读取特展'
+    );
+    const list = (data || [])
+      .filter(item => !String(item.id).startsWith('album-') && !String(item.tag || '').startsWith('album:'))
+      .map(item => this._fromDbTheme(item))
+      .filter(Boolean);
+    this._writeCache('themes', list);
+    return list;
   }
 
   async createThematicExhibition(themeData) {
     const payload = this._toDbTheme(themeData);
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions`, {
-      method: 'POST',
-      headers: REST_HEADERS,
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    const created = this._fromDbTheme(Array.isArray(data) ? data[0] : data);
+    const data = await this._request(
+      '/rest/v1/thematic_exhibitions',
+      { method: 'POST', body: JSON.stringify(payload) },
+      '保存特展'
+    );
+    const created = this._fromDbTheme(this._singleRow(data, '保存特展'));
     try {
       const cached = localStorage.getItem('art_gallery_cache_themes');
       let list = cached ? JSON.parse(cached) : [];
@@ -438,14 +453,12 @@ class NativeSupabaseService {
 
   async updateThematicExhibition(themeData) {
     const payload = this._toDbTheme(themeData);
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?id=eq.${encodeURIComponent(payload.id)}`, {
-      method: 'PATCH',
-      headers: REST_HEADERS,
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    const updated = this._fromDbTheme(Array.isArray(data) ? data[0] : data);
+    const data = await this._request(
+      `/rest/v1/thematic_exhibitions?id=eq.${encodeURIComponent(payload.id)}`,
+      { method: 'PATCH', body: JSON.stringify(payload) },
+      '更新特展'
+    );
+    const updated = this._fromDbTheme(this._singleRow(data, '更新特展'));
     try {
       const cached = localStorage.getItem('art_gallery_cache_themes');
       let list = cached ? JSON.parse(cached) : [];
@@ -458,6 +471,13 @@ class NativeSupabaseService {
   }
 
   async deleteThematicExhibition(themeId) {
+    const deleted = await this._request(
+      `/rest/v1/thematic_exhibitions?id=eq.${encodeURIComponent(themeId)}`,
+      { method: 'DELETE' },
+      '删除特展'
+    );
+    this._singleRow(deleted, '删除特展');
+
     try {
       const cached = localStorage.getItem('art_gallery_cache_themes');
       if (cached) {
@@ -467,46 +487,31 @@ class NativeSupabaseService {
       }
     } catch (e) {}
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?id=eq.${encodeURIComponent(themeId)}`, {
-      method: 'DELETE',
-      headers: REST_HEADERS
-    });
-    return res.ok;
+    return true;
   }
 
   // =========================================================================
   // 4. 便签墙 (Sticky Notes REST API)
   // =========================================================================
   async getStickyNotes() {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/sticky_notes?select=*&is_hidden=eq.false&order=created_at.desc`, {
-        method: 'GET',
-        headers: REST_HEADERS
-      });
-      if (!res.ok) return [];
-      const data = await res.json();
-      const list = (data || []).map(item => this._fromDbNote(item)).filter(Boolean);
-      try { localStorage.setItem('art_gallery_cache_notes', JSON.stringify(list)); } catch (e) {}
-      return list;
-    } catch (e) {
-      try {
-        const cached = localStorage.getItem('art_gallery_cache_notes');
-        if (cached) return JSON.parse(cached);
-      } catch (err) {}
-      return [];
-    }
+    const data = await this._request(
+      '/rest/v1/sticky_notes?select=*&is_hidden=eq.false&order=created_at.desc',
+      { method: 'GET' },
+      '读取便签'
+    );
+    const list = (data || []).map(item => this._fromDbNote(item)).filter(Boolean);
+    this._writeCache('notes', list);
+    return list;
   }
 
   async createStickyNote(noteData) {
     const payload = this._toDbNote(noteData);
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/sticky_notes`, {
-      method: 'POST',
-      headers: REST_HEADERS,
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    const created = this._fromDbNote(Array.isArray(data) ? data[0] : data);
+    const data = await this._request(
+      '/rest/v1/sticky_notes',
+      { method: 'POST', body: JSON.stringify(payload) },
+      '发布便签'
+    );
+    const created = this._fromDbNote(this._singleRow(data, '发布便签'));
     try {
       const cached = localStorage.getItem('art_gallery_cache_notes');
       let list = cached ? JSON.parse(cached) : [];
@@ -518,16 +523,25 @@ class NativeSupabaseService {
   }
 
   async likeStickyNote(noteId) {
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/rpc/increment_note_likes`, {
+    await this._request(
+      '/rest/v1/rpc/increment_note_likes',
+      {
         method: 'POST',
-        headers: REST_HEADERS,
         body: JSON.stringify({ row_id: String(noteId) })
-      });
-    } catch (e) {}
+      },
+      '更新便签点赞'
+    );
+    return true;
   }
 
   async deleteStickyNote(noteId) {
+    const deleted = await this._request(
+      `/rest/v1/sticky_notes?id=eq.${encodeURIComponent(noteId)}`,
+      { method: 'DELETE' },
+      '删除便签'
+    );
+    this._singleRow(deleted, '删除便签');
+
     try {
       const cached = localStorage.getItem('art_gallery_cache_notes');
       if (cached) {
@@ -537,139 +551,66 @@ class NativeSupabaseService {
       }
     } catch (e) {}
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/sticky_notes?id=eq.${encodeURIComponent(noteId)}`, {
-      method: 'DELETE',
-      headers: REST_HEADERS
-    });
-    return res.ok;
+    return true;
   }
 
   // =========================================================================
-  // 5. 课程作品集 (Course Albums / Portfolios - 深度云端直连 + 本地优先)
+  // 5. 课程作品集 (Course Albums / Portfolios - Supabase 云端为唯一数据源)
   // =========================================================================
   async getCourseAlbums() {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?select=*&order=created_at.desc`, {
-        method: 'GET',
-        headers: REST_HEADERS
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const list = (data || [])
-          .filter(item => String(item.id).startsWith('album-') || String(item.tag || '').startsWith('album:'))
-          .map(item => this._fromDbAlbum(item))
-          .filter(Boolean);
-        
-        try { 
-          localStorage.setItem('art_gallery_cache_albums', JSON.stringify(list)); 
-          localStorage.setItem('pear_course_albums', JSON.stringify(list)); 
-        } catch (e) {}
-        console.log('📚 成功直连 Supabase 拉取课程作品集:', list.length, '套');
-        return list;
-      }
-    } catch (e) {
-      console.warn('云端读取作品集异常，回退本地缓存:', e);
-    }
+    const data = await this._request(
+      '/rest/v1/thematic_exhibitions?select=*&order=created_at.desc',
+      { method: 'GET' },
+      '读取课程作品集'
+    );
+    const list = (data || [])
+      .filter(item => String(item.id).startsWith('album-') || String(item.tag || '').startsWith('album:'))
+      .map(item => this._fromDbAlbum(item))
+      .filter(Boolean);
 
-    // 本地持久化缓存兜底
+    this._writeCache('albums', list);
     try {
-      const cached = localStorage.getItem('art_gallery_cache_albums') || localStorage.getItem('pear_course_albums');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
+      localStorage.setItem('pear_course_albums', JSON.stringify(list));
     } catch (e) {}
-
-    return [];
+    console.log('📚 成功直连 Supabase 拉取课程作品集:', list.length, '套');
+    return list;
   }
 
   async createCourseAlbum(albumData) {
     const payload = this._toDbAlbum(albumData);
-    
-    // 1. 本地存储立即写入 (0毫秒响应)
-    try {
-      const cached = localStorage.getItem('art_gallery_cache_albums') || localStorage.getItem('pear_course_albums');
-      let list = cached ? JSON.parse(cached) : [];
-      list = list.filter(a => String(a.id) !== String(payload.id));
-      list.unshift(this._fromDbAlbum(payload));
-      localStorage.setItem('art_gallery_cache_albums', JSON.stringify(list));
-      localStorage.setItem('pear_course_albums', JSON.stringify(list));
-    } catch (e) {}
-
-    // 2. 直连 Supabase 保存
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions`, {
-        method: 'POST',
-        headers: REST_HEADERS,
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error('❌ 保存作品集到 Supabase 失败:', errText);
-      } else {
-        const data = await res.json();
-        return this._fromDbAlbum(Array.isArray(data) ? data[0] : data);
-      }
-    } catch (e) {
-      console.error('云端保存作品集异常:', e);
-    }
-
-    return this._fromDbAlbum(payload);
+    const data = await this._request(
+      '/rest/v1/thematic_exhibitions',
+      { method: 'POST', body: JSON.stringify(payload) },
+      '保存课程作品集'
+    );
+    const created = this._fromDbAlbum(this._singleRow(data, '保存课程作品集'));
+    const list = await this.getCourseAlbums();
+    this._writeCache('albums', list);
+    return created;
   }
 
   async updateCourseAlbum(albumData) {
     const payload = this._toDbAlbum(albumData);
-
-    // 1. 本地存储立即更新
-    try {
-      const cached = localStorage.getItem('art_gallery_cache_albums') || localStorage.getItem('pear_course_albums');
-      let list = cached ? JSON.parse(cached) : [];
-      const idx = list.findIndex(a => String(a.id) === String(payload.id));
-      const formatted = this._fromDbAlbum(payload);
-      if (idx !== -1) list[idx] = formatted;
-      else list.unshift(formatted);
-      localStorage.setItem('art_gallery_cache_albums', JSON.stringify(list));
-      localStorage.setItem('pear_course_albums', JSON.stringify(list));
-    } catch (e) {}
-
-    // 2. 直连 Supabase 更新
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?id=eq.${encodeURIComponent(payload.id)}`, {
-        method: 'PATCH',
-        headers: REST_HEADERS,
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return this._fromDbAlbum(Array.isArray(data) ? data[0] : data);
-      }
-    } catch (e) {
-      console.error('云端更新作品集异常:', e);
-    }
-
-    return this._fromDbAlbum(payload);
+    const data = await this._request(
+      `/rest/v1/thematic_exhibitions?id=eq.${encodeURIComponent(payload.id)}`,
+      { method: 'PATCH', body: JSON.stringify(payload) },
+      '更新课程作品集'
+    );
+    const updated = this._fromDbAlbum(this._singleRow(data, '更新课程作品集'));
+    const list = await this.getCourseAlbums();
+    this._writeCache('albums', list);
+    return updated;
   }
 
   async deleteCourseAlbum(albumId) {
-    // 1. 本地存储立即删除
-    try {
-      const cached = localStorage.getItem('art_gallery_cache_albums') || localStorage.getItem('pear_course_albums');
-      if (cached) {
-        let list = JSON.parse(cached);
-        list = list.filter(a => String(a.id) !== String(albumId));
-        localStorage.setItem('art_gallery_cache_albums', JSON.stringify(list));
-        localStorage.setItem('pear_course_albums', JSON.stringify(list));
-      }
-    } catch (e) {}
-
-    // 2. 直连 Supabase 删除
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?id=eq.${encodeURIComponent(albumId)}`, {
-        method: 'DELETE',
-        headers: REST_HEADERS
-      });
-    } catch (e) {}
-
+    const deleted = await this._request(
+      `/rest/v1/thematic_exhibitions?id=eq.${encodeURIComponent(albumId)}`,
+      { method: 'DELETE' },
+      '删除课程作品集'
+    );
+    this._singleRow(deleted, '删除课程作品集');
+    const list = await this.getCourseAlbums();
+    this._writeCache('albums', list);
     return true;
   }
 }
