@@ -58,7 +58,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-8 hidden sm:flex h-16 sm:h-20 items-center justify-between gap-4 sm:gap-6">
       
       <!-- 品牌标识 (🍐 梨子卡通徽标 + 想吃梨儿童艺术启蒙，内置主理人专属暗门) -->
-      <div class="flex items-center gap-2.5 sm:gap-3.5 cursor-pointer group flex-shrink-0" onclick="navigateTo('gallery')">
+      <div class="flex items-center gap-2.5 sm:gap-3.5 cursor-pointer group flex-shrink-0" onclick="navigateTo('home')">
         <div 
           id="brandLogoSecretBtn"
           onclick="handleBrandSecretClick(event)"
@@ -83,7 +83,7 @@
         <nav class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
           <button 
             id="nav-tab-gallery" 
-            onclick="navigateTo('gallery')" 
+            onclick="navigateTo('home')" 
             class="nav-tab active flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none"
           >
             <span class="text-xs sm:text-sm">🖼️</span>
@@ -160,7 +160,7 @@
     <div class="sm:hidden flex flex-col w-full px-2.5 pt-2 pb-1.5">
       <!-- 移动端顶部第一行：Logo + 右侧操作按钮 -->
       <div class="flex items-center justify-between w-full pb-1.5">
-        <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('gallery')">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('home')">
           <div 
             onclick="handleBrandSecretClick(event)"
             class="w-7 h-7 rounded-xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-[#10E57A] flex items-center justify-center text-stone-950 font-bold shadow-sm text-xs"
@@ -185,7 +185,7 @@
 
       <!-- 移动端顶部第二行：全宽等分6格导航胶囊 (完美容纳全部6大核心板块) -->
       <div class="grid grid-cols-6 gap-0.5 w-full py-0.5 text-center">
-        <button id="nav-tab-gallery-mob" onclick="navigateTo('gallery')" class="mob-nav-tab active flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-black transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-sm w-full">
+        <button id="nav-tab-gallery-mob" onclick="navigateTo('home')" class="mob-nav-tab active flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-black transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-sm w-full">
           <span>🖼️</span><span class="truncate">展厅</span>
         </button>
         <button id="nav-tab-albums-mob" onclick="navigateTo('albums')" class="mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full">
@@ -210,8 +210,11 @@
   <!-- ========================================================================= -->
   <!-- 页面视图一：【作品全览展厅 (Gallery View)】 -->
   <!-- ========================================================================= -->
-  <div id="view-gallery" class="view-page flex-1 flex flex-col z-10">
-    <!-- 🌟 顶部开篇：电影级【本期策展精选焦点大展台】(Curated Masterpieces Carousel) -->
+    <!-- ========================================================================= -->
+  <!-- 页面视图一：🏠【想吃梨美育·综合主页 (Home Hub View)】 -->
+  <!-- ========================================================================= -->
+  <div id="view-home" class="view-page flex-1 flex flex-col z-10">
+    <!-- 1. 顶部焦点特展大轮播 (Cinematic Carousel) -->
     <section class="max-w-7xl mx-auto px-3 sm:px-8 pt-4 sm:pt-8 pb-8 sm:pb-10 w-full">
       <div 
         id="curatedCarouselContainer" 
@@ -219,23 +222,23 @@
         onmouseenter="pauseCarousel()" 
         onmouseleave="resumeCarousel()"
       >
-        <!-- ⚙️ 主理人专属：首页特展排期管理按键 (管理模式激活时在右上角展示) -->
+        <!-- 特展快捷策划入口 -->
         <button 
           id="carouselAdminBtn" 
           onclick="openThemeEditModal()" 
           class="hidden absolute top-4 right-4 z-30 px-3.5 py-1.5 rounded-full bg-stone-950/80 hover:bg-[#10E57A] hover:text-stone-950 text-white font-extrabold text-xs backdrop-blur-xl border border-white/20 transition-all active:scale-95 flex items-center gap-1.5 shadow-2xl"
-          title="管理首页特展排期与策划新特展"
+          title="策划新特展"
         >
-          <span>⚙️</span>
-          <span>管理首页特展排期</span>
+          <span>✨</span>
+          <span>策划特展</span>
         </button>
 
         <!-- 轮播幻灯片容器 -->
         <div id="carouselSlidesBox" class="relative w-full h-full overflow-hidden">
-          <!-- JS 动态渲染各张精选轮播作品 -->
+          <!-- JS 动态渲染焦点特展作品 -->
         </div>
 
-        <!-- 轮播左右切换按钮 (可爱悬浮圆形按键) -->
+        <!-- 轮播切换按钮 -->
         <button 
           onclick="prevCarouselSlide()" 
           class="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/40 hover:bg-[#10E57A] hover:text-stone-950 text-white backdrop-blur-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all active:scale-95 shadow-lg"
@@ -251,20 +254,18 @@
           <i data-lucide="chevron-right" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </button>
 
-        <!-- 底部轮播指示条 -->
+        <!-- 底部轮播指示器 -->
         <div class="absolute bottom-4 sm:bottom-6 right-5 sm:right-8 z-20 flex items-center gap-1.5 sm:gap-2" id="carouselIndicatorsBox">
-          <!-- JS 渲染指示器条 -->
+          <!-- JS 渲染指示点 -->
         </div>
       </div>
     </section>
 
-    <!-- 首页主展示区：1. 作品集在上方 2. 个人作品在下方并配齐标准标题与介绍 -->
-    <main class="flex-1 max-w-7xl mx-auto px-3 sm:px-8 pb-20 w-full">
+    <!-- 首页主内容区：课程作品集在上方 + 学员个人作品在下方 -->
+    <main class="flex-1 max-w-7xl mx-auto px-3 sm:px-8 pb-20 w-full space-y-14 sm:space-y-16">
       
-      <!-- ========================================================================= -->
-      <!-- 🌟 上方板块：📚 课程作品集专区 (Thematic Course Albums) -->
-      <!-- ========================================================================= -->
-      <section class="mb-14 sm:mb-16">
+      <!-- 🌟 上方板块：📚 课程作品集专区 -->
+      <section>
         <div class="flex items-end justify-between gap-4 mb-6">
           <div class="space-y-1">
             <div class="text-[11px] font-mono uppercase tracking-widest text-emerald-600 dark:text-[#10E57A] flex items-center gap-1.5 font-bold">
@@ -297,11 +298,8 @@
         </div>
       </section>
 
-      <!-- ========================================================================= -->
-      <!-- 🌟 下方板块：🎨 学员个人原作展厅 (Contemporary Solo Artworks) -->
-      <!-- ========================================================================= -->
+      <!-- 🌟 下方板块：🎨 学员个人画作精选 -->
       <section class="pt-10 sm:pt-12 border-t border-black/[0.06] dark:border-white/[0.08]">
-        <!-- 标题栏：与作品集保持完全一致的规格与视觉语言 -->
         <div class="flex items-end justify-between gap-4 mb-6">
           <div class="space-y-1">
             <div class="text-[11px] font-mono uppercase tracking-widest text-emerald-600 dark:text-[#10E57A] flex items-center gap-1.5 font-bold">
@@ -314,54 +312,99 @@
               收录孩子们独立创作的原生画作，用纯真笔触与独特视角表达无拘无束的内心世界
             </p>
           </div>
+          <button 
+            onclick="navigateTo('gallery')" 
+            class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-[#10E57A] text-xs font-bold transition-all cursor-pointer flex-shrink-0"
+          >
+            <span>进入全部画作展厅</span>
+            <span>→</span>
+          </button>
         </div>
 
-        <!-- 控制栏：精巧独立胶囊分段器 + 智能搜索 -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-8 sm:mb-10 pb-2">
-          <!-- 年龄段分段控制器 4 格自适应排版 -->
-          <div class="grid grid-cols-4 sm:flex items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto py-1">
-            <button onclick="setAgeFilter('all')" class="age-tab active h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap font-extrabold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="all">
-              <span>🌈 全部</span>
-            </button>
-            <button onclick="setAgeFilter('3-5')" class="age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="3-5">
-              <span>🐣 3-5岁<span class="hidden md:inline"> · 启蒙</span></span>
-            </button>
-            <button onclick="setAgeFilter('6-8')" class="age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="6-8">
-              <span>🚀 6-8岁<span class="hidden md:inline"> · 创想</span></span>
-            </button>
-            <button onclick="setAgeFilter('9-12')" class="age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="9-12">
-              <span>🎨 9-12岁<span class="hidden md:inline"> · 创作</span></span>
-            </button>
-          </div>
-
-          <!-- 极简精巧搜索框 (h-8) -->
-          <div class="relative w-full sm:w-auto flex items-center">
-            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500"></i>
-            <input 
-              type="text" 
-              id="searchInput" 
-              placeholder="🔍 搜索小作者名字、画作标题..." 
-              oninput="handleSearch(this.value)"
-              class="w-full sm:w-60 pl-8 pr-3.5 h-8 bg-white dark:bg-[#15241B] border border-black/[0.04] dark:border-emerald-500/20 rounded-full text-xs text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all shadow-sm flex items-center"
-            />
-          </div>
+        <!-- 首页精选画作网格 (精选前6幅) -->
+        <div id="homeFeaturedGalleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+          <!-- JS 动态渲染首页精选画作卡片 -->
         </div>
 
-        <!-- 画廊大网格 (少儿美育装裱卡片) -->
-        <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
-          <!-- JS 动态渲染全部画作卡片 -->
-        </div>
-
-        <!-- 空状态 -->
-        <div id="emptyState" class="hidden py-24 text-center">
-          <div class="w-14 h-14 rounded-full bg-emerald-100 dark:bg-stone-800 flex items-center justify-center mx-auto text-2xl mb-3 shadow-inner">
-            🎨
-          </div>
-          <p class="text-stone-500 dark:text-stone-400 text-sm font-medium">暂时没有找到相关画作哦</p>
-          <button onclick="resetFilters()" class="mt-3 text-xs text-emerald-600 dark:text-[#10E57A] font-bold underline underline-offset-4">查看全部小朋友的作品</button>
+        <div class="text-center mt-8">
+          <button 
+            onclick="navigateTo('gallery')" 
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-stone-900 dark:bg-emerald-500 text-white dark:text-stone-950 font-black text-xs sm:text-sm hover:scale-105 transition-all shadow-lg cursor-pointer"
+          >
+            <span>🎨 浏览全部学员个人作品</span>
+            <span>→</span>
+          </button>
         </div>
       </section>
 
+    </main>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 页面视图：🖼️【单独以学员个人作品为展示的画作展厅 (Dedicated Solo Gallery)】 -->
+  <!-- ========================================================================= -->
+  <div id="view-gallery" class="view-page hidden flex-1 flex flex-col z-10">
+    <!-- 画作展厅专属 Header -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-4 w-full">
+      <div class="space-y-2 mb-6">
+        <div class="text-[11px] font-mono uppercase tracking-widest text-emerald-600 dark:text-[#10E57A] flex items-center gap-1.5 font-bold">
+          <span>🎨 CONTEMPORARY SOLO ARTWORKS GALLERY</span>
+        </div>
+        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-stone-50 tracking-tight flex items-center gap-2.5">
+          <span>少儿当代画作展厅</span>
+          <span class="text-sm sm:text-base font-normal text-stone-400 font-mono" id="soloGalleryTotalBadge">(共 9 幅原作)</span>
+        </h1>
+        <p class="text-xs sm:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed">
+          这里独立收录了小艺术家们在探索过程中创作的原生力作。不预设标准答案，不教成人化套路，每一幅画都是孩子与真实世界最纯粹、最珍贵的童心对话。
+        </p>
+      </div>
+
+      <!-- 控制栏：年龄段胶囊分段器 + 实时智能搜索框 -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-6 border-b border-black/[0.06] dark:border-white/[0.08]">
+        <!-- 年龄段分段控制器 4 格自适应排版 -->
+        <div class="grid grid-cols-4 sm:flex items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto py-1">
+          <button onclick="setAgeFilter('all')" class="age-tab active h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap font-extrabold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="all">
+            <span>🌈 全部</span>
+          </button>
+          <button onclick="setAgeFilter('3-5')" class="age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="3-5">
+            <span>🐣 3-5岁<span class="hidden md:inline"> · 启蒙</span></span>
+          </button>
+          <button onclick="setAgeFilter('6-8')" class="age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="6-8">
+            <span>🚀 6-8岁<span class="hidden md:inline"> · 创想</span></span>
+          </button>
+          <button onclick="setAgeFilter('9-12')" class="age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="9-12">
+            <span>🎨 9-12岁<span class="hidden md:inline"> · 创作</span></span>
+          </button>
+        </div>
+
+        <!-- 极简精巧搜索框 -->
+        <div class="relative w-full sm:w-auto flex items-center">
+          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500"></i>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="🔍 搜索小作者名字、画作标题..." 
+            oninput="handleSearch(this.value)"
+            class="w-full sm:w-64 pl-8 pr-3.5 h-9 bg-white dark:bg-[#15241B] border border-black/[0.06] dark:border-emerald-500/20 rounded-full text-xs text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all shadow-sm flex items-center"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- 画作全景大网格 -->
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-24 w-full">
+      <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+        <!-- JS 动态渲染全部学员画作卡片 -->
+      </div>
+
+      <!-- 空状态提示 -->
+      <div id="emptyState" class="hidden py-24 text-center">
+        <div class="w-14 h-14 rounded-full bg-emerald-100 dark:bg-stone-800 flex items-center justify-center mx-auto text-2xl mb-3 shadow-inner">
+          🎨
+        </div>
+        <p class="text-stone-500 dark:text-stone-400 text-sm font-medium">暂时没有找到相关画作哦</p>
+        <button onclick="resetFilters()" class="mt-3 text-xs text-emerald-600 dark:text-[#10E57A] font-bold underline underline-offset-4">查看全部小朋友的作品</button>
+      </div>
     </main>
   </div>
 
@@ -3267,11 +3310,30 @@
     }
 
     // =========================================================================
+    // =========================================================================
     // 🌐 全功能 URL Hash 路由与浏览器前进后退历史管理器 (Browser History & Hash Router)
     // =========================================================================
+    function updateNavTabState(activeView) {
+      const tabs = ['gallery', 'albums', 'themes', 'hall', 'notes', 'teacher'];
+      const TAB_ACTIVE = 'nav-tab active flex items-center gap-1.5 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none';
+      const TAB_INACTIVE = 'nav-tab flex items-center gap-1.5 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none';
+
+      const MOB_ACTIVE = 'mob-nav-tab active flex items-center justify-center gap-0.5 py-1.5 rounded-xl text-[11px] font-black transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-sm w-full';
+      const MOB_INACTIVE = 'mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-xl text-[11px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full';
+
+      tabs.forEach(t => {
+        const desk = document.getElementById('nav-tab-' + t);
+        const mob = document.getElementById('nav-tab-' + t + '-mob');
+        const isCurrent = (t === activeView || (activeView === 'theme' && t === 'themes'));
+        if (desk) desk.className = isCurrent ? TAB_ACTIVE : TAB_INACTIVE;
+        if (mob) mob.className = isCurrent ? MOB_ACTIVE : MOB_INACTIVE;
+      });
+    }
+
     function getHashRoute() {
       const rawHash = (window.location.hash || '').replace(/^#\/?/, '').trim();
-      if (!rawHash || rawHash === 'gallery') return { view: 'gallery', param: null };
+      if (!rawHash || rawHash === 'home') return { view: 'home', param: null };
+      if (rawHash === 'gallery') return { view: 'gallery', param: null };
       if (rawHash === 'albums') return { view: 'albums', param: null };
       if (rawHash === 'themes') return { view: 'themes', param: null };
       if (rawHash === 'hall') return { view: 'hall', param: null };
@@ -3296,7 +3358,7 @@
         return { view: 'theme', param: theme || paramVal };
       }
 
-      return { view: 'gallery', param: null };
+      return { view: 'home', param: null };
     }
 
     function handleHashRoute() {
@@ -3309,7 +3371,6 @@
       document.querySelectorAll('.view-page').forEach(el => el.classList.add('hidden'));
       updateNavTabState(viewName);
 
-      // 🌟 同步更新浏览器 URL Hash，完整支持独立网址分享、页面刷新保持与前进/后退！
       if (updateHash) {
         let hashStr = `#/${viewName}`;
         if (viewName === 'album-detail' && paramData) {
@@ -3321,17 +3382,25 @@
         } else if (viewName === 'theme' && paramData) {
           const id = typeof paramData === 'object' ? paramData.id : paramData;
           hashStr = `#/theme/${encodeURIComponent(id)}`;
-        } else if (viewName === 'gallery') {
-          hashStr = '#/gallery';
+        } else if (viewName === 'home') {
+          hashStr = '#/home';
         }
         if (window.location.hash !== hashStr) {
           history.pushState(null, '', hashStr);
         }
       }
 
-      if (viewName === 'gallery') {
-        document.getElementById('view-gallery').classList.remove('hidden');
+      if (viewName === 'home') {
+        document.getElementById('view-home').classList.remove('hidden');
         resumeCarousel();
+        renderCuratedCarousel();
+        renderGallery();
+        renderAlbums();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (viewName === 'gallery') {
+        pauseCarousel();
+        document.getElementById('view-gallery').classList.remove('hidden');
+        renderGallery();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'albums') {
         pauseCarousel();
