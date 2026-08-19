@@ -1255,12 +1255,43 @@
             </div>
           </div>
 
-          <!-- 策展前言深度长文 -->
-          <div>
-            <label class="block font-bold text-stone-700 dark:text-stone-300 mb-1">
-              策展前言与美育文章正文 * <span class="text-[10px] text-stone-400 font-normal">(按回车换行即可自动分段排版)</span>
-            </label>
-            <textarea id="themeEditCuratorStatement" rows="5" required placeholder="输入特展的策展思考、教学洞察与美育心语..." class="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:border-emerald-500 leading-relaxed"></textarea>
+          <!-- 🎨 强大的图文混合编辑板块 (支持插入本地图片、外部链接、小标题与金句) -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="block font-bold text-stone-700 dark:text-stone-300">
+                📝 策展前言与美育文章正文 * <span class="text-[10px] text-emerald-600 dark:text-[#10E57A] font-normal">(支持自由图文混排与外部链接)</span>
+              </label>
+            </div>
+
+            <!-- 图文快速插入工具栏 -->
+            <div class="flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-emerald-50/60 dark:bg-stone-800/80 border border-emerald-300/40 dark:border-stone-700 text-xs">
+              <button type="button" onclick="document.getElementById('indexThemeInlineImageFileInput').click()" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-800 dark:text-[#10E57A] font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm">
+                <span>📷 插入本地图片</span>
+              </button>
+              <button type="button" onclick="insertIndexThemeWebImagePrompt()" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-700 hover:bg-stone-100 text-stone-700 dark:text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer border border-black/5 dark:border-white/5">
+                <span>🌐 网络图片</span>
+              </button>
+              <button type="button" onclick="insertIndexThemeLinkPrompt()" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-700 hover:bg-stone-100 text-stone-700 dark:text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer border border-black/5 dark:border-white/5">
+                <span>🔗 插入超链接</span>
+              </button>
+              <button type="button" onclick="insertIndexThemeHeading()" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-700 hover:bg-stone-100 text-stone-700 dark:text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer border border-black/5 dark:border-white/5">
+                <span>📌 小标题</span>
+              </button>
+              <button type="button" onclick="insertIndexThemeQuote()" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-stone-700 hover:bg-stone-100 text-stone-700 dark:text-stone-200 font-bold flex items-center gap-1 transition-all cursor-pointer border border-black/5 dark:border-white/5">
+                <span>💬 金句引用</span>
+              </button>
+              <input type="file" id="indexThemeInlineImageFileInput" accept="image/*" class="hidden" onchange="handleIndexThemeInlineImageSelected(event)">
+            </div>
+
+            <div>
+              <textarea 
+                id="themeEditCuratorStatement" 
+                rows="6" 
+                required 
+                placeholder="写下本期特展的深度策展手记...&#10;&#10;💡 点击上方【📷 插入本地图片】即可直接上传画作照片混排；&#10;💡 点击【🔗 插入超链接】即可加入任意文章或视频链接！" 
+                class="w-full px-3.5 py-3 bg-stone-50 dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:border-emerald-500 leading-relaxed font-mono text-xs text-stone-900 dark:text-stone-100"
+              ></textarea>
+            </div>
           </div>
 
           <!-- 3 大美育探索亮点 -->
@@ -2096,6 +2127,102 @@
       openThemeEditModal(currentActiveThemeId || (themeExhibitions[0] && themeExhibitions[0].id));
     }
 
+    // ==========================================
+    // 📖 特展深度文章图文智能解析器 (Rich Media & Markdown Parser)
+    // ==========================================
+    function parseRichCuratorArticle(statement) {
+      if (!statement) return '<p class="text-stone-400 italic">暂无策展手记正文内容...</p>';
+      const rawText = Array.isArray(statement) ? statement.join('\n\n') : String(statement);
+      const blocks = rawText.split(/\n\s*\n/);
+      let html = '';
+      let isFirstPara = true;
+
+      for (let block of blocks) {
+        block = block.trim();
+        if (!block) continue;
+
+        // 1. 独立图片块: ![caption](url)
+        const imgMatch = block.match(/^!\[(.*?)\]\((.*?)\)$/s);
+        if (imgMatch) {
+          const caption = imgMatch[1] || '';
+          const url = imgMatch[2];
+          html += `
+            <figure class="my-6 sm:my-8 rounded-3xl overflow-hidden shadow-xl border border-black/[0.05] dark:border-white/[0.08] bg-stone-900/40 group">
+              <div class="relative max-h-[600px] overflow-hidden flex items-center justify-center bg-stone-950/60 p-2 sm:p-4">
+                <img src="${url}" alt="${caption}" class="max-w-full max-h-[560px] object-contain rounded-2xl shadow-md group-hover:scale-102 transition-transform duration-500 select-none cursor-zoom-in" loading="lazy" onclick="openArtImagePreview('${url}', '${caption || '特展插图'}')" onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1200&auto=format&fit=crop&q=80'" />
+              </div>
+              ${caption ? `
+                <figcaption class="px-4 py-3 text-center text-xs sm:text-sm font-bold text-stone-600 dark:text-emerald-300/90 bg-stone-50/90 dark:bg-[#111C15] border-t border-black/[0.04] dark:border-white/[0.06] flex items-center justify-center gap-1.5">
+                  <span>📷</span>
+                  <span>${caption}</span>
+                </figcaption>
+              ` : ''}
+            </figure>
+          `;
+          continue;
+        }
+
+        // 2. 章节小标题: ### title or ## title
+        if (block.startsWith('### ') || block.startsWith('## ') || block.startsWith('# ')) {
+          const title = block.replace(/^#+\s*/, '');
+          html += `
+            <h3 class="text-xl sm:text-2xl font-black text-stone-950 dark:text-stone-50 mt-8 mb-3 pb-2 border-b border-emerald-500/20 flex items-center gap-2">
+              <span class="text-emerald-500 text-lg">✦</span>
+              <span>${title}</span>
+            </h3>
+          `;
+          continue;
+        }
+
+        // 3. 金句引用块: > text
+        if (block.startsWith('> ')) {
+          const quote = block.replace(/^>\s*/gm, '');
+          html += `
+            <blockquote class="p-5 sm:p-6 rounded-2xl bg-emerald-500/10 dark:bg-emerald-950/40 border-l-4 border-emerald-500 text-stone-800 dark:text-emerald-100 font-medium italic my-5 leading-relaxed text-sm sm:text-base">
+              “${quote}”
+            </blockquote>
+          `;
+          continue;
+        }
+
+        // 4. 正文段落 (支持行内超链接 [文字](url)、行内图片与加粗)
+        let inlineHtml = block
+          .replace(/!\[(.*?)\]\((.*?)\)/g, (m, cap, url) => `
+            <span class="block my-5 rounded-2xl overflow-hidden shadow-lg border border-black/5 dark:border-white/10 bg-stone-900/50 text-center">
+              <img src="${url}" alt="${cap}" class="max-w-full max-h-[500px] mx-auto object-contain rounded-xl" loading="lazy" />
+              ${cap ? `<span class="block p-2 text-center text-xs font-bold text-stone-500 dark:text-emerald-300">📷 ${cap}</span>` : ''}
+            </span>
+          `)
+          .replace(/\[(.*?)\]\((.*?)\)/g, (m, text, url) => `
+            <a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-[#10E57A] underline hover:text-emerald-500 transition-colors mx-0.5" title="点击打开链接: ${url}">
+              <span>${text}</span>
+              <svg class="w-3.5 h-3.5 inline-block opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            </a>
+          `)
+          .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-stone-950 dark:text-stone-100">$1</strong>');
+
+        html += `
+          <p class="${isFirstPara ? 'text-base sm:text-lg font-semibold text-emerald-950 dark:text-emerald-100 leading-relaxed' : 'text-stone-700 dark:text-emerald-100/90 leading-relaxed'} my-4">
+            ${isFirstPara ? `<span class="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-[#10E57A] float-left mr-2 leading-none font-serif">“</span>` : ''}${inlineHtml}
+          </p>
+        `;
+        isFirstPara = false;
+      }
+
+      return html;
+    }
+
+    function openArtImagePreview(imgUrl, title) {
+      const modal = document.getElementById('stickyImageModal');
+      const img = document.getElementById('stickyFullImg');
+      const titleEl = document.getElementById('stickyFullTitle');
+      if (modal && img) {
+        img.src = imgUrl;
+        if (titleEl) titleEl.textContent = title || '特展插图欣赏';
+        modal.showModal();
+      }
+    }
+
     function renderThemeExhibition(theme) {
       currentActiveThemeId = theme.id;
       const coverEl = document.getElementById('themeHeroCover');
@@ -2111,13 +2238,9 @@
       document.getElementById('themeArtworkCount').textContent = theme.artworkCount;
       document.getElementById('themeQuoteBox').textContent = `“${theme.introSummary}”`;
 
-      // 渲染策展文章段落
+      // 渲染深度图文策展手记文章 (支持图文混排、超链接、小标题与引用)
       const paragraphsBox = document.getElementById('themeArticleParagraphs');
-      paragraphsBox.innerHTML = theme.curatorStatement.map((p, idx) => `
-        <p class="${idx === 0 ? 'text-base sm:text-lg font-semibold text-emerald-950 dark:text-emerald-100 leading-relaxed' : 'text-stone-700 dark:text-emerald-100/90 leading-relaxed'}">
-          ${idx === 0 ? `<span class="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-[#10E57A] float-left mr-2 leading-none font-serif">“</span>` : ''}${p}
-        </p>
-      `).join('');
+      paragraphsBox.innerHTML = parseRichCuratorArticle(theme.curatorStatement);
 
       // 渲染美育亮点卡片
       const highlightsGrid = document.getElementById('themeHighlightsGrid');
@@ -2129,31 +2252,48 @@
         </div>
       `).join('');
 
-      // 渲染参展画作列表
+      // 渲染参展画作列表（支持纯图文专栏无在库作品时优雅适配）
+      const worksSection = document.getElementById('themeWorksSection');
       const worksGrid = document.getElementById('themeWorksGrid');
       const themeArtworks = artworks.filter(a => theme.artworkIds && theme.artworkIds.includes(a.id));
-      worksGrid.innerHTML = themeArtworks.map(item => `
-        <article class="contemporary-card p-4 cursor-pointer group flex flex-col justify-between" onclick="openArtModal('${item.id}')">
-          <div class="artwork-frame aspect-[4/3] relative mb-3.5">
-            <span class="artwork-category-badge">${item.categoryName}</span>
-            <img src="${item.image}" alt="${item.title}" loading="lazy" class="artwork-img" />
-          </div>
-          <div class="px-1.5 pb-1">
-            <div class="flex items-baseline justify-between gap-2 mb-1.5">
-              <h4 class="font-black text-base text-stone-900 dark:text-stone-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">${item.title}</h4>
-              <span class="text-[10px] font-mono text-stone-400 whitespace-nowrap">${item.date}</span>
+      const countBadge = document.getElementById('themeArtworkCountBadge');
+
+      if (themeArtworks.length === 0) {
+        if (worksSection) worksSection.classList.add('hidden');
+        const inlineCount = (String(theme.curatorStatement).match(/!\[/g) || []).length;
+        if (countBadge) {
+          countBadge.innerHTML = inlineCount > 0 
+            ? `<span>📷 特展插图 ${inlineCount} 幅</span>`
+            : `<span>📖 深度图文专栏</span>`;
+        }
+      } else {
+        if (worksSection) worksSection.classList.remove('hidden');
+        if (countBadge) {
+          countBadge.innerHTML = `<span>🎨 参展收录 <span id="themeArtworkCount">${themeArtworks.length}</span> 件力作</span>`;
+        }
+        worksGrid.innerHTML = themeArtworks.map(item => `
+          <article class="contemporary-card p-4 cursor-pointer group flex flex-col justify-between" onclick="openArtModal('${item.id}')">
+            <div class="artwork-frame aspect-[4/3] relative mb-3.5">
+              <span class="artwork-category-badge">${item.categoryName}</span>
+              <img src="${item.image}" alt="${item.title}" loading="lazy" class="artwork-img" />
             </div>
-            <p class="text-xs text-stone-500 dark:text-stone-400 line-clamp-2 italic mb-3 font-medium">“${item.story}”</p>
-            <div class="flex items-center justify-between text-xs pt-2.5 border-t border-emerald-200/40 dark:border-white/[0.08]">
-              <span class="font-bold text-stone-800 dark:text-emerald-300">🎨 ${item.author} (${item.age})</span>
-              <span class="text-xs text-emerald-600 dark:text-[#10E57A] font-extrabold flex items-center gap-0.5">
-                <span>品鉴原作</span>
-                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-              </span>
+            <div class="px-1.5 pb-1">
+              <div class="flex items-baseline justify-between gap-2 mb-1.5">
+                <h4 class="font-black text-base text-stone-900 dark:text-stone-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">${item.title}</h4>
+                <span class="text-[10px] font-mono text-stone-400 whitespace-nowrap">${item.date}</span>
+              </div>
+              <p class="text-xs text-stone-500 dark:text-stone-400 line-clamp-2 italic mb-3 font-medium">“${item.story}”</p>
+              <div class="flex items-center justify-between text-xs pt-2.5 border-t border-emerald-200/40 dark:border-white/[0.08]">
+                <span class="font-bold text-stone-800 dark:text-emerald-300">🎨 ${item.author} (${item.age})</span>
+                <span class="text-xs text-emerald-600 dark:text-[#10E57A] font-extrabold flex items-center gap-0.5">
+                  <span>品鉴原作</span>
+                  <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </span>
+              </div>
             </div>
-          </div>
-        </article>
-      `).join('');
+          </article>
+        `).join('');
+      }
 
       lucide.createIcons();
     }
@@ -2454,6 +2594,68 @@
           showToast('📸 特展封面已更新！');
         };
         reader.readAsDataURL(file);
+      }
+    }
+
+    // ==========================================
+    // 🎨 前台特展编辑器插图与超链接快捷插入工具函数
+    // ==========================================
+    function insertIndexThemeText(insertText) {
+      const textarea = document.getElementById('themeEditCuratorStatement');
+      if (!textarea) return;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const text = textarea.value;
+      textarea.value = text.substring(0, start) + insertText + text.substring(end);
+      textarea.selectionStart = textarea.selectionEnd = start + insertText.length;
+      textarea.focus();
+    }
+
+    async function handleIndexThemeInlineImageSelected(e) {
+      const file = e.target.files[0];
+      if (file) {
+        showToast('📸 正在处理正文插图...');
+        const base64 = await compressImageFile(file, 1400, 0.85);
+        if (base64) {
+          const caption = prompt('请输入该插图/画作的说明文字（可直接回车跳过）：', file.name.replace(/\.[^/.]+$/, '')) || '';
+          insertIndexThemeText(`\n\n![${caption}](${base64})\n\n`);
+          showToast('🖼️ 正文插图已插入！');
+        }
+      }
+      e.target.value = '';
+    }
+
+    function insertIndexThemeWebImagePrompt() {
+      const url = prompt('请输入网络图片的 URL 链接 (如 https://...):');
+      if (url && url.trim()) {
+        const caption = prompt('请输入该图片的说明/标题（可选）：', '') || '';
+        insertIndexThemeText(`\n\n![${caption}](${url.trim()})\n\n`);
+        showToast('🌐 网络图片已插入！');
+      }
+    }
+
+    function insertIndexThemeLinkPrompt() {
+      const text = prompt('请输入超链接的显示文本（如：查看小艺术家专访文章）：');
+      if (text && text.trim()) {
+        const url = prompt('请输入跳转网址 (如 https://...):', 'https://');
+        if (url && url.trim()) {
+          insertIndexThemeText(` [${text.trim()}](${url.trim()}) `);
+          showToast('🔗 超链接已插入！');
+        }
+      }
+    }
+
+    function insertIndexThemeHeading() {
+      const title = prompt('请输入小标题内容：', '特展美育观察手记');
+      if (title && title.trim()) {
+        insertIndexThemeText(`\n\n### ${title.trim()}\n\n`);
+      }
+    }
+
+    function insertIndexThemeQuote() {
+      const quote = prompt('请输入金句/引言内容：', '每一个孩子都是天生的艺术家。');
+      if (quote && quote.trim()) {
+        insertIndexThemeText(`\n\n> ${quote.trim()}\n\n`);
       }
     }
 
