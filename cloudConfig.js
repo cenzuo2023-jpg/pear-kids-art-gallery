@@ -1,3 +1,33 @@
+
+// =========================================================================
+// 📅 全局创作日期智能解析与降序排序引擎 (Creation Date Comparator)
+// 确保所有作品展、作品集、个人展厅一律按作品上方标注的真实“创作日期”排序
+// =========================================================================
+function parseCreationDateToNumber(dateStr) {
+  if (!dateStr || typeof dateStr !== 'string') return 0;
+  const cleaned = dateStr.trim();
+  const match = cleaned.match(/(\d{4})[^\d]*(\d{1,2})?[^\d]*(\d{1,2})?/);
+  if (!match) return 0;
+  const year = parseInt(match[1], 10) || 0;
+  const month = parseInt(match[2] || '1', 10) || 1;
+  const day = parseInt(match[3] || '1', 10) || 1;
+  return year * 10000 + month * 100 + day;
+}
+
+function compareByCreationDateDesc(a, b) {
+  const dateA = a ? (a.date || a.creationDate || a.createdDate || a.year || '') : '';
+  const dateB = b ? (b.date || b.creationDate || b.createdDate || b.year || '') : '';
+
+  const numA = parseCreationDateToNumber(dateA);
+  const numB = parseCreationDateToNumber(dateB);
+
+  if (numA !== numB) {
+    return numB - numA; // 降序：最新创作日期排在最前面
+  }
+
+  return String(b?.id || '').localeCompare(String(a?.id || ''));
+}
+
 ﻿/**
  * 🍐 想吃梨 · 原生零依赖 Supabase 云数据库直连引擎 (Pure Native Fetch Engine)
  * 
@@ -364,7 +394,7 @@ class NativeSupabaseService {
       { method: 'GET' },
       '读取画作'
     );
-    const list = (data || []).map(item => this._fromDbArtwork(item)).filter(Boolean);
+    const list = (data || []).map(item => this._fromDbArtwork(item)).filter(Boolean).sort(compareByCreationDateDesc);
     this._writeCache('artworks', list);
     console.log('🖼️ 成功直连 Supabase 拉取画作:', list.length, '件');
     return list;
@@ -711,7 +741,7 @@ class NativeSupabaseService {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
-          const list = data.map(item => this._fromDbAlbum(item)).filter(Boolean);
+          const list = data.map(item => this._fromDbAlbum(item)).filter(Boolean).sort(compareByCreationDateDesc);
           try { localStorage.setItem('pear_course_albums', JSON.stringify(list)); } catch (e) {}
           return list;
         }

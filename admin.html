@@ -11,6 +11,37 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <script>
+
+// =========================================================================
+// 📅 全局创作日期智能解析与降序排序引擎 (Creation Date Comparator)
+// 确保所有作品展、作品集、个人展厅一律按作品上方标注的真实“创作日期”排序
+// =========================================================================
+function parseCreationDateToNumber(dateStr) {
+  if (!dateStr || typeof dateStr !== 'string') return 0;
+  const cleaned = dateStr.trim();
+  const match = cleaned.match(/(\d{4})[^\d]*(\d{1,2})?[^\d]*(\d{1,2})?/);
+  if (!match) return 0;
+  const year = parseInt(match[1], 10) || 0;
+  const month = parseInt(match[2] || '1', 10) || 1;
+  const day = parseInt(match[3] || '1', 10) || 1;
+  return year * 10000 + month * 100 + day;
+}
+
+function compareByCreationDateDesc(a, b) {
+  const dateA = a ? (a.date || a.creationDate || a.createdDate || a.year || '') : '';
+  const dateB = b ? (b.date || b.creationDate || b.createdDate || b.year || '') : '';
+
+  const numA = parseCreationDateToNumber(dateA);
+  const numB = parseCreationDateToNumber(dateB);
+
+  if (numA !== numB) {
+    return numB - numA; // 降序：最新创作日期排在最前面
+  }
+
+  return String(b?.id || '').localeCompare(String(a?.id || ''));
+}
+
+
     (() => {
       try {
         const savedTheme = localStorage.getItem('pear_admin_theme');
@@ -1452,7 +1483,8 @@ button:focus:not(:focus-visible),
         grid.innerHTML = '<div class="col-span-full py-12 text-center text-stone-500">暂无课程作品集，点击右上角新建</div>';
         return;
       }
-      grid.innerHTML = adminAlbums.map(alb => `
+      const sortedAlbums = [...adminAlbums].sort(compareByCreationDateDesc);
+      grid.innerHTML = sortedAlbums.map(alb => `
         <div class="p-4 rounded-2xl bg-stone-900/60 border border-white/10 hover:border-emerald-500/30 transition-all flex flex-col justify-between group">
           <div class="space-y-2.5">
             <div class="aspect-[16/10] rounded-xl overflow-hidden bg-stone-950 relative border border-white/5">
@@ -1547,7 +1579,8 @@ button:focus:not(:focus-visible),
       const search = (document.getElementById('adminArtSearchInput')?.value || '').toLowerCase();
       if (!tbody) return;
 
-      const filtered = adminArtworks.filter(a => 
+      const sortedArtworks = [...adminArtworks].sort(compareByCreationDateDesc);
+      const filtered = sortedArtworks.filter(a => 
         (a.title && a.title.toLowerCase().includes(search)) ||
         (a.author && a.author.toLowerCase().includes(search)) ||
         (a.categoryName && a.categoryName.toLowerCase().includes(search))
