@@ -673,175 +673,116 @@
   <!-- ========================================================================= -->
   <div id="view-theme" class="view-page flex-1 flex flex-col z-10 hidden">
     
-    <!-- 顶部极简导航与返回 (完全公开纯净，编辑按钮默认隐藏) -->
-    <div class="max-w-5xl mx-auto px-4 sm:px-8 pt-6 pb-2 w-full flex items-center justify-between">
+    <!-- 1. 顶部极简返回链接 (去掉冗余大框与装饰标签) -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-4 pb-2 w-full flex items-center justify-between">
       <button 
         onclick="navigateTo('themes')" 
-        class="inline-flex items-center gap-2 text-xs font-extrabold text-stone-700 dark:text-emerald-300 hover:text-emerald-600 dark:hover:text-[#10E57A] px-4 py-2 rounded-full bg-white dark:bg-[#15241B] shadow-sm border border-black/[0.04] dark:border-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+        class="inline-flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-[#10E57A] transition-colors cursor-pointer font-medium"
       >
-        <i data-lucide="arrow-left" class="w-4 h-4"></i>
-        <span>返回全部特展专栏</span>
+        <span>← 返回特展专栏</span>
       </button>
 
-      <div class="flex items-center gap-2.5">
-        <!-- ✏️ 林老师专属编辑特展按钮 (默认 hidden 隐藏，只有管理模式或连点Logo/快捷键才显示) -->
-        <button 
-          id="themeQuickEditBtn"
-          onclick="openCurrentThemeEditor()"
-          class="hidden inline-flex items-center gap-1.5 text-xs font-black px-3.5 py-1.5 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-[#10E57A] hover:bg-emerald-500/30 border border-emerald-500/30 active:scale-95 transition-all shadow-sm"
-          title="林老师专属：编辑本期特展"
-        >
-          <span>✏️</span>
-          <span>编辑本期特展</span>
-        </button>
-
-        <span class="text-xs font-mono font-extrabold text-stone-400 dark:text-stone-400 flex items-center gap-1.5">
-          <span>🏛️</span>
-          <span class="hidden sm:inline">想吃梨少儿当代艺术展 · 策展专题</span>
-          <span class="sm:hidden">策展专题</span>
-        </span>
-      </div>
+      <!-- ✏️ 编辑按钮 (管理模式下可见) -->
+      <button 
+        id="themeQuickEditBtn"
+        onclick="openCurrentThemeEditor()"
+        class="hidden inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-[#10E57A] hover:underline cursor-pointer"
+      >
+        <span>✏️ 编辑本期特展</span>
+      </button>
     </div>
 
-    <!-- 深度文章与特展内容主体 -->
-    <article class="max-w-5xl mx-auto px-4 sm:px-8 py-6 pb-24 w-full space-y-12">
+    <!-- 2. 深度沉浸式文章主体 (纯粹杂志级排版，去除割裂板块大框) -->
+    <article class="w-full pb-20">
       
-      <!-- 1. 艺术期刊级特展标题与主视觉大展框 (Magazine Hero Title & Visual Frame) -->
-      <div class="space-y-6">
-        
-        <!-- 标题区 (左对齐纯净通透，突出学术与艺术品位) -->
-        <div class="space-y-3">
-          <div class="flex flex-wrap items-center gap-2.5">
-            <span id="themeTagBadge" class="px-3.5 py-1 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 font-black text-xs uppercase tracking-wider shadow-sm">
-              🌟 2026 夏季年度重磅特展
-            </span>
-            <span id="themeDateBadge" class="text-xs font-mono font-bold text-stone-500 dark:text-emerald-300/80 px-3 py-1 rounded-full bg-stone-100 dark:bg-emerald-950/50 border border-stone-200/50 dark:border-emerald-500/20">
-              2026.06 - 2026.08
-            </span>
-          </div>
-
-          <h1 id="themeMainTitle" class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-stone-950 dark:text-stone-50 leading-[1.2]">
-            特展主标题
-          </h1>
-
-          <p id="themeSubTitle" class="text-xs sm:text-sm text-stone-400 dark:text-emerald-200/60 font-mono tracking-wider font-medium">
-            SubTitle English / Curatorial Concept
-          </p>
+      <!-- 头部：标题与展期元信息 -->
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-6 w-full space-y-3">
+        <div class="flex items-center gap-2 text-xs font-mono text-stone-400">
+          <span id="themeTagBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-[#10E57A] font-bold text-[11px]">
+            🌟 2026 夏季年度重磅特展
+          </span>
+          <span id="themeDateBadge">2026.06 - 2026.08</span>
         </div>
 
-        <!-- 主视觉展画大展台 (带优雅光晕，无割裂感) -->
-        <div class="relative w-full aspect-[16/9] sm:aspect-[21/9] min-h-[300px] sm:min-h-[420px] rounded-[28px] sm:rounded-[36px] overflow-hidden shadow-2xl bg-stone-900 border border-black/[0.04] dark:border-emerald-500/20 group">
+        <h1 id="themeMainTitle" class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-stone-950 dark:text-stone-50 leading-snug">
+          特展主标题
+        </h1>
+
+        <p id="themeSubTitle" class="text-xs sm:text-sm text-stone-400 dark:text-emerald-200/60 font-mono">
+          SubTitle English / Curatorial Concept
+        </p>
+      </div>
+
+      <!-- 首图展示 (无黑色边框线，纯粹高级大图) -->
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 w-full">
+        <div class="relative w-full aspect-[16/9] sm:aspect-[21/10] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border-0 group bg-stone-100 dark:bg-stone-900">
           <img 
             id="themeHeroCover" 
             src="" 
             alt="特展主视觉" 
-            class="w-full h-full object-cover select-none group-hover:scale-102 transition-transform duration-700"
+            class="w-full h-full object-cover select-none"
             onerror="this.src='https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85'"
           />
-          <!-- 细腻柔光微遮罩 -->
-          <div class="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent pointer-events-none"></div>
-          
-          <div class="absolute bottom-4 sm:bottom-6 left-5 sm:left-8 right-5 z-10 flex items-center justify-between text-white text-xs font-mono font-bold">
-            <span class="px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-stone-200">
-              CURATED VISUAL ARCHIVE
-            </span>
-            <span id="themeArtworkCountBadge" class="px-3 py-1 rounded-full bg-emerald-500/80 text-stone-950 backdrop-blur-md font-bold">
-              ✨ 参展收录 <span id="themeArtworkCount">4</span> 件力作
-            </span>
-          </div>
         </div>
-
       </div>
 
-      <!-- 2. 浑然一体的策展人手记长文专栏 (Seamless Integrated Curatorial Essay Paper) -->
-      <div class="p-6 sm:p-10 lg:p-12 rounded-[32px] bg-white dark:bg-[#15241B] border border-black/[0.04] dark:border-emerald-500/20 shadow-xl space-y-8">
-        
-        <!-- 策展团队署名条 -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-black/[0.04] dark:border-white/[0.06]">
-          <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-400 to-[#10E57A] flex items-center justify-center text-xl shadow-md text-stone-950 flex-shrink-0">
-              👩‍🏫
-            </div>
-            <div>
-              <div class="text-[10px] font-mono uppercase tracking-widest text-stone-400 dark:text-stone-400 font-bold">
-                CURATED BY · 策展团队
-              </div>
-              <div id="themeCuratorName" class="text-base sm:text-lg font-black text-stone-950 dark:text-stone-100">
-                陈昨 & 想吃梨美育教研组
-              </div>
-            </div>
-          </div>
-
-          <!-- 🎙️ 沉浸式微嵌音频导读 -->
-          <div class="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-emerald-50 dark:bg-[#111C15] border border-emerald-500/20">
-            <button 
-              onclick="toggleAudioPlay();" 
-              class="w-7 h-7 rounded-full bg-[#10E57A] text-stone-950 flex items-center justify-center active:scale-95 transition-transform shadow-sm font-bold flex-shrink-0"
-              title="播放/暂停策展导语"
-            >
-              <i data-lucide="play" class="w-3.5 h-3.5 ml-0.5"></i>
-            </button>
-            <div class="text-xs">
-              <span class="font-extrabold text-stone-900 dark:text-emerald-200">🎙️ 策展人导读语音</span>
-              <span class="text-[10px] text-stone-400 font-mono ml-1">01:15</span>
-            </div>
-          </div>
+      <!-- 文章署名与导读条 (沉浸式文章行内排版，无板块边框) -->
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-5 pb-3 w-full flex items-center justify-between text-xs sm:text-sm text-stone-500 dark:text-stone-400 border-b border-black/[0.06] dark:border-white/[0.08]">
+        <div class="flex items-center gap-2">
+          <span>文 / <strong id="themeCuratorName" class="text-stone-900 dark:text-stone-100 font-bold">陈昨 & 想吃梨教研组</strong></span>
         </div>
 
-        <!-- 策展金句引言 (深翠温润气泡框) -->
-        <blockquote id="themeQuoteBox" class="p-5 sm:p-7 rounded-2xl bg-emerald-50/80 dark:bg-[#111C15] dark:border-l-4 dark:border-emerald-400 border-l-4 border-emerald-500 text-stone-900 dark:text-emerald-100/95 italic font-medium leading-relaxed text-base sm:text-lg">
-          “引言短句...”
-        </blockquote>
-
-        <!-- 详细段落内容 (纯净长文排版，首段首字放大) -->
-        <div id="themeArticleParagraphs" class="space-y-5 leading-loose text-sm sm:text-base text-stone-700 dark:text-emerald-100/90 font-normal">
-          <!-- JS 动态注入段落 -->
-        </div>
-
-        <!-- 💡 三大美育核心探索 (整合在文章内部，整洁对称) -->
-        <div class="pt-6 border-t border-black/[0.04] dark:border-white/[0.06] space-y-4">
-          <div class="text-xs font-mono font-bold uppercase tracking-widest text-emerald-700 dark:text-[#10E57A]">
-            💡 EDUCATIONAL PERSPECTIVES · 本期三大美育探索亮点
-          </div>
-          <div id="themeHighlightsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <!-- JS 动态渲染亮点卡片 -->
-          </div>
-        </div>
-
-        <!-- 策展落款印章 -->
-        <div class="pt-4 flex items-center justify-between text-xs font-mono text-stone-500 dark:text-stone-400 border-t border-black/[0.04] dark:border-white/[0.06]">
-          <span>想吃梨少儿艺术启蒙教研室 · 策展审核</span>
-          <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-[#10E57A] font-bold">🏛️ 策展归档认证</span>
-        </div>
-
+        <!-- 🎙️ 语音导读微按键 -->
+        <button 
+          onclick="toggleAudioPlay();" 
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-800 dark:text-[#10E57A] font-bold text-xs hover:bg-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+        >
+          <i data-lucide="play" class="w-3.5 h-3.5"></i>
+          <span>语音导读</span>
+        </button>
       </div>
 
-      <!-- 3. 🎨 本期特展参展作品群展台 (Featured Artworks Showcase) -->
-      <div class="space-y-6 pt-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-black/[0.04] dark:border-white/[0.06]">
-          <div>
-            <h3 class="text-xl sm:text-2xl font-black text-stone-950 dark:text-stone-100 tracking-tight flex items-center gap-2">
-              <span>🎨 本期特展参展力作群展</span>
-            </h3>
-            <p class="text-xs text-stone-400 mt-1">收录本期主题代表性少儿原创作品 · 点击可开启多视角大图与童声原声展台</p>
-          </div>
-          <span class="text-xs font-mono font-bold text-emerald-600 dark:text-[#10E57A] bg-emerald-500/10 px-3 py-1 rounded-full self-start sm:self-auto">
-            SHOWCASE WALL
-          </span>
+      <!-- 策展金句引言 (优雅内嵌引语) -->
+      <blockquote id="themeQuoteBox" class="max-w-4xl mx-auto px-4 sm:px-6 my-6 text-stone-700 dark:text-emerald-100/90 italic font-serif text-base sm:text-lg border-l-2 border-emerald-500 pl-4 py-1 leading-relaxed">
+        “引言短句...”
+      </blockquote>
+
+      <!-- 正文内容 (纯粹杂志长文排版，大字距与行高，支持图文混排) -->
+      <div id="themeArticleParagraphs" class="max-w-4xl mx-auto px-4 sm:px-6 space-y-6 text-base sm:text-lg leading-[1.85] text-stone-800 dark:text-stone-200 font-normal">
+        <!-- JS 动态注入段落 -->
+      </div>
+
+      <!-- 💡 美育探索亮点 (仅在有内容时自然流式呈现) -->
+      <div id="themeHighlightsSection" class="max-w-4xl mx-auto px-4 sm:px-6 pt-8 space-y-3">
+        <div class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-700 dark:text-[#10E57A]">
+          💡 本期美育探索视角
+        </div>
+        <div id="themeHighlightsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <!-- JS 动态渲染亮点卡片 -->
+        </div>
+      </div>
+
+      <!-- 3. 🎨 参展作品区 (紧凑 4 列排版，简洁标题，无副标题与冗余标签) -->
+      <div id="themeWorksSection" class="max-w-4xl mx-auto px-4 sm:px-6 pt-12 pb-6 space-y-4">
+        <div class="pb-2 border-b border-black/[0.06] dark:border-white/[0.08]">
+          <h3 class="text-lg sm:text-xl font-black text-stone-950 dark:text-stone-100 tracking-tight flex items-center gap-2">
+            <span>🎨 参展作品</span>
+          </h3>
         </div>
 
-        <div id="themeWorksGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <!-- 4列紧凑卡片网格 (容纳4张卡片) -->
+        <div id="themeWorksGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           <!-- JS 动态渲染参展画作卡片 -->
         </div>
       </div>
 
-      <!-- 4. 底部返回大按键 -->
-      <div class="pt-8 text-center">
+      <!-- 4. 底部返回按钮 -->
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-10 text-center">
         <button 
-          onclick="navigateTo('gallery')" 
-          class="px-8 py-3.5 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 font-black text-sm shadow-xl shadow-emerald-500/25 active:scale-95 transition-all"
+          onclick="navigateTo('themes')" 
+          class="px-6 py-2.5 rounded-full bg-stone-100 dark:bg-stone-800 hover:bg-emerald-500 hover:text-stone-950 text-stone-700 dark:text-stone-200 font-bold text-xs active:scale-95 transition-all shadow-sm cursor-pointer"
         >
-          返回展厅探索更多作品 ➔
+          ← 返回特展专栏
         </button>
       </div>
 
@@ -2243,14 +2184,23 @@
       paragraphsBox.innerHTML = parseRichCuratorArticle(theme.curatorStatement);
 
       // 渲染美育亮点卡片
+      const highlightsSection = document.getElementById('themeHighlightsSection');
       const highlightsGrid = document.getElementById('themeHighlightsGrid');
-      highlightsGrid.innerHTML = theme.keyHighlights.map(h => `
-        <div class="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#15241B] border border-black/[0.04] dark:border-emerald-500/20 shadow-sm space-y-2 hover:border-emerald-500/40 transition-colors">
-          <div class="text-3xl mb-1">${h.icon}</div>
-          <div class="text-sm font-black text-stone-950 dark:text-stone-100">${h.title}</div>
-          <div class="text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-normal">${h.desc}</div>
-        </div>
-      `).join('');
+      if (highlightsGrid) {
+        if (!theme.keyHighlights || theme.keyHighlights.length === 0) {
+          if (highlightsSection) highlightsSection.classList.add('hidden');
+          highlightsGrid.innerHTML = '';
+        } else {
+          if (highlightsSection) highlightsSection.classList.remove('hidden');
+          highlightsGrid.innerHTML = theme.keyHighlights.map(h => `
+            <div class="p-3.5 rounded-2xl bg-emerald-50/50 dark:bg-[#111C15] border border-emerald-500/15 space-y-1">
+              <div class="text-xl">${h.icon || '💡'}</div>
+              <div class="text-xs font-black text-stone-950 dark:text-stone-100">${h.title}</div>
+              <div class="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed">${h.desc}</div>
+            </div>
+          `).join('');
+        }
+      }
 
       // 渲染参展画作列表（支持纯图文专栏无在库作品时优雅适配）
       const worksSection = document.getElementById('themeWorksSection');
@@ -2272,22 +2222,20 @@
           countBadge.innerHTML = `<span>🎨 参展收录 <span id="themeArtworkCount">${themeArtworks.length}</span> 件力作</span>`;
         }
         worksGrid.innerHTML = themeArtworks.map(item => `
-          <article class="contemporary-card p-4 cursor-pointer group flex flex-col justify-between" onclick="openArtModal('${item.id}')">
-            <div class="artwork-frame aspect-[4/3] relative mb-3.5">
-              <span class="artwork-category-badge">${item.categoryName}</span>
+          <article class="contemporary-card p-2.5 sm:p-3 cursor-pointer group flex flex-col justify-between rounded-2xl" onclick="openArtModal('${item.id}')">
+            <div class="artwork-frame aspect-[4/3] relative mb-2 rounded-xl overflow-hidden">
+              <span class="artwork-category-badge text-[9px] px-1.5 py-0.5">${item.categoryName}</span>
               <img src="${item.image}" alt="${item.title}" loading="lazy" class="artwork-img" />
             </div>
-            <div class="px-1.5 pb-1">
-              <div class="flex items-baseline justify-between gap-2 mb-1.5">
-                <h4 class="font-black text-base text-stone-900 dark:text-stone-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">${item.title}</h4>
-                <span class="text-[10px] font-mono text-stone-400 whitespace-nowrap">${item.date}</span>
+            <div class="px-0.5 space-y-1">
+              <div class="flex items-baseline justify-between gap-1">
+                <h4 class="font-black text-xs sm:text-sm text-stone-900 dark:text-stone-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">${item.title}</h4>
+                <span class="text-[9px] font-mono text-stone-400 whitespace-nowrap">${item.date || ''}</span>
               </div>
-              <p class="text-xs text-stone-500 dark:text-stone-400 line-clamp-2 italic mb-3 font-medium">“${item.story}”</p>
-              <div class="flex items-center justify-between text-xs pt-2.5 border-t border-emerald-200/40 dark:border-white/[0.08]">
-                <span class="font-bold text-stone-800 dark:text-emerald-300">🎨 ${item.author} (${item.age})</span>
-                <span class="text-xs text-emerald-600 dark:text-[#10E57A] font-extrabold flex items-center gap-0.5">
-                  <span>品鉴原作</span>
-                  <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+              <div class="flex items-center justify-between text-[11px] pt-1 border-t border-black/[0.04] dark:border-white/[0.06]">
+                <span class="font-bold text-stone-600 dark:text-emerald-300 truncate">🎨 ${item.author} (${item.age})</span>
+                <span class="text-[10px] text-emerald-600 dark:text-[#10E57A] font-extrabold flex-shrink-0">
+                  品鉴 →
                 </span>
               </div>
             </div>
