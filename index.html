@@ -39,6 +39,10 @@
       }
     }
   </script>
+  <!-- 🍐 默认本地基础数据集 (含全部画作、学员、特展及课程作品集) -->
+  <script src="data.js?v=20260819_v3"></script>
+  <!-- 🍐 纯原生零依赖 Supabase 云数据库直连引擎 -->
+  <script src="cloudConfig.js?v=20260819_v3"></script>
 </head>
 <body class="min-h-screen antialiased flex flex-col selection:bg-[#10E57A] selection:text-stone-950">
 
@@ -1708,10 +1712,11 @@
   <script src="data.js?v=20260819_v2"></script>
   <script src="cloudConfig.js?v=20260819_v2"></script>
   <script>
-    let artworks = [];
-    let studentList = [];
-    let themeExhibitions = [];
-    let stickyNotes = [];
+    let artworks = (typeof window !== 'undefined' && Array.isArray(window.initialArtworks)) ? [...window.initialArtworks] : [];
+    let studentList = (typeof window !== 'undefined' && Array.isArray(window.initialStudents)) ? [...window.initialStudents] : ((typeof window !== 'undefined' && Array.isArray(window.studentList)) ? [...window.studentList] : []);
+    let themeExhibitions = (typeof window !== 'undefined' && Array.isArray(window.initialThematicExhibitions)) ? [...window.initialThematicExhibitions] : ((typeof window !== 'undefined' && Array.isArray(window.themeExhibitions)) ? [...window.themeExhibitions] : []);
+    let stickyNotes = (typeof window !== 'undefined' && Array.isArray(window.initialStickyNotes)) ? [...window.initialStickyNotes] : [];
+    let courseAlbums = (typeof window !== 'undefined' && Array.isArray(window.initialCourseAlbums)) ? [...window.initialCourseAlbums] : [];
     let currentView = 'gallery';
     let currentAgeFilter = 'all';
     let currentSearchTerm = '';
@@ -2236,9 +2241,17 @@ async function syncDataFromCloud() {
       initAdminGateway();
       setupLightDismiss();
       startCarouselTimer();
+
+      // 🌟 1. 0毫秒极速瞬时同步渲染全部页面与板块（确保页面打开立即可见，无需等待网络）
+      renderCuratedCarousel();
+      renderGallery();
       renderAlbums();
+      renderHall();
+      renderThemesArchive();
+      renderStickyWall();
       lucide.createIcons();
 
+      // 🌟 2. 异步拉取云端最新数据并无缝重绘
       try {
         await syncDataFromCloud();
       } catch (e) {
