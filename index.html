@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>想吃梨 · 少儿奇妙艺术展厅与小画家名人堂</title>
+  <title>想吃梨</title>
   <!-- 🍐 梨子品牌网页 Favicon 图标 -->
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍐</text></svg>">
@@ -960,9 +960,7 @@
           文章标题
         </h1>
 
-        <p id="themeSubTitle" class="text-sm sm:text-base text-stone-500 dark:text-stone-400 font-serif leading-relaxed">
-          副标题或引言概述
-        </p>
+
       </div>
 
       <!-- 首图展示 (宽幅高清封面) -->
@@ -2858,9 +2856,6 @@
                 <h3 class="font-black text-lg sm:text-xl text-stone-950 dark:text-stone-50 group-hover:text-emerald-600 dark:group-hover:text-[#10E57A] transition-colors leading-snug">
                   ${theme.title}
                 </h3>
-                <p class="text-xs text-emerald-700 dark:text-[#10E57A] font-bold font-mono tracking-wide line-clamp-1">
-                  ${theme.subTitle || ''}
-                </p>
 
               </div>
 
@@ -3022,16 +3017,6 @@
       if (authorEl) authorEl.textContent = theme.curator || '想吃梨美育团队';
       const titleEl = document.getElementById('themeMainTitle');
       if (titleEl) titleEl.textContent = theme.title || '';
-      const subTitleEl = document.getElementById('themeSubTitle');
-      if (subTitleEl) {
-        if (theme.subTitle || theme.subtitle) {
-          subTitleEl.textContent = theme.subTitle || theme.subtitle;
-          subTitleEl.classList.remove('hidden');
-        } else {
-          subTitleEl.classList.add('hidden');
-        }
-      }
-
 
       // 渲染文章正文
       // The list response contains summaries; load this article body only on detail pages.

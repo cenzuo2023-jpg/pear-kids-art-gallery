@@ -3,13 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>想吃梨 · 主理人专属策展管理中心 (Curator CMS)</title>
+  <title>想吃梨</title>
   <!-- 🍐 梨子品牌网页 Favicon 图标 -->
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍐</text></svg>">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+  <script>
+    (() => {
+      try {
+        const savedTheme = localStorage.getItem('pear_admin_theme');
+        if (savedTheme === 'light') document.documentElement.classList.remove('dark');
+        else document.documentElement.classList.add('dark');
+      } catch (e) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -110,8 +121,19 @@
         <span>📥 备份数据文件</span>
       </button>
 
-      <button 
-        onclick="refreshAdminData()" 
+      <button
+        id="adminThemeToggle"
+        onclick="toggleAdminTheme()"
+        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold transition-all border border-white/10"
+        title="切换亮色/暗黑模式"
+        aria-label="切换亮色/暗黑模式"
+      >
+        <i id="adminThemeToggleIcon" data-lucide="sun" class="w-4 h-4"></i>
+        <span id="adminThemeToggleLabel" class="hidden sm:inline">亮色</span>
+      </button>
+
+      <button
+        onclick="refreshAdminData()"
         class="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs transition-all active:scale-95 border border-white/10"
         title="刷新最新数据"
       >
@@ -129,7 +151,7 @@
   </header>
 
   <!-- 主体工作区 (左侧菜单 + 右侧内容) -->
-  <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+  <div class="flex-1 min-h-0 h-[calc(100vh-4rem)] flex flex-col md:flex-row overflow-hidden">
     
     <!-- 左侧导航菜单 -->
     <aside id="adminSidebar" class="admin-sidebar w-full md:w-64 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#0A100C]/70 p-4 flex md:flex-col gap-1.5 overflow-x-auto md:overflow-visible flex-shrink-0">
@@ -216,7 +238,7 @@
     </aside>
 
     <!-- 右侧内容视窗 -->
-    <main class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6">
+    <main class="flex-1 min-h-0 h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] overflow-y-auto p-4 sm:p-8 space-y-6">
       
       <!-- ===================================================================== -->
       <!-- 模块 1：展厅数据总览 (Overview) -->
@@ -820,13 +842,7 @@
                 placeholder="输入文章标题..." 
                 class="w-full bg-transparent text-3xl sm:text-4xl lg:text-5xl font-black text-white placeholder:text-stone-700 border-0 focus:outline-none tracking-tight leading-tight"
               />
-
-              <input 
-                type="text" 
-                id="themeFormSubTitle" 
-                placeholder="输入副标题或简要导语 (选填)..." 
-                class="w-full bg-transparent text-base sm:text-xl text-stone-400 placeholder:text-stone-700 border-0 focus:outline-none font-medium"
-              />
+              <input type="hidden" id="themeFormSubTitle" value="">
 
               <!-- 🏷️ 属性元数据栏 -->
               <div class="p-4 sm:p-5 rounded-2xl bg-[#111D15] border border-white/10 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
@@ -881,7 +897,7 @@
             </div>
 
             <!-- 简洁博客写作工具栏 -->
-            <div class="sticky top-20 z-20 flex flex-wrap items-center gap-1 p-2 rounded-xl bg-[#111D15]/95 backdrop-blur-xl border border-white/15 shadow-lg text-xs" role="toolbar" aria-label="文章格式工具">
+            <div id="themeEditorToolbar" class="admin-theme-toolbar sticky top-4 z-40 flex flex-wrap items-center gap-1 p-2 rounded-xl bg-[#111D15]/95 backdrop-blur-xl border border-white/15 shadow-2xl text-xs" role="toolbar" aria-label="文章格式工具">
               <select onchange="formatAdminThemeBlock(this.value); this.value='p';" class="h-8 px-2 rounded-lg bg-stone-900 border border-white/10 text-stone-200 font-bold focus:outline-none focus:border-teal-400" aria-label="段落样式">
                 <option value="p">段落</option>
                 <option value="h2">大标题</option>
@@ -1282,6 +1298,38 @@ button:focus:not(:focus-visible),
       transition: color 150ms ease, background 150ms ease;
     }
     .editor-tool-btn:hover { color: #10E57A; background: rgba(255, 255, 255, 0.07); }
+
+    /* Admin theme switch: dark is the default; light mode keeps the same layout and controls. */
+    html:not(.dark) body { background: #f4f8f5 !important; color: #1c1917 !important; }
+    html:not(.dark) header,
+    html:not(.dark) #adminSidebar { background: rgba(255, 255, 255, 0.94) !important; border-color: #dfe9e2 !important; }
+    html:not(.dark) main { background: #f4f8f5 !important; }
+    html:not(.dark) [class*="bg-[#111"],
+    html:not(.dark) [class*="bg-[#0E"],
+    html:not(.dark) [class*="bg-[#0A"],
+    html:not(.dark) [class*="bg-stone-950"],
+    html:not(.dark) [class*="bg-stone-900"],
+    html:not(.dark) [class*="bg-stone-800"] { background-color: #ffffff !important; }
+    html:not(.dark) [class*="bg-black"] { background-color: #eef4ef !important; }
+    html:not(.dark) [class*="text-white"] { color: #1c1917 !important; }
+    html:not(.dark) [class*="text-stone-100"],
+    html:not(.dark) [class*="text-stone-200"],
+    html:not(.dark) [class*="text-stone-300"] { color: #3f3f46 !important; }
+    html:not(.dark) [class*="text-stone-400"],
+    html:not(.dark) [class*="text-stone-500"] { color: #64716a !important; }
+    html:not(.dark) [class*="border-white"] { border-color: #dfe9e2 !important; }
+    html:not(.dark) .admin-nav-item { color: #57534e; }
+    html:not(.dark) .admin-nav-item:hover { color: #1c1917; background: #edf5ef; }
+    html:not(.dark) .admin-nav-item.active { color: #052e16; background: #6ee7b7; }
+    html:not(.dark) #curatorAuthOverlay { background: rgba(236, 245, 239, 0.96) !important; }
+    html:not(.dark) #themeVisualCanvas,
+    html:not(.dark) #themeFormCuratorNote,
+    html:not(.dark) #adminThemeEditorPreviewContainer { background: #ffffff !important; color: #292524 !important; border-color: #dfe9e2 !important; }
+    html:not(.dark) #themeVisualCanvas h2 { color: #1c1917; }
+    html:not(.dark) #themeVisualCanvas h3 { color: #047857; }
+    html:not(.dark) #themeVisualCanvas blockquote { color: #166534; background: #ecfdf5; }
+    html:not(.dark) #themeEditorToolbar { background: rgba(255, 255, 255, 0.96) !important; border-color: #dfe9e2 !important; }
+    html:not(.dark) .editor-tool-btn { color: #57534e; }
   </style>
 
   <!-- 核心交互脚本 -->
@@ -1392,6 +1440,43 @@ button:focus:not(:focus-visible),
       lucide.createIcons();
     }
 
+    function getAdminTheme() {
+      return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    }
+
+    function updateAdminThemeToggle() {
+      const theme = getAdminTheme();
+      const button = document.getElementById('adminThemeToggle');
+      const icon = document.getElementById('adminThemeToggleIcon');
+      const label = document.getElementById('adminThemeToggleLabel');
+      if (button) {
+        button.title = theme === 'dark' ? '切换到亮色模式' : '切换到暗黑模式';
+        button.setAttribute('aria-label', button.title);
+      }
+      if (icon) icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+      if (label) label.textContent = theme === 'dark' ? '亮色' : '暗黑';
+      if (window.lucide?.createIcons) lucide.createIcons();
+    }
+
+    function applyAdminTheme(theme, persist = true) {
+      const isDark = theme !== 'light';
+      document.documentElement.classList.toggle('dark', isDark);
+      if (persist) {
+        try { localStorage.setItem('pear_admin_theme', isDark ? 'dark' : 'light'); } catch (e) {}
+      }
+      updateAdminThemeToggle();
+    }
+
+    function toggleAdminTheme() {
+      applyAdminTheme(getAdminTheme() === 'dark' ? 'light' : 'dark');
+    }
+
+    function initializeAdminTheme() {
+      let saved = 'dark';
+      try { saved = localStorage.getItem('pear_admin_theme') || 'dark'; } catch (e) {}
+      applyAdminTheme(saved, false);
+    }
+
     function initializeAdminSidebar() {
       setAdminSidebarCollapsed(localStorage.getItem('pear_admin_sidebar_collapsed') === 'true');
     }
@@ -1423,7 +1508,7 @@ button:focus:not(:focus-visible),
       setAdminSidebarCollapsed(isStudio ? true : savedCollapsed);
 
       if (updateUrl) updateAdminUrl(tabName, replaceState);
-      document.title = `${ADMIN_TAB_TITLES[tabName] || '后台'} · 想吃梨管理后台`;
+      document.title = '想吃梨';
       window.scrollTo({ top: 0, behavior: updateUrl ? 'smooth' : 'auto' });
       lucide.createIcons();
     }
@@ -3206,6 +3291,7 @@ button:focus:not(:focus-visible),
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+      initializeAdminTheme();
       initializeAdminSidebar();
       window.addEventListener('popstate', () => {
         if (localStorage.getItem('pear_curator_auth') === 'true') {
