@@ -663,3 +663,16 @@ if (typeof window !== 'undefined') {
   window.initialCourseAlbums = initialCourseAlbums;
   window.courseAlbums = initialCourseAlbums;
 }
+
+// Global Window Aliases for Universal Front-End & Admin Access
+if (typeof window !== 'undefined') {
+  window.initialArtworks = typeof initialArtworks !== 'undefined' ? initialArtworks : [];
+  window.initialStudents = typeof initialStudents !== 'undefined' ? initialStudents : (typeof studentList !== 'undefined' ? studentList : []);
+  window.studentList = window.initialStudents;
+  window.initialThematicExhibitions = typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : (typeof themeExhibitions !== 'undefined' ? themeExhibitions : []);
+  window.themeExhibitions = window.initialThematicExhibitions;
+  window.initialStickyNotes = typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : [];
+  window.stickyNotes = window.initialStickyNotes;
+  window.initialCourseAlbums = typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : [];
+  window.courseAlbums = window.initialCourseAlbums;
+}
