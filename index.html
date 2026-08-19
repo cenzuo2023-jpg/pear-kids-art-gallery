@@ -1959,18 +1959,18 @@
         // 提取参与该堂课的小朋友花名册（前4位）
         const authors = Array.from(new Set(artworksList.map(a => a.author))).filter(Boolean);
         const authorChips = authors.slice(0, 4).map(name => `
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
             <span>🎨</span><span>${name}</span>
           </span>
         `).join('') + (authors.length > 4 ? `<span class="text-[10px] text-stone-400 font-bold px-1">+${authors.length - 4}位</span>` : '');
 
-        // 提取底层折页预览图 (保证各层均有清晰画面)
+        // 提取底层折页预览图
         const layer1Img = artworksList[1] ? artworksList[1].image : (artworksList[0] ? artworksList[0].image : cover);
         const layer2Img = artworksList[2] ? artworksList[2].image : (artworksList[0] ? artworksList[0].image : cover);
 
         return `
           <article 
-            class="accordion-book-card relative rounded-3xl bg-[#111D15] border border-white/10 p-4 sm:p-5 flex flex-col justify-between cursor-pointer group hover:border-emerald-500/50 shadow-lg hover:shadow-2xl h-full transition-all duration-300"
+            class="accordion-book-card relative rounded-3xl bg-white dark:bg-[#111D15] border border-stone-200/80 dark:border-white/10 p-4 sm:p-5 flex flex-col justify-between cursor-pointer group hover:border-emerald-500/50 shadow-sm hover:shadow-xl dark:shadow-none h-full transition-all duration-300"
             onclick="openCourseAlbumDetail('${album.id}')"
           >
             <div>
@@ -1980,17 +1980,17 @@
                 <div class="accordion-spine"></div>
                 
                 <!-- 底层折页 2 (后展) -->
-                <div class="accordion-layer accordion-layer-2 bg-stone-900">
+                <div class="accordion-layer accordion-layer-2 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-white/20">
                   <img src="${layer2Img}" class="w-full h-full object-cover" loading="lazy" />
                 </div>
 
                 <!-- 中间折页 1 (中展) -->
-                <div class="accordion-layer accordion-layer-1 bg-stone-900">
+                <div class="accordion-layer accordion-layer-1 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-white/20">
                   <img src="${layer1Img}" class="w-full h-full object-cover" loading="lazy" />
                 </div>
 
                 <!-- 主封面 (前盖) -->
-                <div class="accordion-main-cover">
+                <div class="accordion-main-cover border border-stone-200/80 dark:border-white/15 bg-stone-100 dark:bg-[#17261C]">
                   <img src="${cover}" alt="${album.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
                   
                   <!-- 封面渐变遮罩与徽章 -->
@@ -2016,12 +2016,12 @@
                 </div>
               </div>
 
-              <!-- 中间：课题标题与导语 (固定高度排版，确保整行三张卡片完全平齐工整) -->
+              <!-- 中间：课题标题与导语 (亮暗模式自适应) -->
               <div class="space-y-2">
-                <h3 class="text-base sm:text-lg font-black text-white group-hover:text-emerald-400 transition-colors leading-snug line-clamp-1">
+                <h3 class="text-base sm:text-lg font-black text-stone-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-snug line-clamp-1">
                   ${album.title}
                 </h3>
-                <p class="text-xs text-stone-300 line-clamp-2 leading-relaxed min-h-[36px]">
+                <p class="text-xs text-stone-600 dark:text-stone-300 line-clamp-2 leading-relaxed min-h-[36px]">
                   ${album.introSummary || '探索色彩与材料的奇妙实验，记录一堂课的童心创想与师生互动...'}
                 </p>
 
@@ -2033,9 +2033,9 @@
             </div>
 
             <!-- 底部操作按钮 -->
-            <div class="pt-3.5 mt-3 border-t border-white/[0.08] flex items-center justify-between text-xs">
-              <span class="text-stone-400 font-mono text-[11px]">${album.tag || '🎨 主题创作工坊'}</span>
-              <span class="font-black text-[#10E57A] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+            <div class="pt-3.5 mt-3 border-t border-stone-100 dark:border-white/[0.08] flex items-center justify-between text-xs">
+              <span class="text-stone-400 dark:text-stone-400 font-mono text-[11px]">${album.tag || '🎨 主题创作工坊'}</span>
+              <span class="font-black text-emerald-600 dark:text-[#10E57A] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                 <span>翻阅风琴画卷</span><span>→</span>
               </span>
             </div>
@@ -2134,12 +2134,12 @@
 
         return `
           <article 
-            class="album-art-card group rounded-3xl bg-white dark:bg-[#111D15] border border-black/[0.06] dark:border-white/10 p-4 sm:p-5 flex flex-col justify-between cursor-pointer hover:border-emerald-500/40 shadow-sm hover:shadow-2xl transition-all duration-300"
+            class="album-art-card group rounded-3xl bg-white dark:bg-[#111D15] border border-stone-200/80 dark:border-white/10 p-4 sm:p-5 flex flex-col justify-between cursor-pointer hover:border-emerald-500/50 shadow-sm hover:shadow-xl dark:shadow-none transition-all duration-300"
             onclick="openAlbumArtworkModal(${idx})"
           >
             <div>
               <!-- 顶部：严格固定 4:3 比例的画作照片容器 -->
-              <div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-stone-900 border border-black/[0.05] dark:border-white/10 mb-3.5 group-hover:scale-[1.01] transition-transform duration-300 shadow">
+              <div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-stone-100 dark:bg-stone-900 border border-stone-200/80 dark:border-white/10 mb-3.5 group-hover:scale-[1.01] transition-transform duration-300 shadow-sm">
                 <img src="${imgUrl}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
                 
                 <!-- 序号徽章与学员标签 -->
@@ -2163,7 +2163,7 @@
               <!-- 中间：画作标题与导师观察说明 -->
               <div class="space-y-2">
                 <div class="flex items-center justify-between gap-2">
-                  <h3 class="font-black text-base text-stone-950 dark:text-stone-50 group-hover:text-emerald-600 dark:group-hover:text-[#10E57A] transition-colors truncate">
+                  <h3 class="font-black text-base text-stone-900 dark:text-stone-50 group-hover:text-emerald-600 dark:group-hover:text-[#10E57A] transition-colors truncate">
                     ${title}
                   </h3>
                   <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold flex-shrink-0">
@@ -2171,16 +2171,16 @@
                   </span>
                 </div>
 
-                <!-- 单张作品专属深度说明与导师点评板块 -->
-                <div class="p-3 rounded-2xl bg-emerald-500/[0.06] dark:bg-stone-900/80 border border-emerald-500/15 dark:border-white/5 text-xs text-stone-700 dark:text-stone-300 leading-relaxed italic font-sans min-h-[58px]">
+                <!-- 单张作品专属深度说明与导师点评板块 (亮暗模式自适应) -->
+                <div class="p-3 rounded-2xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200/80 dark:border-white/5 text-xs text-stone-700 dark:text-stone-300 leading-relaxed italic font-sans min-h-[58px]">
                   “${comment}”
                 </div>
               </div>
             </div>
 
             <!-- 底部：点击放大交互条 -->
-            <div class="pt-3 mt-3 border-t border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between text-xs">
-              <span class="text-stone-400 text-[11px]">收录于《${album.title}》</span>
+            <div class="pt-3 mt-3 border-t border-stone-100 dark:border-white/[0.06] flex items-center justify-between text-xs">
+              <span class="text-stone-400 dark:text-stone-400 text-[11px]">收录于《${album.title}》</span>
               <span class="text-emerald-600 dark:text-[#10E57A] font-bold flex items-center gap-1 group-hover:underline">
                 <span>放大看大图</span><span>↗</span>
               </span>
@@ -2192,7 +2192,7 @@
       lucide.createIcons();
     }
 
-    function openAlbumArtworkModal(idx) {
+        function openAlbumArtworkModal(idx) {
       if (!currentActiveAlbumData || !currentActiveAlbumData.artworks || !currentActiveAlbumData.artworks[idx]) return;
       const art = currentActiveAlbumData.artworks[idx];
       const customArtObj = {
@@ -3813,88 +3813,115 @@
     // ==========================================
     // 🖼️ 现代沉浸式画作详情弹窗与多视角相册 (Multi-Angle Gallery Modal)
     // ==========================================
+    
     let modalPhotos = [];
     let currentModalPhotoIndex = 0;
 
-    function openArtModal(id) {
-      const item = artworks.find(a => a.id === id);
-      if (!item) return;
-      currentActiveArtwork = item;
-
-      // 提取多视角照片数组（支持雕塑、装置、画作多角度浏览）
-      modalPhotos = (item.images && item.images.length > 0) ? item.images : [item.image];
-      currentModalPhotoIndex = 0;
-
-      renderModalPhoto();
-
-      document.getElementById('modalTitle').textContent = item.title;
-      document.getElementById('modalAuthor').textContent = item.author;
-      document.getElementById('modalAge').textContent = getAgeGroupTag(item.ageGroup || item.age);
-      document.getElementById('modalCategory').textContent = `🎨 ${item.categoryName || '少儿当代'}`;
-      document.getElementById('modalDate').textContent = item.date || '';
-      document.getElementById('modalStory').textContent = item.story || '';
-      document.getElementById('modalTeacherComment').textContent = item.teacherComment || '每一幅画都是童心最纯粹的表达。';
-
-      stopAudio();
-
-      const modal = document.getElementById('artModal');
-      modal.showModal();
-      lucide.createIcons();
-    }
-
     function renderModalPhoto() {
-      const img = document.getElementById('modalImage');
-      const prevBtn = document.getElementById('modalPrevPhotoBtn');
-      const nextBtn = document.getElementById('modalNextPhotoBtn');
+      const imgEl = document.getElementById('modalImage');
+      const prevBtn = document.getElementById('prevPhotoBtn');
+      const nextBtn = document.getElementById('nextPhotoBtn');
+      const countEl = document.getElementById('modalPhotoCounter');
+      const dotsEl = document.getElementById('modalPhotoDots');
       const indicatorBox = document.getElementById('modalPhotoIndicatorBox');
-      const counter = document.getElementById('modalPhotoCounter');
-      const dots = document.getElementById('modalPhotoDots');
 
-      if (!img || modalPhotos.length === 0) return;
-      img.src = modalPhotos[currentModalPhotoIndex];
+      if (!imgEl) return;
 
-      const total = modalPhotos.length;
-      if (total > 1) {
-        if (prevBtn) prevBtn.classList.remove('hidden');
-        if (nextBtn) nextBtn.classList.remove('hidden');
-        if (indicatorBox) indicatorBox.classList.remove('hidden');
-        if (counter) counter.textContent = `📷 ${currentModalPhotoIndex + 1} / ${total}`;
-        if (dots) {
-          dots.innerHTML = modalPhotos.map((_, idx) => `
-            <button 
-              onclick="event.stopPropagation(); setModalPhotoIndex(${idx})" 
-              class="w-2 h-2 rounded-full transition-all ${idx === currentModalPhotoIndex ? 'bg-[#10E57A] w-4' : 'bg-white/50 hover:bg-white'}"
-              title="切换至第 ${idx + 1} 张照片"
-            ></button>
-          `).join('');
+      if (!modalPhotos || modalPhotos.length === 0) {
+        if (currentActiveArtwork && currentActiveArtwork.image) {
+          modalPhotos = [currentActiveArtwork.image];
+        } else {
+          modalPhotos = ['https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1200&auto=format&fit=crop&q=85'];
         }
-      } else {
-        if (prevBtn) prevBtn.classList.add('hidden');
-        if (nextBtn) nextBtn.classList.add('hidden');
-        if (indicatorBox) indicatorBox.classList.add('hidden');
+      }
+
+      if (currentModalPhotoIndex >= modalPhotos.length) currentModalPhotoIndex = 0;
+      if (currentModalPhotoIndex < 0) currentModalPhotoIndex = modalPhotos.length - 1;
+
+      imgEl.src = modalPhotos[currentModalPhotoIndex];
+
+      const multi = modalPhotos.length > 1;
+      if (indicatorBox) indicatorBox.style.display = multi ? 'flex' : 'none';
+      if (prevBtn) prevBtn.style.display = multi ? 'flex' : 'none';
+      if (nextBtn) nextBtn.style.display = multi ? 'flex' : 'none';
+
+      if (countEl) countEl.textContent = `${currentModalPhotoIndex + 1} / ${modalPhotos.length}`;
+
+      if (dotsEl && multi) {
+        dotsEl.innerHTML = modalPhotos.map((_, i) => `
+          <button 
+            type="button"
+            onclick="currentModalPhotoIndex=${i}; renderModalPhoto();" 
+            class="w-2 h-2 rounded-full transition-all cursor-pointer ${i === currentModalPhotoIndex ? 'bg-[#10E57A] scale-125' : 'bg-white/40 hover:bg-white/70'}"
+          ></button>
+        `).join('');
       }
     }
 
     function prevModalPhoto() {
-      if (modalPhotos.length <= 1) return;
+      if (!modalPhotos || modalPhotos.length <= 1) return;
       currentModalPhotoIndex = (currentModalPhotoIndex - 1 + modalPhotos.length) % modalPhotos.length;
       renderModalPhoto();
     }
 
     function nextModalPhoto() {
-      if (modalPhotos.length <= 1) return;
+      if (!modalPhotos || modalPhotos.length <= 1) return;
       currentModalPhotoIndex = (currentModalPhotoIndex + 1) % modalPhotos.length;
       renderModalPhoto();
     }
 
-    function setModalPhotoIndex(index) {
-      if (index >= 0 && index < modalPhotos.length) {
-        currentModalPhotoIndex = index;
-        renderModalPhoto();
+
+    function openArtModal(target) {
+      let item = null;
+      if (typeof target === 'object' && target !== null) {
+        item = target;
+      } else {
+        item = (artworks || []).find(a => String(a.id) === String(target));
+      }
+
+      if (!item) {
+        console.warn('未找到指定画作数据:', target);
+        return;
+      }
+      currentActiveArtwork = item;
+
+      // 提取多张视角照片
+      modalPhotos = (item.images && item.images.length > 0) ? item.images : (item.image ? [item.image] : []);
+      currentModalPhotoIndex = 0;
+
+      renderModalPhoto();
+
+      const titleEl = document.getElementById('modalTitle');
+      if (titleEl) titleEl.textContent = item.title || '画作力作';
+      
+      const authorEl = document.getElementById('modalAuthor');
+      if (authorEl) authorEl.textContent = item.author || '小艺术家';
+      
+      const ageEl = document.getElementById('modalAge');
+      if (ageEl) ageEl.textContent = getAgeGroupTag(item.ageGroup || item.age);
+      
+      const catEl = document.getElementById('modalCategory');
+      if (catEl) catEl.textContent = `🎨 ${item.categoryName || '美育探索'}`;
+      
+      const dateEl = document.getElementById('modalDate');
+      if (dateEl) dateEl.textContent = item.date || '2026';
+      
+      const storyEl = document.getElementById('modalStory');
+      if (storyEl) storyEl.textContent = item.story || item.comment || '纯真童言与自由创作灵感。';
+      
+      const commEl = document.getElementById('modalTeacherComment');
+      if (commEl) commEl.textContent = item.teacherComment || item.comment || '每一笔色彩都是童年最纯粹的表达。';
+
+      stopAudio();
+
+      const modal = document.getElementById('artModal');
+      if (modal) {
+        modal.showModal();
+        lucide.createIcons();
       }
     }
 
-    function closeArtModal() {
+        function closeArtModal() {
       stopAudio();
       document.getElementById('artModal').close();
     }

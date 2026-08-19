@@ -522,7 +522,6 @@ dialog[open]::backdrop {
   perspective: 1200px;
   transform-style: preserve-3d;
   transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease, border-color 0.3s ease;
-  background-color: #111D15;
 }
 
 .accordion-book-card:hover {
