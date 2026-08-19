@@ -682,44 +682,27 @@
             <input type="text" id="studentFormName" required placeholder="如：林雨桐" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400">
           </div>
 
-          <!-- 年龄 -->
-          <div class="space-y-1.5">
-            <label class="font-bold text-stone-300">年龄</label>
-            <input type="text" id="studentFormAge" placeholder="如：5岁" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <!-- 年龄组 -->
           <div class="space-y-1.5">
             <label class="font-bold text-stone-300">所属年龄组</label>
             <select id="studentFormAgeGroup" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400">
               <option value="3-5">3-5岁 启蒙班</option>
-              <option value="6-8">6-8岁 创想班</option>
-              <option value="9-12">9-12岁 大师班</option>
+              <option value="6-8">6-8岁 进阶班</option>
+              <option value="9-12">9-12岁 创想班</option>
             </select>
-          </div>
-
-          <!-- 班级名称 -->
-          <div class="space-y-1.5">
-            <label class="font-bold text-stone-300">所属班级</label>
-            <input type="text" id="studentFormClass" placeholder="如：启蒙创想一班" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400">
           </div>
         </div>
 
-        <!-- 头像管理 -->
+        <!-- 头像管理 (仅保留一键上传本地头像) -->
         <div class="space-y-2">
           <label class="font-bold text-stone-300">小艺术家头像照片</label>
           <div class="flex items-center gap-3">
             <img id="studentAvatarPreview" src="https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80" class="w-14 h-14 rounded-full object-cover border border-white/10 flex-shrink-0 bg-stone-900">
             <div class="flex-1 space-y-1.5">
               <input type="file" id="studentAvatarFileInput" accept="image/*" class="hidden" onchange="handleStudentAvatarSelected(event)">
-              <div class="flex gap-2">
-                <button type="button" onclick="document.getElementById('studentAvatarFileInput').click()" class="px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs border border-white/10 cursor-pointer">
-                  上传本地头像
-                </button>
-                <input type="url" id="studentAvatarUrlInput" placeholder="或粘贴网络图片 URL..." oninput="document.getElementById('studentAvatarPreview').src=this.value" class="flex-1 px-3 py-1.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white text-xs focus:outline-none focus:border-amber-400">
-              </div>
+              <button type="button" onclick="document.getElementById('studentAvatarFileInput').click()" class="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs border border-white/10 cursor-pointer flex items-center gap-1.5">
+                <span>📷 上传本地头像</span>
+              </button>
             </div>
           </div>
         </div>
@@ -728,12 +711,6 @@
         <div class="space-y-1.5">
           <label class="font-bold text-stone-300">个性签名 / 艺术创想寄语</label>
           <textarea id="studentFormBio" rows="3" placeholder="画画的时候我可以去任何想去的地方，我最喜欢天马行空的怪兽和甜品。" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400 leading-relaxed"></textarea>
-        </div>
-
-        <!-- 代表作品数 -->
-        <div class="space-y-1.5">
-          <label class="font-bold text-stone-300">参展代表作品数</label>
-          <input type="number" id="studentFormArtCount" min="1" max="99" value="1" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-amber-400">
         </div>
 
         <!-- 底部提交栏 -->
@@ -1321,19 +1298,15 @@
           document.getElementById('studentModalTitle').innerHTML = `<span>✏️</span><span>编辑小艺术家 · ${s.name}</span>`;
           document.getElementById('studentFormId').value = s.id;
           document.getElementById('studentFormName').value = s.name;
-          document.getElementById('studentFormAge').value = s.age;
           document.getElementById('studentFormAgeGroup').value = s.ageGroup || '3-5';
-          document.getElementById('studentFormClass').value = s.className || '';
-          document.getElementById('studentAvatarPreview').src = s.avatar;
-          document.getElementById('studentAvatarUrlInput').value = s.avatar.startsWith('data:') ? '' : s.avatar;
+          document.getElementById('studentAvatarPreview').src = s.avatar || 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80';
           document.getElementById('studentFormBio').value = s.bio || '';
-          document.getElementById('studentFormArtCount').value = s.featuredArtCount || 1;
         }
       } else {
         document.getElementById('studentModalTitle').innerHTML = `<span>🌟</span><span>新增小艺术家档案</span>`;
         document.getElementById('studentFormId').value = '';
         document.getElementById('studentAvatarPreview').src = 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80';
-        document.getElementById('studentFormArtCount').value = 1;
+        document.getElementById('studentFormBio').value = '';
       }
 
       modal.classList.remove('hidden');
@@ -1360,12 +1333,25 @@
       e.preventDefault();
       const id = document.getElementById('studentFormId').value;
       const name = document.getElementById('studentFormName').value.trim();
-      const age = document.getElementById('studentFormAge').value.trim() || '5岁';
       const ageGroup = document.getElementById('studentFormAgeGroup').value;
-      const className = document.getElementById('studentFormClass').value.trim() || '启蒙创想班';
       const avatar = document.getElementById('studentAvatarPreview').src;
       const bio = document.getElementById('studentFormBio').value.trim();
-      const artCount = parseInt(document.getElementById('studentFormArtCount').value) || 1;
+
+      // 根据年龄组智能赋予显示标签与班级
+      const ageGroupMap = {
+        '3-5': { age: '4-5岁', className: '启蒙班' },
+        '6-8': { age: '6-8岁', className: '进阶班' },
+        '9-12': { age: '9-12岁', className: '创想班' }
+      };
+      const defaultInfo = ageGroupMap[ageGroup] || { age: '5岁', className: '启蒙班' };
+
+      // 保留历史细化信息或采用智能预设
+      const existing = id ? adminStudents.find(s => s.id === id) : null;
+      const age = existing ? (existing.age || defaultInfo.age) : defaultInfo.age;
+      const className = existing ? (existing.className || defaultInfo.className) : defaultInfo.className;
+      
+      // 代表作品数自动关联画作库真实收录量
+      const artCount = adminArtworks.filter(a => a.author === name).length || (existing ? (existing.featuredArtCount || 1) : 1);
 
       const studentData = {
         id: id || ('s-' + Date.now()),
@@ -1374,7 +1360,7 @@
         ageGroup,
         className,
         avatar,
-        bio,
+        bio: bio || '画画的时候我可以去任何想去的地方，用纯真直觉探索色彩世界。',
         featuredArtCount: artCount
       };
 
