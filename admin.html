@@ -877,18 +877,7 @@
                 </div>
               </div>
 
-              <!-- 💡 导语概述框 -->
-              <div class="p-4 rounded-2xl bg-emerald-500/10 border-l-4 border-teal-400 space-y-1">
-                <div class="text-[11px] text-teal-300 font-bold flex items-center gap-1">
-                  <span>💡</span><span>文章导读引言 / 核心思想概述</span>
-                </div>
-                <textarea 
-                  id="themeFormIntro" 
-                  rows="2" 
-                  placeholder="在此写下一段引言短句（如：在大自然与星空之间，孩子们以纯真直觉构筑童年梦想...）" 
-                  class="w-full bg-transparent text-stone-200 text-xs sm:text-sm leading-relaxed border-0 focus:outline-none placeholder:text-stone-600 font-serif italic"
-                ></textarea>
-              </div>
+
             </div>
 
             <!-- 简洁博客写作工具栏 -->
@@ -2293,7 +2282,7 @@ button:focus:not(:focus-visible),
                 <span class="text-[10px] text-stone-400 font-medium">✍️ ${theme.curator || '想吃梨美育团队'}</span>
               </div>
               <h3 class="font-black text-sm text-white truncate mt-1">${theme.title}</h3>
-              <p class="text-[11px] text-stone-400 line-clamp-2 leading-relaxed">${theme.introSummary || theme.intro || '记录少儿美育启蒙与教学心得...'}</p>
+
             </div>
           </div>
 
@@ -2388,7 +2377,6 @@ button:focus:not(:focus-visible),
             document.getElementById('themeCoverUrlInput').value = cover.startsWith('data:') ? '' : cover;
           }
 
-          document.getElementById('themeFormIntro').value = theme.introSummary || theme.intro || '';
           const noteContent = Array.isArray(theme.curatorStatement) ? theme.curatorStatement.join('\n\n') : (theme.curatorStatement || theme.curator_note || '');
           document.getElementById('themeFormCuratorNote').value = noteContent;
           syncMarkdownToCanvas();
@@ -2411,7 +2399,6 @@ button:focus:not(:focus-visible),
         document.getElementById('themeFormDate').value = '2026.08';
         document.getElementById('themeFormTitle').value = '';
         document.getElementById('themeFormSubTitle').value = '';
-        document.getElementById('themeFormIntro').value = '';
         document.getElementById('themeFormCuratorNote').value = '';
         const canvas = document.getElementById('themeVisualCanvas');
         if (canvas) canvas.innerHTML = '<p><br></p>';
@@ -2971,7 +2958,6 @@ button:focus:not(:focus-visible),
       const curator = (document.getElementById('themeFormCurator') ? document.getElementById('themeFormCurator').value : '想吃梨美育团队').trim() || '想吃梨美育团队';
       const date = (document.getElementById('themeFormDate').value || '2026.08').trim();
       const coverImage = document.getElementById('themeFormCover').value.trim() || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1600&auto=format&fit=crop&q=85';
-      const introSummary = document.getElementById('themeFormIntro').value.trim();
       const curatorNote = document.getElementById('themeFormCuratorNote').value.trim();
       const isInHero = document.getElementById('themeFormIsInHero').checked;
 
@@ -2989,7 +2975,6 @@ button:focus:not(:focus-visible),
         curator,
         date,
         coverImage,
-        introSummary,
         curatorStatement: curatorNote,
         curator_note: curatorNote,
         artworkIds: [],

@@ -910,7 +910,7 @@
   <div id="view-theme" class="view-page flex-1 flex flex-col z-10 hidden">
     
     <!-- 顶部极简返回链接 -->
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-3 w-full flex items-center justify-between">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-3 w-full flex items-center justify-between">
       <button 
         onclick="navigateTo('themes')" 
         class="inline-flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-[#10E57A] transition-colors cursor-pointer font-bold"
@@ -932,7 +932,7 @@
     <article class="w-full pb-20">
       
       <!-- 头部：标题与发布信息 -->
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-6 w-full space-y-3">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-6 w-full space-y-3">
         <div class="flex items-center gap-2 text-xs font-mono text-stone-400 flex-wrap">
           <span id="themeTagBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-[#10E57A] font-bold text-[11px]">
             🌟 美育专栏
@@ -952,7 +952,7 @@
       </div>
 
       <!-- 首图展示 (宽幅高清封面) -->
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 w-full mb-8">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 w-full mb-8">
         <div class="relative w-full aspect-[16/8] sm:aspect-[16/7] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border border-black/[0.04] dark:border-white/[0.08] bg-stone-100 dark:bg-stone-900">
           <img 
             id="themeHeroCover" 
@@ -967,9 +967,6 @@
       <!-- 博客正文 -->
       <div class="max-w-3xl mx-auto px-4 sm:px-6 w-full">
         <div class="min-w-0">
-          <blockquote id="themeQuoteBox" class="my-6 text-stone-700 dark:text-emerald-100/90 italic font-serif text-base sm:text-lg border-l-4 border-[#10E57A] pl-4 py-1 leading-relaxed">
-            “引言短句...”
-          </blockquote>
 
           <div id="themeArticleParagraphs" class="space-y-6 text-base sm:text-lg leading-[1.9] text-stone-800 dark:text-stone-200 font-normal">
             <!-- JS 动态注入文章正文 -->
@@ -1355,15 +1352,11 @@
             </div>
           </div>
 
-          <!-- 策展团队与摘要引言 -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- 策展团队 -->
+          <div>
             <div>
               <label class="block font-bold text-stone-700 dark:text-stone-300 mb-1">策展人 / 教研团队签名</label>
               <input type="text" id="themeEditCurator" required placeholder="如：林老师 & 想吃梨美育教研组" class="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:border-emerald-500">
-            </div>
-            <div>
-              <label class="block font-bold text-stone-700 dark:text-stone-300 mb-1">策展金句引言 (引语框展示)</label>
-              <input type="text" id="themeEditIntroSummary" required placeholder="一句话提炼特展核心灵感寄语..." class="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:border-emerald-500 italic">
             </div>
           </div>
 
@@ -2412,10 +2405,12 @@
         renderHall();
         renderStickyWall();
 
-        // 🌟 如果当前正处在某个独立页面（如画册详情/学生主页），同步静默刷新其内容
+        // 当前详情页只刷新内容，不重新执行路由，避免隐藏/重建页面导致阅读位置回到顶部。
         const { view, param } = getHashRoute();
-        if (view && view !== 'gallery') {
-          navigateTo(view, param, false);
+        if (param && typeof param === 'object') {
+          if (view === 'album-detail') renderAlbumDetail(param);
+          if (view === 'student') renderStudentProfile(param);
+          if (view === 'theme') renderThemeExhibition(param);
         }
 
         lucide.createIcons();
@@ -2556,9 +2551,6 @@
               ${theme.title}
             </h2>
 
-            <p class="text-xs sm:text-sm text-stone-200/90 line-clamp-2 mt-2 leading-relaxed font-normal hidden sm:block">
-              ${theme.introSummary}
-            </p>
 
             <div class="mt-3.5 sm:mt-4 flex flex-wrap items-center gap-2.5 sm:gap-3">
               <button 
@@ -2720,9 +2712,7 @@
                 <p class="text-xs text-emerald-700 dark:text-[#10E57A] font-bold font-mono tracking-wide line-clamp-1">
                   ${theme.subTitle || ''}
                 </p>
-                <p class="text-xs text-stone-600 dark:text-emerald-100/80 leading-relaxed line-clamp-2 pt-1 font-normal">
-                  ${theme.introSummary || (theme.curatorStatement && theme.curatorStatement[0]) || '记录孩子们自由探索的艺术时光...'}
-                </p>
+
               </div>
 
               <!-- 亮点标签与底部阅读按键 -->
@@ -2884,7 +2874,6 @@
       const titleEl = document.getElementById('themeMainTitle');
       if (titleEl) titleEl.textContent = theme.title || '';
       const subTitleEl = document.getElementById('themeSubTitle');
-      const intro = (theme.introSummary || theme.intro || '').trim();
       if (subTitleEl) {
         if (theme.subTitle || theme.subtitle) {
           subTitleEl.textContent = theme.subTitle || theme.subtitle;
@@ -2894,16 +2883,6 @@
         }
       }
 
-      // 优雅引语框 (仅在有真实引言时展示)
-      const quoteBox = document.getElementById('themeQuoteBox');
-      if (quoteBox) {
-        if (intro && intro !== '引言短句...' && !intro.includes('引言短句')) {
-          quoteBox.textContent = `“${intro}”`;
-          quoteBox.classList.remove('hidden');
-        } else {
-          quoteBox.classList.add('hidden');
-        }
-      }
 
       // 渲染文章正文
       const paragraphsBox = document.getElementById('themeArticleParagraphs');
@@ -2988,7 +2967,7 @@
                   <span class="text-[10px] font-mono text-stone-400">${theme.date}</span>
                 </div>
                 <h4 class="font-black text-sm text-stone-900 dark:text-stone-100 truncate">${theme.title}</h4>
-                <p class="text-[11px] text-stone-500 dark:text-stone-400 truncate mt-0.5">${theme.introSummary || theme.subTitle}</p>
+
               </div>
             </div>
 
@@ -3120,7 +3099,6 @@
         document.getElementById('themeEditDate').value = '2026.09 - 2026.11';
         document.getElementById('themeEditCover').value = artworks[0] ? artworks[0].image : '';
         document.getElementById('themeEditCurator').value = '陈昨 & 想吃梨美育教研组';
-        document.getElementById('themeEditIntroSummary').value = '';
         document.getElementById('themeEditCuratorStatement').value = '';
         document.getElementById('highlight1Icon').value = '🌿';
         document.getElementById('highlight1Title').value = '自然媒介';
@@ -3150,7 +3128,6 @@
       document.getElementById('themeEditDate').value = theme.date;
       document.getElementById('themeEditCover').value = theme.coverImage;
       document.getElementById('themeEditCurator').value = theme.curator;
-      document.getElementById('themeEditIntroSummary').value = theme.introSummary;
       document.getElementById('themeEditCuratorStatement').value = Array.isArray(theme.curatorStatement) ? theme.curatorStatement.join('\n\n') : theme.curatorStatement;
 
       const h1 = theme.keyHighlights && theme.keyHighlights[0] ? theme.keyHighlights[0] : { icon: '🌿', title: '', desc: '' };
@@ -3300,8 +3277,6 @@
       const date = document.getElementById('themeEditDate').value.trim();
       const coverImage = document.getElementById('themeEditCover').value.trim();
       const curator = document.getElementById('themeEditCurator').value.trim();
-      const introSummary = document.getElementById('themeEditIntroSummary').value.trim();
-      
       const rawStatements = document.getElementById('themeEditCuratorStatement').value;
       const curatorStatement = rawStatements.split('\n').map(s => s.trim()).filter(Boolean);
 
@@ -3336,8 +3311,7 @@
         coverImage,
         curator,
         artworkCount: selectedArtworkIds.length,
-        introSummary,
-        curatorStatement: curatorStatement.length > 0 ? curatorStatement : [introSummary],
+        curatorStatement,
         keyHighlights,
         artworkIds: selectedArtworkIds,
         isInHero: true
