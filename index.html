@@ -170,22 +170,22 @@
         </div>
       </div>
 
-      <!-- 移动端顶部第二行：全宽水平滑动导航胶囊栏 (完整展示所有5个板块，顺滑滑动，不卡边) -->
-      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full">
-        <button id="nav-tab-gallery-mob" onclick="navigateTo('gallery')" class="mob-nav-tab active flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-black transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-sm whitespace-nowrap flex-shrink-0">
-          <span>🖼️</span><span>作品展厅</span>
+      <!-- 移动端顶部第二行：全宽等分5格导航胶囊 (完美容纳全部5大板块，一屏全景呈现，永不截断) -->
+      <div class="grid grid-cols-5 gap-1 w-full py-0.5">
+        <button id="nav-tab-gallery-mob" onclick="navigateTo('gallery')" class="mob-nav-tab active flex items-center justify-center gap-0.5 py-1.5 rounded-xl text-[11px] font-black transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-sm w-full">
+          <span>🖼️</span><span class="truncate">展厅</span>
         </button>
-        <button id="nav-tab-themes-mob" onclick="navigateTo('themes')" class="mob-nav-tab flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0">
-          <span>🎨</span><span>特展专栏</span>
+        <button id="nav-tab-themes-mob" onclick="navigateTo('themes')" class="mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-xl text-[11px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full">
+          <span>🎨</span><span class="truncate">专栏</span>
         </button>
-        <button id="nav-tab-hall-mob" onclick="navigateTo('hall')" class="mob-nav-tab flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0">
-          <span>👑</span><span>名人堂</span>
+        <button id="nav-tab-hall-mob" onclick="navigateTo('hall')" class="mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-xl text-[11px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full">
+          <span>👑</span><span class="truncate">名人堂</span>
         </button>
-        <button id="nav-tab-notes-mob" onclick="navigateTo('notes')" class="mob-nav-tab flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0">
-          <span>📝</span><span>便签墙</span>
+        <button id="nav-tab-notes-mob" onclick="navigateTo('notes')" class="mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-xl text-[11px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full">
+          <span>📝</span><span class="truncate">便签墙</span>
         </button>
-        <button id="nav-tab-teacher-mob" onclick="navigateTo('teacher')" class="mob-nav-tab flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0">
-          <span>👩‍🏫</span><span>关于老师</span>
+        <button id="nav-tab-teacher-mob" onclick="navigateTo('teacher')" class="mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-xl text-[11px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full">
+          <span>👩‍🏫</span><span class="truncate">老师</span>
         </button>
       </div>
     </div>
@@ -247,19 +247,19 @@
       
       <!-- 控制栏：精巧独立胶囊分段器 + 智能搜索 -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-8 sm:mb-10 pb-5">
-        <!-- 年龄段分段控制器：精巧实体胶囊按钮 (h-8，text-xs) -->
-        <div class="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar max-w-full py-1">
-          <button onclick="setAgeFilter('all')" class="age-tab active h-8 flex items-center gap-1.5 px-3.5 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap flex-shrink-0 font-extrabold text-xs focus:outline-none" data-age="all">
-            <span>🌈 全部画作 (8)</span>
+        <!-- 年龄段分段控制器：4格自适应排版 (移动端4等分全景呈现，永不截断/卡边) -->
+        <div class="grid grid-cols-4 sm:flex items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto py-1">
+          <button onclick="setAgeFilter('all')" class="age-tab active h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap font-extrabold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="all">
+            <span>🌈 全部 (8)</span>
           </button>
-          <button onclick="setAgeFilter('3-5')" class="age-tab h-8 flex items-center gap-1.5 px-3.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap flex-shrink-0 font-bold text-xs focus:outline-none" data-age="3-5">
-            <span>🐣 3-5岁 · 启蒙</span>
+          <button onclick="setAgeFilter('3-5')" class="age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="3-5">
+            <span>🐣 3-5岁<span class="hidden md:inline"> · 启蒙</span></span>
           </button>
-          <button onclick="setAgeFilter('6-8')" class="age-tab h-8 flex items-center gap-1.5 px-3.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap flex-shrink-0 font-bold text-xs focus:outline-none" data-age="6-8">
-            <span>🚀 6-8岁 · 创想</span>
+          <button onclick="setAgeFilter('6-8')" class="age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="6-8">
+            <span>🚀 6-8岁<span class="hidden md:inline"> · 创想</span></span>
           </button>
-          <button onclick="setAgeFilter('9-12')" class="age-tab h-8 flex items-center gap-1.5 px-3.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap flex-shrink-0 font-bold text-xs focus:outline-none" data-age="9-12">
-            <span>🎨 9-12岁 · 创作</span>
+          <button onclick="setAgeFilter('9-12')" class="age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto" data-age="9-12">
+            <span>🎨 9-12岁<span class="hidden md:inline"> · 创作</span></span>
           </button>
         </div>
 
@@ -2705,93 +2705,64 @@
     // ==========================================
     // 🌟 核心页面路由切换 (Navigation Router)
     // ==========================================
+    function updateNavTabState(activeView) {
+      const tabs = ['gallery', 'themes', 'hall', 'notes', 'teacher'];
+      const TAB_ACTIVE = 'nav-tab active flex items-center gap-1.5 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none';
+      const TAB_INACTIVE = 'nav-tab flex items-center gap-1.5 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none';
+
+      const MOB_ACTIVE = 'mob-nav-tab active flex items-center justify-center gap-0.5 py-1.5 rounded-xl text-[11px] font-black transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-sm w-full';
+      const MOB_INACTIVE = 'mob-nav-tab flex items-center justify-center gap-0.5 py-1.5 rounded-xl text-[11px] font-bold transition-all bg-white dark:bg-[#15241B] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 w-full';
+
+      tabs.forEach(t => {
+        const desk = document.getElementById('nav-tab-' + t);
+        const mob = document.getElementById('nav-tab-' + t + '-mob');
+        const isCurrent = (t === activeView || (activeView === 'theme' && t === 'themes'));
+        if (desk) desk.className = isCurrent ? TAB_ACTIVE : TAB_INACTIVE;
+        if (mob) mob.className = isCurrent ? MOB_ACTIVE : MOB_INACTIVE;
+      });
+    }
+
     function navigateTo(viewName, paramData = null) {
       currentView = viewName;
-      
       document.querySelectorAll('.view-page').forEach(el => el.classList.add('hidden'));
-
-      const tabGallery = document.getElementById('nav-tab-gallery');
-      const tabThemes = document.getElementById('nav-tab-themes');
-      const tabHall = document.getElementById('nav-tab-hall');
-      const tabNotes = document.getElementById('nav-tab-notes');
-      const tabTeacher = document.getElementById('nav-tab-teacher');
-
-      const TAB_ACTIVE = 'nav-tab active flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-extrabold transition-all bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 shadow-md shadow-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none';
-      const TAB_INACTIVE = 'nav-tab flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4.5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 whitespace-nowrap flex-shrink-0 focus:outline-none';
+      updateNavTabState(viewName);
 
       if (viewName === 'gallery') {
         document.getElementById('view-gallery').classList.remove('hidden');
-        if (tabGallery) tabGallery.className = TAB_ACTIVE;
-        if (tabThemes) tabThemes.className = TAB_INACTIVE;
-        if (tabHall) tabHall.className = TAB_INACTIVE;
-        if (tabNotes) tabNotes.className = TAB_INACTIVE;
-        if (tabTeacher) tabTeacher.className = TAB_INACTIVE;
         resumeCarousel();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'themes') {
         pauseCarousel();
         document.getElementById('view-themes').classList.remove('hidden');
-        if (tabGallery) tabGallery.className = TAB_INACTIVE;
-        if (tabThemes) tabThemes.className = TAB_ACTIVE;
-        if (tabHall) tabHall.className = TAB_INACTIVE;
-        if (tabNotes) tabNotes.className = TAB_INACTIVE;
-        if (tabTeacher) tabTeacher.className = TAB_INACTIVE;
         renderThemesArchive();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'hall') {
         pauseCarousel();
         document.getElementById('view-hall').classList.remove('hidden');
-        if (tabGallery) tabGallery.className = TAB_INACTIVE;
-        if (tabThemes) tabThemes.className = TAB_INACTIVE;
-        if (tabHall) tabHall.className = TAB_ACTIVE;
-        if (tabNotes) tabNotes.className = TAB_INACTIVE;
-        if (tabTeacher) tabTeacher.className = TAB_INACTIVE;
         renderHall();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'notes') {
         pauseCarousel();
         document.getElementById('view-notes').classList.remove('hidden');
-        if (tabGallery) tabGallery.className = TAB_INACTIVE;
-        if (tabThemes) tabThemes.className = TAB_INACTIVE;
-        if (tabHall) tabHall.className = TAB_INACTIVE;
-        if (tabNotes) tabNotes.className = TAB_ACTIVE;
-        if (tabTeacher) tabTeacher.className = TAB_INACTIVE;
         renderStickyWall();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'teacher') {
         pauseCarousel();
         document.getElementById('view-teacher').classList.remove('hidden');
-        if (tabGallery) tabGallery.className = TAB_INACTIVE;
-        if (tabThemes) tabThemes.className = TAB_INACTIVE;
-        if (tabHall) tabHall.className = TAB_INACTIVE;
-        if (tabNotes) tabNotes.className = TAB_INACTIVE;
-        if (tabTeacher) tabTeacher.className = TAB_ACTIVE;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'student' && paramData) {
         pauseCarousel();
         document.getElementById('view-student').classList.remove('hidden');
-        if (tabGallery) tabGallery.className = TAB_INACTIVE;
-        if (tabThemes) tabThemes.className = TAB_INACTIVE;
-        if (tabHall) tabHall.className = TAB_INACTIVE;
-        if (tabNotes) tabNotes.className = TAB_INACTIVE;
-        if (tabTeacher) tabTeacher.className = TAB_INACTIVE;
         renderStudentProfile(paramData);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'theme' && paramData) {
         pauseCarousel();
         document.getElementById('view-theme').classList.remove('hidden');
-        if (tabGallery) tabGallery.className = TAB_INACTIVE;
-        if (tabThemes) tabThemes.className = TAB_INACTIVE;
-        if (tabHall) tabHall.className = TAB_INACTIVE;
-        if (tabNotes) tabNotes.className = TAB_INACTIVE;
-        if (tabTeacher) tabTeacher.className = TAB_INACTIVE;
         renderThemeExhibition(paramData);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
 
-    // ==========================================
-    // 📝 视图：美育便签墙自由共创微社区系统 (Community Sticky Wall System)
     // ==========================================
     function getRoleAvatar(role) {
       if (role === 'parent') return '👩‍👧';
@@ -3168,11 +3139,14 @@
 
     function setAgeFilter(age) {
       currentAgeFilter = age;
+      const ACTIVE_CLASSES = 'age-tab active h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap font-extrabold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto';
+      const INACTIVE_CLASSES = 'age-tab h-8 flex items-center justify-center gap-1 px-1.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-[11px] sm:text-xs focus:outline-none w-full sm:w-auto';
+
       document.querySelectorAll('.age-tab').forEach(b => {
         if (b.dataset.age === age) {
-          b.className = 'age-tab active h-8 flex items-center gap-1.5 px-3.5 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap flex-shrink-0 font-extrabold text-xs focus:outline-none';
+          b.className = ACTIVE_CLASSES;
         } else {
-          b.className = 'age-tab h-8 flex items-center gap-1.5 px-3.5 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap flex-shrink-0 font-bold text-xs focus:outline-none';
+          b.className = INACTIVE_CLASSES;
         }
       });
       renderGallery();
