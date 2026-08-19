@@ -1730,8 +1730,7 @@ button:focus:not(:focus-visible),
         renderThemeArtworkSelectorBox([]);
       }
 
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      switchAdminTab('theme-studio');
       lucide.createIcons();
     }
 
@@ -1761,9 +1760,7 @@ button:focus:not(:focus-visible),
     }
 
     function closeThemeModal() {
-      const modal = document.getElementById('themeModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      switchAdminTab('themes');
     }
 
     // ==========================================
