@@ -2211,7 +2211,105 @@
       openArtModal(customArtObj);
     }
 
-        function renderCuratedCarousel() {
+        
+    function getFeaturedThemes() {
+      if (typeof themeExhibitions === 'undefined' || !Array.isArray(themeExhibitions)) return [];
+      const featured = themeExhibitions.filter(t => t && t.isInHero !== false);
+      return featured.length > 0 ? featured : themeExhibitions;
+    }
+
+    function openCustomArtModal(art) {
+      const modal = document.getElementById('artModal');
+      if (!modal || !art) return;
+
+      document.getElementById('modalImage').src = art.image;
+      document.getElementById('modalTitle').textContent = art.title;
+      document.getElementById('modalAuthorName').textContent = art.author;
+      document.getElementById('modalAuthorAgeGroup').textContent = getAgeGroupTag(art.ageGroup);
+      document.getElementById('modalDate').textContent = art.date || '2026';
+      document.getElementById('modalTeacherComment').textContent = art.teacherComment || '纯真灵气的艺术表达。';
+
+      currentModalArtwork = art;
+      modal.showModal();
+      lucide.createIcons();
+    }
+
+    async function syncDataFromCloud() {
+      if (!window.galleryCloud) return;
+      try {
+        const [cloudArts, cloudStudents, cloudThemes, cloudNotes, cloudAlbums] = await Promise.all([
+          window.galleryCloud.getArtworks ? window.galleryCloud.getArtworks() : Promise.resolve([]),
+          window.galleryCloud.getStudents ? window.galleryCloud.getStudents() : Promise.resolve([]),
+          window.galleryCloud.getThematicExhibitions ? window.galleryCloud.getThematicExhibitions() : Promise.resolve([]),
+          window.galleryCloud.getStickyNotes ? window.galleryCloud.getStickyNotes() : Promise.resolve([]),
+          window.galleryCloud.getCourseAlbums ? window.galleryCloud.getCourseAlbums() : Promise.resolve([])
+        ]);
+
+        if (Array.isArray(cloudArts) && cloudArts.length > 0) artworks = cloudArts;
+        if (Array.isArray(cloudStudents) && cloudStudents.length > 0) studentList = cloudStudents;
+        if (Array.isArray(cloudThemes) && cloudThemes.length > 0) themeExhibitions = cloudThemes;
+        if (Array.isArray(cloudNotes) && cloudNotes.length > 0) stickyNotes = cloudNotes;
+        if (Array.isArray(cloudAlbums) && cloudAlbums.length > 0) courseAlbums = cloudAlbums;
+
+        renderCuratedCarousel();
+        renderThemesArchive();
+        renderGallery();
+        renderAlbums();
+        renderHall();
+        renderStickyWall();
+        lucide.createIcons();
+        console.log('🖼️ 前台展厅已同步最新数据: 画作', artworks.length, '件, 小艺术家', studentList.length, '位, 作品集', courseAlbums.length, '套');
+      } catch (err) {
+        console.warn('云端数据读取异常:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      initTheme();
+      initBgm();
+      initAdminGateway();
+      setupLightDismiss();
+      startCarouselTimer();
+
+      // 🌟 1. 0毫秒极速瞬时同步渲染全部页面与板块（确保页面打开立即可见，无需等待网络）
+      renderCuratedCarousel();
+      renderGallery();
+      renderAlbums();
+      renderHall();
+      renderThemesArchive();
+      renderStickyWall();
+      lucide.createIcons();
+
+      // 🌟 2. 异步拉取云端最新数据并无缝重绘
+      try {
+        await syncDataFromCloud();
+      } catch (e) {
+        console.error('前台同步云端数据异常:', e);
+      }
+      lucide.createIcons();
+
+      // 初始化便签墙扫码直达二维码
+      initStickyQrCode();
+
+      // 扫码直达深链接解析 (画作详情 / 扫码贴便签)
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetArtId = urlParams.get('art');
+      const postMode = urlParams.get('post') || urlParams.get('action') || urlParams.get('note');
+
+      if (targetArtId) {
+        setTimeout(() => {
+          openArtModal(targetArtId);
+        }, 600);
+      } else if (postMode) {
+        setTimeout(() => {
+          navigateTo('notes');
+          openNewStickyModal();
+        }, 500);
+      }
+    });
+
+
+    function renderCuratedCarousel() {
       const box = document.getElementById('carouselSlidesBox');
       const indBox = document.getElementById('carouselIndicatorsBox');
       const activeThemes = getFeaturedThemes();
