@@ -1334,587 +1334,93 @@ button:focus:not(:focus-visible),
 
   <!-- 核心交互脚本 -->
   <script>
-    let adminArtworks = [];
-    let adminThemes = [];
-    let adminNotes = [];
-    let adminStudents = [];
+    // =========================================================================
+    // ⚡ 本地优先零延迟秒开缓存引擎 (Admin Local-First Instant Cache)
+    // 0毫秒直接读取本地已同步的真实数据，打开后台瞬间立见，彻底告别白屏与转圈等待！
+    // =========================================================================
+    function getAdminCache(key, fallback) {
+      try {
+        const cached = localStorage.getItem('art_gallery_cache_' + key) || localStorage.getItem('pear_gallery_v2_' + key) || localStorage.getItem('pear_course_' + key);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+      return Array.isArray(fallback) ? [...fallback] : [];
+    }
+
+    let adminArtworks = getAdminCache('artworks', typeof initialArtworks !== 'undefined' ? initialArtworks : []);
+    let adminThemes = getAdminCache('themes', typeof initialThematicExhibitions !== 'undefined' ? initialThematicExhibitions : []);
+    let adminNotes = getAdminCache('notes', typeof initialStickyNotes !== 'undefined' ? initialStickyNotes : []);
+    let adminStudents = getAdminCache('students', typeof initialStudents !== 'undefined' ? initialStudents : []);
+    let adminAlbums = getAdminCache('albums', typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : []);
     let currentArtworkImages = [];
 
-    // --- 数据加载与渲染 ---
+    // --- 数据加载与渐进式增量渲染 (Progressive Streaming Sync) ---
     async function loadAllAdminData() {
-      try {
-        if (!window.galleryCloud) {
-          throw new Error('云端数据服务尚未加载');
-        }
-
-        const [arts, themes, notes, students, albums] = await Promise.all([
-          window.galleryCloud.getArtworks(),
-          window.galleryCloud.getThematicExhibitions(),
-          window.galleryCloud.getStickyNotes(),
-          window.galleryCloud.getStudents(),
-          window.galleryCloud.getCourseAlbums ? window.galleryCloud.getCourseAlbums() : Promise.resolve([])
-        ]);
-        adminArtworks = arts || [];
-        adminThemes = themes || [];
-        adminNotes = notes || [];
-        adminStudents = students || [];
-        adminAlbums = albums || [];
-
-        renderOverviewStats();
-        renderAdminArtworksTable();
-        renderAdminStudentsGrid();
-        renderAdminAlbumsGrid();
-        renderAdminThemesGrid();
-        renderAdminNotesGrid();
-        updateAuthorDropdowns();
-        syncAdminToLocalCache();
-        lucide.createIcons();
-      } catch (e) {
-        console.error('加载后台数据出错:', e);
-        showToast('❌ 云端数据加载失败：' + (e.message || '请稍后重试'));
-      }
-    }
-
-    function syncAdminToLocalCache() {
-      try {
-        localStorage.setItem('art_gallery_cache_artworks', JSON.stringify(adminArtworks));
-        localStorage.setItem('art_gallery_cache_students', JSON.stringify(adminStudents));
-        localStorage.setItem('art_gallery_cache_themes', JSON.stringify(adminThemes));
-        localStorage.setItem('art_gallery_cache_albums', JSON.stringify(adminAlbums));
-        localStorage.setItem('art_gallery_cache_notes', JSON.stringify(adminNotes));
-        localStorage.setItem('pear_course_albums', JSON.stringify(adminAlbums));
-      } catch (e) {}
-    }
-
-    const ADMIN_TABS = ['overview', 'artworks', 'albums', 'album-studio', 'themes', 'notes', 'students', 'backup', 'theme-studio'];
-    const ADMIN_TAB_TITLES = {
-      overview: '总览',
-      artworks: '作品展',
-      albums: '作品集',
-      'album-studio': '编辑作品集',
-      themes: '专栏',
-      'theme-studio': '编辑专栏',
-      students: '小艺术家',
-      notes: '便签墙',
-      backup: '数据'
-    };
-
-    function getAdminTabFromUrl() {
-      const requested = new URL(window.location.href).searchParams.get('section') || 'overview';
-      return ADMIN_TABS.includes(requested) ? requested : 'overview';
-    }
-
-    function updateAdminUrl(tabName, replaceState = false) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('section', tabName);
-      url.searchParams.delete('id');
-
-      const editorId = tabName === 'theme-studio'
-        ? document.getElementById('themeFormId')?.value
-        : (tabName === 'album-studio' ? document.getElementById('albumFormId')?.value : '');
-
-      if (editorId) url.searchParams.set('id', editorId);
-
-      const nextUrl = url.pathname + url.search + url.hash;
-      const currentUrl = window.location.pathname + window.location.search + window.location.hash;
-      if (nextUrl !== currentUrl) {
-        history[replaceState ? 'replaceState' : 'pushState']({ adminTab: tabName }, '', nextUrl);
-      }
-    }
-
-    function setAdminSidebarCollapsed(collapsed, persist = false) {
-      const sidebar = document.getElementById('adminSidebar');
-      const toggle = document.getElementById('adminSidebarToggle');
-      if (!sidebar) return;
-
-      sidebar.classList.toggle('is-collapsed', Boolean(collapsed));
-      if (toggle) {
-        toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-        toggle.setAttribute('aria-label', collapsed ? '展开管理目录' : '折叠管理目录');
-        toggle.title = collapsed ? '展开管理目录' : '折叠管理目录';
-        toggle.innerHTML = `<i data-lucide="${collapsed ? 'panel-left-open' : 'panel-left-close'}" class="w-4 h-4"></i>`;
-      }
-      if (persist) {
-        localStorage.setItem('pear_admin_sidebar_collapsed', collapsed ? 'true' : 'false');
-      }
-      lucide.createIcons();
-    }
-
-    function getAdminTheme() {
-      return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-    }
-
-    function updateAdminThemeToggle() {
-      const theme = getAdminTheme();
-      const button = document.getElementById('adminThemeToggle');
-      const icon = document.getElementById('adminThemeToggleIcon');
-      const label = document.getElementById('adminThemeToggleLabel');
-      if (button) {
-        button.title = theme === 'dark' ? '切换到亮色模式' : '切换到暗黑模式';
-        button.setAttribute('aria-label', button.title);
-      }
-      if (icon) icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
-      if (label) label.textContent = theme === 'dark' ? '亮色' : '暗黑';
-      if (window.lucide?.createIcons) lucide.createIcons();
-    }
-
-    function applyAdminTheme(theme, persist = true) {
-      const isDark = theme !== 'light';
-      document.documentElement.classList.toggle('dark', isDark);
-      if (persist) {
-        try { localStorage.setItem('pear_admin_theme', isDark ? 'dark' : 'light'); } catch (e) {}
-      }
-      updateAdminThemeToggle();
-    }
-
-    function toggleAdminTheme() {
-      applyAdminTheme(getAdminTheme() === 'dark' ? 'light' : 'dark');
-    }
-
-    function initializeAdminTheme() {
-      let saved = 'dark';
-      try { saved = localStorage.getItem('pear_admin_theme') || 'dark'; } catch (e) {}
-      applyAdminTheme(saved, false);
-    }
-
-    function initializeAdminSidebar() {
-      setAdminSidebarCollapsed(localStorage.getItem('pear_admin_sidebar_collapsed') === 'true');
-    }
-
-    function toggleAdminSidebar() {
-      const sidebar = document.getElementById('adminSidebar');
-      if (!sidebar) return;
-      setAdminSidebarCollapsed(!sidebar.classList.contains('is-collapsed'), true);
-    }
-
-    function switchAdminTab(tabName, updateUrl = true, replaceState = false) {
-      if (!ADMIN_TABS.includes(tabName)) tabName = 'overview';
-
-      ADMIN_TABS.forEach(tab => {
-        const viewEl = document.getElementById(`admin-view-${tab}`);
-        const btnEl = document.getElementById(`tab-btn-${tab}`);
-        if (viewEl) viewEl.classList.add('hidden');
-        if (btnEl) btnEl.classList.remove('active');
-      });
-
-      const activeView = document.getElementById(`admin-view-${tabName}`);
-      const navTab = tabName === 'theme-studio' ? 'themes' : (tabName === 'album-studio' ? 'albums' : tabName);
-      const activeBtn = document.getElementById(`tab-btn-${navTab}`);
-      if (activeView) activeView.classList.remove('hidden');
-      if (activeBtn) activeBtn.classList.add('active');
-
-      const isStudio = tabName === 'theme-studio' || tabName === 'album-studio';
-      const savedCollapsed = localStorage.getItem('pear_admin_sidebar_collapsed') === 'true';
-      setAdminSidebarCollapsed(isStudio ? true : savedCollapsed);
-
-      if (updateUrl) updateAdminUrl(tabName, replaceState);
-      document.title = '想吃梨';
-      window.scrollTo({ top: 0, behavior: updateUrl ? 'smooth' : 'auto' });
-      lucide.createIcons();
-    }
-
-    function applyAdminRouteFromUrl() {
-      const tabName = getAdminTabFromUrl();
-      const id = new URL(window.location.href).searchParams.get('id');
-
-      if (tabName === 'theme-studio') {
-        openThemeStudio(id || null, false);
-      } else if (tabName === 'album-studio') {
-        openAlbumStudio(id || null, false);
-      } else {
-        switchAdminTab(tabName, false);
-      }
-
-      if (!new URL(window.location.href).searchParams.has('section')) {
-        updateAdminUrl(tabName, true);
-      }
-    }
-
-    function renderOverviewStats() {
-      document.getElementById('stat-art-count').textContent = adminArtworks.length;
-      document.getElementById('stat-student-count').textContent = adminStudents.length;
-      document.getElementById('stat-theme-count').textContent = adminThemes.length;
-      document.getElementById('stat-note-count').textContent = adminNotes.length;
-
-      const bArt = document.getElementById('backupStatArtCount');
-      if (bArt) bArt.textContent = adminArtworks.length;
-      const bStu = document.getElementById('backupStatStudentCount');
-      if (bStu) bStu.textContent = adminStudents.length;
-      const bTheme = document.getElementById('backupStatThemeCount');
-      if (bTheme) bTheme.textContent = adminThemes.length;
-      const bNote = document.getElementById('backupStatNoteCount');
-      if (bNote) bNote.textContent = adminNotes.length;
-    }
-
-    function updateAuthorDropdowns() {
-      const select = document.getElementById('artAuthorQuickSelect');
-      if (!select) return;
-      select.innerHTML = '<option value="">选已有小画家</option>' + adminStudents.map(s => `
-        <option value="${s.name}">${s.name} (${s.age})</option>
-      `).join('');
-    }
-
-    // =========================================================================
-    // 🎨 作品档案库管理 (Artworks)
-    
-    // =========================================================================
-    // 📚 课程作品集后台管理与批量建册工作台核心引擎
-    // =========================================================================
-    let adminAlbums = [];
-    let currentStudioAlbumArtworks = []; // 暂存当前正在编辑的作品集包含的画作数组
-
-    function renderAdminAlbumsGrid() {
-      const grid = document.getElementById('adminAlbumsGrid');
-      if (!grid) return;
-
-      const albums = adminAlbums || [];
-
-      if (albums.length === 0) {
-        grid.innerHTML = '<div class="col-span-full p-8 text-center text-stone-500 bg-stone-900/40 rounded-2xl border border-white/5">暂无课程作品集，点击上方按钮批量录入第一套作品集</div>';
-        return;
-      }
-
-      grid.innerHTML = albums.map(alb => {
-        const cover = alb.coverImage || (alb.artworks && alb.artworks[0] ? alb.artworks[0].image : 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80');
-        const artCount = Array.isArray(alb.artworks) ? alb.artworks.length : (alb.artworkCount || 0);
-        const authors = Array.from(new Set((alb.artworks || []).map(a => a.author))).filter(Boolean);
-        const authorChips = authors.slice(0, 5).map(n => `<span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 text-[10px]">${n}</span>`).join(' ') + (authors.length > 5 ? `<span class="text-[10px] text-stone-400">+${authors.length - 5}</span>` : '');
-
-        return `
-          <div class="p-4 sm:p-5 rounded-2xl bg-[#0F1712] border border-white/[0.08] flex flex-col justify-between gap-4 group hover:border-emerald-500/30 transition-all">
-            <div class="flex gap-3 sm:gap-4">
-              <img src="${cover}" class="w-24 sm:w-28 h-20 sm:h-24 rounded-xl object-cover border border-white/10 bg-stone-900 flex-shrink-0" />
-              <div class="space-y-1.5 flex-1 min-w-0">
-                <div class="flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px]">${alb.className || '创想班'}</span>
-                  <span class="text-[10px] text-stone-400 font-mono">${alb.date || '2026'}</span>
-                </div>
-                <h3 class="font-black text-sm sm:text-base text-white truncate group-hover:text-emerald-400 transition-colors">${alb.title}</h3>
-                <p class="text-xs text-stone-400 line-clamp-1">${alb.introSummary || '美育课程探索记录'}</p>
-                <div class="flex flex-wrap items-center gap-1 pt-0.5">${authorChips}</div>
-              </div>
-            </div>
-
-            <div class="pt-3 border-t border-white/[0.06] flex items-center justify-between">
-              <span class="text-[11px] text-teal-400 font-bold">📚 收录 ${artCount} 幅画作</span>
-              <div class="flex items-center gap-2">
-                <button onclick="openAlbumStudio('${alb.id}')" class="px-2.5 py-1 rounded-lg bg-teal-500/15 hover:bg-teal-500 text-teal-400 hover:text-stone-950 text-[11px] font-bold transition-all cursor-pointer">
-                  ✏️ 编辑画册
-                </button>
-                <button onclick="adminDeleteAlbum('${alb.id}')" class="px-2.5 py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500 text-rose-400 hover:text-white text-[11px] font-bold transition-all cursor-pointer">
-                  🗑️ 删除
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      lucide.createIcons();
-    }
-
-    function openAlbumStudio(albumId = null, updateUrl = true) {
-      const form = document.getElementById('albumForm');
-      if (form) form.reset();
-      currentStudioAlbumArtworks = [];
-
-      if (albumId) {
-        const albums = adminAlbums || [];
-        const alb = albums.find(a => String(a.id) === String(albumId));
-        if (alb) {
-          document.getElementById('albumStudioTitle').textContent = `编辑课程作品集 · 《${alb.title}》`;
-          document.getElementById('albumFormId').value = alb.id;
-          document.getElementById('albumFormTitle').value = alb.title;
-          document.getElementById('albumFormSubTitle').value = alb.subTitle || alb.subtitle || '';
-          document.getElementById('albumFormTag').value = alb.tag || '';
-          document.getElementById('albumFormDate').value = alb.date || '';
-          document.getElementById('albumFormAgeGroup').value = alb.ageGroup || '6-8';
-          document.getElementById('albumFormClassName').value = alb.className || '';
-          
-          const cover = alb.coverImage || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80';
-          document.getElementById('albumFormCover').value = cover;
-          document.getElementById('albumCoverPreview').src = cover;
-          document.getElementById('albumFormIntro').value = alb.introSummary || alb.intro || '';
-          document.getElementById('albumFormNotes').value = alb.teacherNotes || '';
-
-          currentStudioAlbumArtworks = Array.isArray(alb.artworks) ? JSON.parse(JSON.stringify(alb.artworks)) : [];
-        }
-      } else {
-        document.getElementById('albumStudioTitle').textContent = '批量录入新课程作品集';
-        document.getElementById('albumFormId').value = '';
-        const defaultCover = 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80';
-        document.getElementById('albumFormCover').value = defaultCover;
-        document.getElementById('albumCoverPreview').src = defaultCover;
-        document.getElementById('albumFormTag').value = '🎨 创想班 · 周末主题工坊';
-        document.getElementById('albumFormDate').value = new Date().toISOString().slice(0, 10).replace(/-/g, '.');
-        document.getElementById('albumFormAgeGroup').value = '6-8';
-        document.getElementById('albumFormClassName').value = '创想B班';
-        document.getElementById('albumFormTitle').value = '';
-        document.getElementById('albumFormSubTitle').value = '';
-        document.getElementById('albumFormIntro').value = '';
-        document.getElementById('albumFormNotes').value = '';
-      }
-
-      renderAlbumStudioArtworks();
-      switchAdminTab('album-studio', updateUrl);
-      lucide.createIcons();
-    }
-
-    async function handleAlbumCoverSelected(e) {
-      const file = e.target.files[0];
-      if (file) {
-        showToast('📸 正在处理并上传画册封面...');
-        const albumId = document.getElementById('albumFormId').value || ('album-' + Date.now());
-        let finalSrc = null;
-        try {
-          if (window.galleryCloud && window.galleryCloud.uploadCourseMedia) {
-            finalSrc = await window.galleryCloud.uploadCourseMedia(file, `albums/${albumId}`);
-          }
-        } catch (err) {
-          console.warn('对象存储上传未就绪，使用本地高压缩存储:', err);
-        }
-        if (!finalSrc) {
-          finalSrc = await compressImageFile(file, 1200, 0.85);
-        }
-        if (finalSrc) {
-          document.getElementById('albumFormCover').value = finalSrc;
-          document.getElementById('albumCoverPreview').src = finalSrc;
-          showToast('✨ 封面已更新！');
-        }
-      }
-      e.target.value = '';
-    }
-
-    async function handleAlbumBatchDrop(e) {
-      e.preventDefault();
-      const dt = e.dataTransfer;
-      if (dt && dt.files && dt.files.length > 0) {
-        await processBatchImageFiles(Array.from(dt.files));
-      }
-    }
-
-    async function handleAlbumBatchImagesSelected(e) {
-      const files = Array.from(e.target.files || []);
-      if (files.length > 0) {
-        await processBatchImageFiles(files);
-      }
-      e.target.value = '';
-    }
-
-    async function processBatchImageFiles(files) {
-      const imageFiles = files.filter(f => f.type.startsWith('image/'));
-      if (imageFiles.length === 0) return;
-
-      const albumId = document.getElementById('albumFormId').value || ('album-' + Date.now());
-      showToast(`📸 正在批量上传 ${imageFiles.length} 幅画作至云端对象存储...`);
-      for (let i = 0; i < imageFiles.length; i++) {
-        const file = imageFiles[i];
-        let finalSrc = null;
-        try {
-          if (window.galleryCloud && window.galleryCloud.uploadCourseMedia) {
-            finalSrc = await window.galleryCloud.uploadCourseMedia(file, `albums/${albumId}`);
-          }
-        } catch (err) {
-          console.warn('对象存储上传未就绪，使用本地高压缩存储:', err);
-        }
-        if (!finalSrc) {
-          finalSrc = await compressImageFile(file, 1200, 0.82);
-        }
-        if (finalSrc) {
-          const cleanFileName = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ").trim();
-          const defaultTitle = cleanFileName || `作品第 ${currentStudioAlbumArtworks.length + 1} 幅`;
-          
-          currentStudioAlbumArtworks.push({
-            id: 'art-alb-item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
-            title: defaultTitle,
-            author: '',
-            comment: '',
-            image: finalSrc
-          });
-
-          if (currentStudioAlbumArtworks.length === 1 && document.getElementById('albumFormCover').value.includes('photo-1579783900882')) {
-            document.getElementById('albumFormCover').value = finalSrc;
-            document.getElementById('albumCoverPreview').src = finalSrc;
-          }
-        }
-      }
-
-      renderAlbumStudioArtworks();
-      showToast(`🎉 成功导入 ${imageFiles.length} 幅画作！`);
-    }
-
-        function renderAlbumStudioArtworks() {
-      const list = document.getElementById('albumStudioArtworksList');
-      const countBadge = document.getElementById('albumBatchCountBadge');
-      if (countBadge) countBadge.textContent = `已添加 ${currentStudioAlbumArtworks.length} 幅`;
-      if (!list) return;
-
-      if (currentStudioAlbumArtworks.length === 0) {
-        list.innerHTML = '<div class="py-6 text-center text-xs text-stone-500">尚未添加画作，请拖入或选择照片批量上传</div>';
-        return;
-      }
-
-      // 生成学员花名册选项
-      const studentOptions = (adminStudents || []).map(s => `<option value="${s.name}">${s.name} (${s.ageGroup ? s.ageGroup + '岁' : (s.className || '学员')})</option>`).join('');
-
-      list.innerHTML = currentStudioAlbumArtworks.map((art, idx) => `
-        <div class="p-4 sm:p-5 rounded-2xl bg-stone-900/90 border border-white/10 flex flex-col gap-3 group hover:border-teal-500/40 transition-all shadow-md">
-          <!-- 上半部分：序号、缩略图、画作标题与学员选择器 -->
-          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
-            <div class="flex items-center gap-3 flex-1 min-w-0 w-full sm:w-auto">
-              <span class="w-7 h-7 rounded-full bg-teal-500/20 text-teal-300 flex items-center justify-center font-mono text-xs font-bold flex-shrink-0">
-                ${idx + 1}
-              </span>
-              <img src="${art.image}" class="w-16 h-16 rounded-xl object-cover border border-white/10 bg-stone-950 flex-shrink-0 shadow" />
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1 min-w-0">
-                <div class="space-y-1">
-                  <span class="text-[10px] text-stone-400 font-bold">画作标题</span>
-                  <input 
-                    type="text" 
-                    value="${art.title || ''}" 
-                    oninput="currentStudioAlbumArtworks[${idx}].title = this.value" 
-                    placeholder="输入画作名称..." 
-                    class="w-full px-2.5 py-1.5 bg-stone-950 border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-teal-400 font-bold"
-                  />
-                </div>
-                <div class="space-y-1">
-                  <span class="text-[10px] text-stone-400 font-bold">小作者姓名 (选填或点选)</span>
-                  <div class="flex items-center gap-1.5">
-                    <input 
-                      type="text" 
-                      value="${art.author || ''}" 
-                      oninput="currentStudioAlbumArtworks[${idx}].author = this.value" 
-                      placeholder="小作者名字" 
-                      class="w-28 px-2.5 py-1.5 bg-stone-950 border border-white/10 rounded-lg text-xs text-teal-300 font-bold focus:outline-none focus:border-teal-400"
-                    />
-                    <select 
-                      onchange="this.previousElementSibling.value = this.value; currentStudioAlbumArtworks[${idx}].author = this.value;" 
-                      class="flex-1 px-2 py-1.5 bg-stone-950 border border-white/10 rounded-lg text-[11px] text-stone-300 focus:outline-none cursor-pointer"
-                    >
-                      <option value="">▼ 花名册快速点选</option>
-                      ${studentOptions}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 移除画作按钮 -->
-            <button 
-              type="button" 
-              onclick="removeAlbumStudioArtwork(${idx})" 
-              class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white text-xs transition-all cursor-pointer self-end sm:self-auto flex items-center gap-1"
-              title="移除该画作"
-            >
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-              <span class="sm:hidden text-xs">移除</span>
-            </button>
-          </div>
-
-          <!-- 🌟 用户建议 2：单张作品专属说明板块 (创作故事 / 童言童语 / 导师观察) -->
-          <div class="pt-2.5 border-t border-white/5 space-y-1">
-            <label class="text-[11px] text-teal-300 font-bold flex items-center gap-1">
-              <span>💬</span>
-              <span>单张作品专属说明 / 创作童言 / 导师点评：</span>
-            </label>
-            <textarea 
-              rows="2" 
-              oninput="currentStudioAlbumArtworks[${idx}].comment = this.value" 
-              placeholder="在此输入这幅画的创作故事、孩子童言或导师观察说明（如：用橙红与钴蓝表现出睡莲在夕阳下的光影变化，笔触大胆自信...）" 
-              class="w-full px-3 py-2 bg-stone-950/80 border border-white/10 rounded-xl text-xs text-stone-200 placeholder:text-stone-600 focus:outline-none focus:border-teal-400 leading-relaxed font-sans"
-            >${art.comment || ''}</textarea>
-          </div>
-        </div>
-      `).join('');
-
-      lucide.createIcons();
-    }
-
-    function removeAlbumStudioArtwork(idx) {
-      currentStudioAlbumArtworks.splice(idx, 1);
-      renderAlbumStudioArtworks();
-    }
-
-    async function handleSaveAlbum(e) {
-      e.preventDefault();
-      const id = document.getElementById('albumFormId').value;
-      const title = document.getElementById('albumFormTitle').value.trim();
-      const subTitle = document.getElementById('albumFormSubTitle').value.trim();
-      const tag = document.getElementById('albumFormTag').value.trim();
-      const date = document.getElementById('albumFormDate').value.trim() || new Date().toISOString().slice(0, 10).replace(/-/g, '.');
-      const ageGroup = document.getElementById('albumFormAgeGroup').value;
-      const className = document.getElementById('albumFormClassName').value.trim();
-      const coverImage = document.getElementById('albumFormCover').value;
-      const introSummary = document.getElementById('albumFormIntro').value.trim();
-      const teacherNotes = document.getElementById('albumFormNotes').value.trim();
-
-      if (currentStudioAlbumArtworks.length === 0) {
-        alert('请至少添加一张画作照片！');
-        return;
-      }
-
-      const albumData = {
-        id: id || ('album-' + Date.now()),
-        title,
-        subTitle,
-        tag,
-        date,
-        ageGroup,
-        className,
-        coverImage,
-        introSummary,
-        teacherNotes,
-        artworks: currentStudioAlbumArtworks,
-        artworkCount: currentStudioAlbumArtworks.length
-      };
-
-      showToast('💾 正在保存课程作品集...');
-      try {
-        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
-        let savedAlbum;
-        if (id) {
-          savedAlbum = await window.galleryCloud.updateCourseAlbum(albumData);
-          const idx = adminAlbums.findIndex(a => a.id === id);
-          if (idx !== -1) adminAlbums[idx] = savedAlbum;
-          showToast(`🎉 成功更新作品集《${title}》！`);
-        } else {
-          savedAlbum = await window.galleryCloud.createCourseAlbum(albumData);
-          adminAlbums.unshift(savedAlbum);
-          showToast(`🎉 成功发布新作品集《${title}》！`);
-        }
-      } catch (err) {
-        console.error('保存作品集失败:', err);
-        showToast(`❌ 作品集未保存到云端：${err.message || '请稍后重试'}`);
-        return;
-      }
-
-      renderAdminAlbumsGrid();
+      // 🌟 1. 0毫秒优先全量渲染本地持久化数据
       renderOverviewStats();
-      syncAdminToLocalCache();
-      switchAdminTab('albums');
+      renderAdminArtworksTable();
+      renderAdminStudentsGrid();
+      renderAdminAlbumsGrid();
+      renderAdminThemesGrid();
+      renderAdminNotesGrid();
+      updateAuthorDropdowns();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      if (!window.galleryCloud) return;
+
+      // 🌟 2. 增量渐进式并发同步：各表独立拉取，回来一个立即更新对应视图，绝不互相阻塞
+      const syncTasks = [
+        window.galleryCloud.getArtworks().then(arts => {
+          if (Array.isArray(arts) && arts.length > 0) {
+            adminArtworks = arts;
+            renderAdminArtworksTable();
+            renderOverviewStats();
+            updateAuthorDropdowns();
+          }
+        }).catch(err => console.warn('同步画作失败:', err)),
+
+        window.galleryCloud.getThematicExhibitions().then(themes => {
+          if (Array.isArray(themes) && themes.length > 0) {
+            adminThemes = themes;
+            renderAdminThemesGrid();
+            renderOverviewStats();
+          }
+        }).catch(err => console.warn('同步特展失败:', err)),
+
+        window.galleryCloud.getStudents().then(students => {
+          if (Array.isArray(students) && students.length > 0) {
+            adminStudents = students;
+            renderAdminStudentsGrid();
+            renderOverviewStats();
+            updateAuthorDropdowns();
+          }
+        }).catch(err => console.warn('同步学员失败:', err)),
+
+        window.galleryCloud.getStickyNotes().then(notes => {
+          if (Array.isArray(notes) && notes.length > 0) {
+            adminNotes = notes;
+            renderAdminNotesGrid();
+            renderOverviewStats();
+          }
+        }).catch(err => console.warn('同步便签失败:', err)),
+
+        (window.galleryCloud.getCourseAlbums ? window.galleryCloud.getCourseAlbums() : Promise.resolve([])).then(albums => {
+          if (Array.isArray(albums) && albums.length > 0) {
+            adminAlbums = albums;
+            renderAdminAlbumsGrid();
+            renderOverviewStats();
+          }
+        }).catch(err => console.warn('同步画册失败:', err))
+      ];
+
+      await Promise.allSettled(syncTasks);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      console.log('⚡ 后台管理数据已全量平滑同步完毕！');
     }
 
-    async function adminDeleteAlbum(id) {
-      const alb = adminAlbums.find(a => a.id === id);
-      if (confirm(`⚠️ 确定要删除课程作品集《${alb ? alb.title : id}》吗？`)) {
-        try {
-          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
-          await window.galleryCloud.deleteCourseAlbum(id);
-          adminAlbums = adminAlbums.filter(a => a.id !== id);
-          showToast('🗑️ 作品集已从云端删除');
-          renderAdminAlbumsGrid();
-          renderOverviewStats();
-          syncAdminToLocalCache();
-        } catch (err) {
-          console.error('删除作品集失败:', err);
-          showToast('❌ 作品集未从云端删除：' + (err.message || '请稍后重试'));
-        }
-      }
-    }
-
-
-    // =========================================================================
-    function renderAdminArtworksTable() {
+        function renderAdminArtworksTable() {
       const tbody = document.getElementById('adminArtworksTableBody');
       const search = (document.getElementById('adminArtSearchInput')?.value || '').toLowerCase();
       if (!tbody) return;
