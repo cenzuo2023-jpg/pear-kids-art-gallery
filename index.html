@@ -812,34 +812,29 @@
       </button>
     </section>
 
-    <!-- 课题核心信息 Banner -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-8 py-4 w-full">
-      <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-emerald-950/30 via-stone-900/40 to-teal-950/20 border border-emerald-500/20 backdrop-blur-xl relative overflow-hidden space-y-4">
-        <div class="flex flex-wrap items-center gap-2.5 text-xs font-bold text-emerald-400">
-          <span id="albumDetailClassName" class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300">创想班</span>
-          <span id="albumDetailDate" class="px-3 py-1 rounded-full bg-white/5 text-stone-300 font-mono">2026.08</span>
-          <span id="albumDetailAgeGroup" class="px-3 py-1 rounded-full bg-white/5 text-stone-300">6-8岁</span>
-          <span id="albumDetailCountBadge" class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 font-bold">共收录 6 幅画作</span>
+    <!-- 简洁课程信息页头 -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 pt-7 pb-9 w-full">
+      <div class="max-w-4xl space-y-4">
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-stone-500 dark:text-stone-400">
+          <span id="albumDetailClassName" class="font-bold text-emerald-700 dark:text-emerald-400">创想班</span>
+          <span aria-hidden="true">·</span>
+          <span id="albumDetailDate" class="font-mono">2026.08</span>
+          <span aria-hidden="true">·</span>
+          <span id="albumDetailAgeGroup">6-8岁</span>
         </div>
 
-        <h1 id="albumDetailTitle" class="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+        <h1 id="albumDetailTitle" class="text-3xl sm:text-4xl font-black text-stone-950 dark:text-stone-50 tracking-tight leading-tight">
           课程作品集标题
         </h1>
 
-        <!-- 课题教学目标与导语引言 -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-black/40 border border-white/10 space-y-2.5">
-          <div class="flex items-center gap-2 text-xs font-bold text-teal-300">
-            <span>💡</span>
-            <span>课题探索导语与美育目标：</span>
-          </div>
-          <p id="albumDetailIntro" class="text-xs sm:text-sm text-stone-200 leading-relaxed font-sans">
-            课程导语与教学目标说明...
-          </p>
-          <div id="albumDetailNotesBox" class="pt-2.5 border-t border-white/10 text-xs text-stone-400 italic hidden">
-            <span class="font-bold not-italic text-emerald-400">👩‍🏫 导师课后手记：</span>
-            <span id="albumDetailNotes" class="text-stone-300"></span>
-          </div>
-        </div>
+        <p id="albumDetailIntro" class="max-w-3xl text-sm sm:text-base text-stone-600 dark:text-stone-300 leading-relaxed">
+          课程导语与教学目标说明...
+        </p>
+
+        <p id="albumDetailNotesBox" class="max-w-3xl text-xs sm:text-sm text-stone-500 dark:text-stone-400 leading-relaxed hidden">
+          <span class="font-bold text-stone-700 dark:text-stone-300">导师手记：</span>
+          <span id="albumDetailNotes"></span>
+        </p>
       </div>
     </section>
 
@@ -2269,11 +2264,10 @@
         return;
       }
 
-      // 渲染每行 3 张标准向下排列的画作卡片 (固定 4:3 比例，带专属深度说明与点击放大)
+      // 渲染每行 3 张标准向下排列的画作卡片 (固定 4:3 比例，点击放大)
       grid.innerHTML = artworksList.map((art, idx) => {
         const title = art.title || `创作作品 #${idx + 1}`;
         const author = art.author || '学员';
-        const comment = art.comment || '色彩饱满，线条富有自由创想。';
         const imgUrl = art.image || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1200&auto=format&fit=crop&q=85';
 
         return `
@@ -2304,21 +2298,14 @@
                 </div>
               </div>
 
-              <!-- 中间：画作标题与导师观察说明 -->
-              <div class="space-y-2">
-                <div class="flex items-center justify-between gap-2">
-                  <h3 class="font-black text-base text-stone-900 dark:text-stone-50 group-hover:text-emerald-600 dark:group-hover:text-[#10E57A] transition-colors truncate">
-                    ${title}
-                  </h3>
-                  <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold flex-shrink-0">
-                    学员原作
-                  </span>
-                </div>
-
-                <!-- 单张作品专属深度说明与导师点评板块 (亮暗模式自适应) -->
-                <div class="p-3 rounded-2xl bg-stone-50 dark:bg-stone-900/80 border border-stone-200/80 dark:border-white/5 text-xs text-stone-700 dark:text-stone-300 leading-relaxed italic font-sans min-h-[58px]">
-                  “${comment}”
-                </div>
+              <!-- 画作标题 -->
+              <div class="flex items-center justify-between gap-2">
+                <h3 class="font-black text-base text-stone-900 dark:text-stone-50 group-hover:text-emerald-600 dark:group-hover:text-[#10E57A] transition-colors truncate">
+                  ${title}
+                </h3>
+                <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold flex-shrink-0">
+                  学员原作
+                </span>
               </div>
             </div>
 
