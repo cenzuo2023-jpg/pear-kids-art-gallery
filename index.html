@@ -1386,67 +1386,67 @@
     </div>
   </dialog>
 
-  <!-- 9. 📝 贴便签与发布微作品弹窗 (New Sticky Note Modal - 极简便捷发布) -->
-  <dialog id="newStickyModal" class="p-0 rounded-[32px] overflow-hidden shadow-2xl bg-white dark:bg-[#15241B] focus:outline-none max-w-lg w-full border-0">
-    <div class="p-6 sm:p-8 max-h-[90vh] overflow-y-auto text-stone-900 dark:text-stone-100">
+  <!-- 9. 📝 贴便签弹窗 (New Sticky Note Modal - 手机端全屏沉浸适配 / 电脑端精致浮动卡片) -->
+  <dialog id="newStickyModal" class="p-0 sm:rounded-[32px] overflow-hidden shadow-2xl bg-white dark:bg-[#15241B] focus:outline-none w-full sm:max-w-lg border-0 m-0 sm:m-auto">
+    <div class="p-5 sm:p-8 h-full sm:h-auto flex flex-col justify-between overflow-y-auto text-stone-900 dark:text-stone-100 max-h-[94vh]">
       
       <!-- 弹窗顶栏 -->
-      <div class="flex items-center justify-between mb-5 pb-3 border-b border-black/[0.05] dark:border-white/[0.06]">
+      <div class="flex items-center justify-between pb-3.5 mb-3 border-b border-black/[0.05] dark:border-white/[0.06] flex-shrink-0">
         <div>
-          <h3 class="font-black text-stone-950 dark:text-stone-100 text-xl tracking-tight flex items-center gap-2">
+          <h3 class="font-black text-stone-950 dark:text-stone-100 text-lg sm:text-xl tracking-tight flex items-center gap-2">
             <span>✍️ 贴一张便签</span>
           </h3>
-          <p class="text-xs text-stone-400 dark:text-stone-400 mt-0.5">写下美育心得、给老师寄语，或随手晒一张画作</p>
+          <p class="text-xs text-stone-400 dark:text-stone-400 mt-0.5">写下美育心得、给老师寄语，或记录纯真童心</p>
         </div>
-        <button onclick="closeNewStickyModal()" class="w-8 h-8 rounded-full bg-stone-100 dark:bg-emerald-950/60 text-stone-500 dark:text-stone-400 flex items-center justify-center hover:bg-stone-200 cursor-pointer">
+        <button onclick="closeNewStickyModal()" class="w-9 h-9 rounded-full bg-stone-100 dark:bg-emerald-950/60 text-stone-500 dark:text-stone-400 flex items-center justify-center hover:bg-stone-200 dark:hover:bg-emerald-900 cursor-pointer active:scale-95 transition-all">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <form id="newStickyForm" onsubmit="handleNewStickySubmit(event)" class="space-y-4 text-xs">
+      <form id="newStickyForm" onsubmit="handleNewStickySubmit(event)" class="space-y-4 text-xs flex-1 flex flex-col justify-between">
         
-        <!-- 1. 署名设置 (姓名/昵称 + 匿名发布勾选) -->
-        <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label class="font-bold text-stone-700 dark:text-stone-300">您的昵称 / 签名 *</label>
-            <label class="inline-flex items-center gap-1.5 cursor-pointer text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-bold select-none text-[11px]">
-              <input type="checkbox" id="stickyAnonymousCheck" onchange="toggleStickyAnonymous()" class="rounded text-emerald-600 focus:ring-emerald-500 w-3.5 h-3.5">
-              <span>🕶️ 匿名发布</span>
-            </label>
+        <div class="space-y-3.5 flex-1 flex flex-col">
+          <!-- 1. 署名设置 (姓名/昵称 + 匿名发布勾选) -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="font-bold text-stone-800 dark:text-stone-200">您的昵称 / 签名 *</label>
+              <label class="inline-flex items-center gap-1.5 cursor-pointer text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-bold select-none text-[11px]">
+                <input type="checkbox" id="stickyAnonymousCheck" onchange="toggleStickyAnonymous()" class="rounded text-emerald-600 focus:ring-emerald-500 w-3.5 h-3.5">
+                <span>🕶️ 匿名发布</span>
+              </label>
+            </div>
+            <input 
+              type="text" 
+              id="stickyAuthorInput" 
+              required 
+              placeholder="输入您的姓名或昵称（如：桐桐妈妈、周子墨、小沈...）" 
+              class="w-full px-3.5 py-3 bg-stone-50 dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:border-emerald-500 font-bold text-sm text-stone-900 dark:text-stone-100"
+            >
           </div>
-          <input 
-            type="text" 
-            id="stickyAuthorInput" 
-            required 
-            placeholder="输入您的姓名或昵称（如：桐桐妈妈、周子墨、小沈...）" 
-            class="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:border-emerald-500 font-bold text-xs text-stone-900 dark:text-stone-100"
-          >
+
+          <!-- 2. 便签文字内容 -->
+          <div class="flex-1 flex flex-col min-h-[140px] sm:min-h-[120px]">
+            <label class="block font-bold text-stone-800 dark:text-stone-200 mb-1.5">
+              便签内容 *
+            </label>
+            <textarea 
+              id="stickyContentInput" 
+              required 
+              placeholder="写下一段美育心得、给老师的寄语，或记录纯真童心话语..." 
+              class="w-full flex-1 p-3.5 bg-stone-50 dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:border-emerald-500 leading-relaxed text-sm text-stone-900 dark:text-stone-100 resize-none"
+            ></textarea>
+          </div>
         </div>
 
-        <!-- 2. 便签文字内容 -->
-        <div>
-          <label class="block font-bold text-stone-700 dark:text-stone-300 mb-1">
-            便签内容 *
-          </label>
-          <textarea 
-            id="stickyContentInput" 
-            rows="4" 
-            required 
-            placeholder="写下一段美育心得、给老师的寄语，或记录纯真童心话语..." 
-            class="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-800 rounded-xl focus:outline-none focus:border-emerald-500 leading-relaxed text-xs text-stone-900 dark:text-stone-100"
-          ></textarea>
-        </div>
-
-        <!-- 提交按键 -->
+        <!-- 3. 提交按键 -->
         <div class="pt-2">
           <button 
             type="submit" 
-            class="w-full py-3.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 rounded-2xl font-black text-sm tracking-wide transition-all shadow-lg shadow-emerald-500/25 active:scale-98 cursor-pointer"
+            class="w-full py-3.5 sm:py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-[#10E57A] text-stone-950 rounded-2xl font-black text-sm tracking-wide transition-all shadow-lg shadow-emerald-500/25 active:scale-98 cursor-pointer flex items-center justify-center gap-2"
           >
-            📌 贴到美育便签墙上 🚀
+            <span>📌 贴到美育便签墙上 🚀</span>
           </button>
         </div>
-
       </form>
     </div>
   </dialog>

@@ -351,13 +351,14 @@ html.dark .artwork-category-badge {
   opacity: 0.4 !important;
 }
 
-/* 原生 Dialog 弹窗动画 */
+/* 原生 Dialog 弹窗动画与居中 */
 dialog {
   border: none;
   padding: 0;
   background: transparent;
   max-width: 94vw;
   width: 100%;
+  margin: auto;
   opacity: 0;
   transform: scale(0.94) translateY(20px);
   transition-property: opacity, transform, display, overlay;
@@ -387,12 +388,43 @@ dialog::backdrop {
 }
 
 dialog[open]::backdrop {
-  background-color: rgba(7, 18, 12, 0.8);
+  background-color: rgba(7, 18, 12, 0.82);
   backdrop-filter: blur(12px);
 
   @starting-style {
     background-color: rgba(0, 0, 0, 0);
     backdrop-filter: blur(0px);
+  }
+}
+
+/* 📱 手机端全屏极速贴便签弹窗体验 (Full-Screen Mobile Dialog) */
+@media (max-width: 640px) {
+  dialog#newStickyModal {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    max-width: 100vw !important;
+    max-height: 100% !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    transform: none !important;
+    background: var(--bg-main) !important;
+  }
+  dialog#newStickyModal[open] {
+    transform: none !important;
+  }
+  dialog#newStickyModal > div {
+    height: 100% !important;
+    height: 100dvh !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    padding: 1.25rem 1rem 1.5rem 1rem !important;
+    background: transparent !important;
   }
 }
 
