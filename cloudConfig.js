@@ -1,5 +1,5 @@
 /**
- * 🍐 想吃梨儿童艺术启蒙 · 原生零依赖 Supabase 云数据库直连引擎 (Pure Native Fetch Engine)
+ * 🍐 想吃梨 · 原生零依赖 Supabase 云数据库直连引擎 (Pure Native Fetch Engine)
  * 
  * 架构优势：
  * 1. 【零第三方 SDK 依赖】: 彻底摆脱外部 CDN 脚本加载延迟与拦截，直接使用浏览器原生 fetch() 发起 HTTP REST 请求。
