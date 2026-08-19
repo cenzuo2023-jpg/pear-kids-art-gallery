@@ -3514,11 +3514,18 @@
       } else if (viewName === 'theme' && paramData) {
         pauseCarousel();
         document.getElementById('view-theme').classList.remove('hidden');
-        let themeObj = paramData;
-        if (typeof paramData !== 'object') {
-          themeObj = (themeExhibitions || []).find(t => String(t.id) === String(paramData)) || (initialThematicExhibitions || []).find(t => String(t.id) === String(paramData));
+        let themeObj = typeof paramData === 'object' ? paramData : ((themeExhibitions || []).find(t => String(t.id) === String(paramData)) || (initialThematicExhibitions || []).find(t => String(t.id) === String(paramData)));
+        if (themeObj) {
+          renderThemeExhibition(themeObj);
         }
-        renderThemeExhibition(themeObj);
+        const themeId = typeof paramData === 'object' ? paramData.id : paramData;
+        if (themeId && window.galleryCloud && window.galleryCloud.getThematicExhibitionById) {
+          window.galleryCloud.getThematicExhibitionById(themeId).then(fullTheme => {
+            if (fullTheme && currentActiveThemeId === themeId) {
+              renderThemeExhibition(fullTheme);
+            }
+          });
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (viewName === 'hall') {
         pauseCarousel();

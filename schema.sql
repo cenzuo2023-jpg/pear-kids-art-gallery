@@ -123,3 +123,37 @@ ALTER TABLE IF EXISTS artworks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS students DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS thematic_exhibitions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS sticky_notes DISABLE ROW LEVEL SECURITY;
+
+
+-- ============================================================================
+-- 📦 6. Supabase 对象存储桶配置 (Storage Bucket: course-media)
+-- 用于存储课程作品集大图、特展封面与图文插图，彻底根除 Base64 数据库超时
+-- ============================================================================
+
+-- 创建公开对象存储桶 course-media
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'course-media',
+  'course-media',
+  true,
+  52428800, -- 50MB 限制
+  ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml']
+)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- 配置 Storage 读写安全策略 (RLS)
+CREATE POLICY "Public Read Course Media" ON storage.objects
+FOR SELECT TO anon, authenticated
+USING (bucket_id = 'course-media');
+
+CREATE POLICY "Public Insert Course Media" ON storage.objects
+FOR INSERT TO anon, authenticated
+WITH CHECK (bucket_id = 'course-media');
+
+CREATE POLICY "Public Update Course Media" ON storage.objects
+FOR UPDATE TO anon, authenticated
+USING (bucket_id = 'course-media');
+
+CREATE POLICY "Public Delete Course Media" ON storage.objects
+FOR DELETE TO anon, authenticated
+USING (bucket_id = 'course-media');

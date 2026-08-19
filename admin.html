@@ -1478,11 +1478,22 @@ button:focus:not(:focus-visible),
     async function handleAlbumCoverSelected(e) {
       const file = e.target.files[0];
       if (file) {
-        showToast('📸 正在处理封面图...');
-        const base64 = await compressImageFile(file, 1200, 0.85);
-        if (base64) {
-          document.getElementById('albumFormCover').value = base64;
-          document.getElementById('albumCoverPreview').src = base64;
+        showToast('📸 正在处理并上传画册封面...');
+        const albumId = document.getElementById('albumFormId').value || ('album-' + Date.now());
+        let finalSrc = null;
+        try {
+          if (window.galleryCloud && window.galleryCloud.uploadCourseMedia) {
+            finalSrc = await window.galleryCloud.uploadCourseMedia(file, `albums/${albumId}`);
+          }
+        } catch (err) {
+          console.warn('对象存储上传未就绪，使用本地高压缩存储:', err);
+        }
+        if (!finalSrc) {
+          finalSrc = await compressImageFile(file, 1200, 0.85);
+        }
+        if (finalSrc) {
+          document.getElementById('albumFormCover').value = finalSrc;
+          document.getElementById('albumCoverPreview').src = finalSrc;
           showToast('✨ 封面已更新！');
         }
       }
@@ -1509,26 +1520,36 @@ button:focus:not(:focus-visible),
       const imageFiles = files.filter(f => f.type.startsWith('image/'));
       if (imageFiles.length === 0) return;
 
-      showToast(`📸 正在批量导入并压缩 ${imageFiles.length} 幅画作...`);
+      const albumId = document.getElementById('albumFormId').value || ('album-' + Date.now());
+      showToast(`📸 正在批量上传 ${imageFiles.length} 幅画作至云端对象存储...`);
       for (let i = 0; i < imageFiles.length; i++) {
         const file = imageFiles[i];
-        const base64 = await compressImageFile(file, 1200, 0.82);
-        if (base64) {
+        let finalSrc = null;
+        try {
+          if (window.galleryCloud && window.galleryCloud.uploadCourseMedia) {
+            finalSrc = await window.galleryCloud.uploadCourseMedia(file, `albums/${albumId}`);
+          }
+        } catch (err) {
+          console.warn('对象存储上传未就绪，使用本地高压缩存储:', err);
+        }
+        if (!finalSrc) {
+          finalSrc = await compressImageFile(file, 1200, 0.82);
+        }
+        if (finalSrc) {
           const cleanFileName = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ").trim();
           const defaultTitle = cleanFileName || `作品第 ${currentStudioAlbumArtworks.length + 1} 幅`;
           
           currentStudioAlbumArtworks.push({
             id: 'art-alb-item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
             title: defaultTitle,
-            author: '', // 🌟 用户建议 1：默认不选中任何小朋友，由老师自主选择或输入
-            comment: '', // 🌟 用户建议 2：默认空说明，供老师针对单张作品填写专属深度说明
-            image: base64
+            author: '',
+            comment: '',
+            image: finalSrc
           });
 
-          // 如果封面还是默认图，自动用第一张画作作为封面
           if (currentStudioAlbumArtworks.length === 1 && document.getElementById('albumFormCover').value.includes('photo-1579783900882')) {
-            document.getElementById('albumFormCover').value = base64;
-            document.getElementById('albumCoverPreview').src = base64;
+            document.getElementById('albumFormCover').value = finalSrc;
+            document.getElementById('albumCoverPreview').src = finalSrc;
           }
         }
       }
@@ -1537,7 +1558,7 @@ button:focus:not(:focus-visible),
       showToast(`🎉 成功导入 ${imageFiles.length} 幅画作！`);
     }
 
-    function renderAlbumStudioArtworks() {
+        function renderAlbumStudioArtworks() {
       const list = document.getElementById('albumStudioArtworksList');
       const countBadge = document.getElementById('albumBatchCountBadge');
       if (countBadge) countBadge.textContent = `已添加 ${currentStudioAlbumArtworks.length} 幅`;
@@ -2214,12 +2235,19 @@ button:focus:not(:focus-visible),
       openThemeStudio(themeId);
     }
 
-    function openThemeStudio(themeId = null) {
+    async function openThemeStudio(themeId = null) {
       const form = document.getElementById('themeForm');
       if (form) form.reset();
 
       if (themeId) {
-        const theme = adminThemes.find(t => t.id === themeId);
+        let theme = adminThemes.find(t => t.id === themeId);
+        // 🌟 核心升级：按需单独拉取该特展的完整数据 (含 sections, curator_note, artwork_ids)
+        if (window.galleryCloud && window.galleryCloud.getThematicExhibitionById) {
+          showToast('⏳ 正在加载特展完整图文内容...');
+          const fullTheme = await window.galleryCloud.getThematicExhibitionById(themeId);
+          if (fullTheme) theme = fullTheme;
+        }
+
         if (theme) {
           document.getElementById('themeModalTitle').innerHTML = `<span>✏️</span><span>编辑主题特展 · 《${theme.title}》</span>`;
           document.getElementById('themeFormId').value = theme.id;
@@ -2270,16 +2298,27 @@ button:focus:not(:focus-visible),
       lucide.createIcons();
     }
 
-    async function handleThemeCoverSelected(e) {
+        async function handleThemeCoverSelected(e) {
       const file = e.target.files[0];
       if (file) {
-        showToast('📸 正在处理特展封面...');
-        const base64 = await compressImageFile(file, 1600, 0.85);
-        if (base64) {
-          document.getElementById('themeFormCover').value = base64;
-          document.getElementById('themeCoverPreview').src = base64;
+        showToast('📸 正在处理并上传特展封面...');
+        const themeId = document.getElementById('themeFormId').value || ('theme-' + Date.now());
+        let finalSrc = null;
+        try {
+          if (window.galleryCloud && window.galleryCloud.uploadCourseMedia) {
+            finalSrc = await window.galleryCloud.uploadCourseMedia(file, `themes/${themeId}`);
+          }
+        } catch (err) {
+          console.warn('对象存储上传未就绪，使用本地高压缩存储:', err);
+        }
+        if (!finalSrc) {
+          finalSrc = await compressImageFile(file, 1600, 0.85);
+        }
+        if (finalSrc) {
+          document.getElementById('themeFormCover').value = finalSrc;
+          document.getElementById('themeCoverPreview').src = finalSrc;
           if (document.getElementById('themeCoverUrlInput')) {
-            document.getElementById('themeCoverUrlInput').value = '';
+            document.getElementById('themeCoverUrlInput').value = finalSrc.startsWith('http') ? finalSrc : '';
           }
           showToast('✨ 特展封面已更新！');
         }
@@ -2295,7 +2334,7 @@ button:focus:not(:focus-visible),
       }
     }
 
-    function closeThemeModal() {
+        function closeThemeModal() {
       switchAdminTab('themes');
     }
 
@@ -2384,12 +2423,23 @@ button:focus:not(:focus-visible),
     async function handleAdminThemeInlineImageSelected(e) {
       const file = e.target.files[0];
       if (file) {
-        showToast('📸 正在处理图片...');
-        const base64 = await compressImageFile(file, 1400, 0.85);
-        if (base64) {
+        showToast('📸 正在上传插图至对象存储...');
+        const themeId = document.getElementById('themeFormId').value || ('theme-' + Date.now());
+        let finalSrc = null;
+        try {
+          if (window.galleryCloud && window.galleryCloud.uploadCourseMedia) {
+            finalSrc = await window.galleryCloud.uploadCourseMedia(file, `themes/${themeId}`);
+          }
+        } catch (err) {
+          console.warn('对象存储上传未就绪，使用本地高压缩存储:', err);
+        }
+        if (!finalSrc) {
+          finalSrc = await compressImageFile(file, 1400, 0.85);
+        }
+        if (finalSrc) {
           const caption = prompt('请输入图片说明/图注（可选，可直接回车）：', file.name.replace(/\.[^/.]+$/, '')) || '';
-          insertVisualImageBlock(base64, caption);
-          showToast('🎉 图片已实时渲染插入！');
+          insertVisualImageBlock(finalSrc, caption);
+          showToast('🎉 插图已成功插入！');
         }
       }
       e.target.value = '';

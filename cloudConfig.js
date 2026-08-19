@@ -1,10 +1,12 @@
 /**
  * 🍐 想吃梨儿童艺术启蒙 · 原生零依赖 Supabase 云数据库直连引擎 (Pure Native Fetch Engine)
  * 
- * 架构优势：
- * 1. 【零第三方 SDK 依赖】: 彻底摆脱外部 CDN 脚本加载延迟与拦截，直接使用浏览器原生 fetch() 发起 HTTP REST 请求。
- * 2. 【毫秒级瞬间直连】: 页面打开 0 毫秒立即请求 Supabase，杜绝任何白屏与竞态等待。
- * 3. 【三方绝对一致】: 数据库 -> 后台 -> 前台 全链路标准 REST API 直通。
+ * 架构升级 (v3.0 性能与存储重构版)：
+ * 1. 【列表轻量化】: 列表请求彻底排除 sections / curator_note 等大字段，杜绝 Base64 导致的 PostgreSQL statement timeout (HTTP 500)。
+ * 2. 【详情按需加载】: 浏览/编辑具体特展或画册详情时，按需单条请求完整数据。
+ * 3. 【原生对象存储】: 新上传图片统一上传至 Supabase Storage (course-media)，只在数据库存 URL。
+ * 4. 【全兼容与幂等】: 100% 兼容存量 Base64 与新 Storage URL。
+ * 5. 【查询防重合并】: 同一周期内的重复列表查询自动共享在途 Promise。
  */
 
 const SUPABASE_URL = "https://hnzddhxgzbkllnmwpvdi.supabase.co";
@@ -19,7 +21,9 @@ const REST_HEADERS = {
 
 class NativeSupabaseService {
   constructor() {
-    console.log('🚀 原生 Supabase REST 引擎已就绪:', SUPABASE_URL);
+    console.log('🚀 原生 Supabase REST 引擎已就绪 (v3.0 轻量化与对象存储架构):', SUPABASE_URL);
+    this._themesListPromise = null;
+    this._albumsListPromise = null;
   }
 
   // --- 字段映射 (DB -> Frontend) ---
@@ -119,6 +123,7 @@ class NativeSupabaseService {
 
   _toDbTheme(t) {
     const rawIds = Array.isArray(t.artworkIds) ? t.artworkIds : (Array.isArray(t.artwork_ids) ? t.artwork_ids : []);
+    const sections = Array.isArray(t.keyHighlights) ? t.keyHighlights : (Array.isArray(t.sections) ? t.sections : []);
     return {
       id: String(t.id || ('theme-' + Date.now())),
       title: String(t.title || ''),
@@ -128,6 +133,7 @@ class NativeSupabaseService {
       date: String(t.date || '2026.08'),
       intro: String(t.introSummary || t.intro || ''),
       curator_note: Array.isArray(t.curatorStatement) ? t.curatorStatement.join('\n\n') : String(t.curatorStatement || t.curator_note || ''),
+      sections: sections,
       artwork_ids: rawIds,
       is_in_hero: Boolean(t.isInHero !== false),
       hero_order: parseInt(t.heroOrder || t.hero_order || 1)
@@ -170,6 +176,54 @@ class NativeSupabaseService {
       likes: parseInt(n.likes || 0),
       is_hidden: Boolean(n.isHidden)
     };
+  }
+
+  // =========================================================================
+  // 0. 对象存储服务 (Supabase Storage API) - course-media Bucket
+  // =========================================================================
+  async uploadCourseMedia(fileOrBlob, folder = 'themes') {
+    if (!fileOrBlob) throw new Error('未提供待上传的文件数据');
+    
+    // 生成安全文件名与扩展名
+    const mimeType = fileOrBlob.type || 'image/jpeg';
+    let ext = 'jpg';
+    if (fileOrBlob.name && fileOrBlob.name.includes('.')) {
+      ext = fileOrBlob.name.split('.').pop().toLowerCase();
+    } else if (mimeType.includes('png')) {
+      ext = 'png';
+    } else if (mimeType.includes('webp')) {
+      ext = 'webp';
+    } else if (mimeType.includes('gif')) {
+      ext = 'gif';
+    }
+
+    const randomSuffix = Math.random().toString(36).substring(2, 10);
+    const fileName = `${Date.now()}_${randomSuffix}.${ext}`;
+    const cleanFolder = folder.replace(/^\/+/, '').replace(/\/+$/, '');
+    const storagePath = `${cleanFolder}/${fileName}`;
+
+    console.log(`☁️ 正在上传图片至 Supabase Storage: course-media/${storagePath}`);
+
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/course-media/${storagePath}`, {
+      method: 'POST',
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": mimeType,
+        "x-upsert": "true"
+      },
+      body: fileOrBlob
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('❌ Supabase Storage 上传失败:', res.status, errText);
+      throw new Error(`Storage 上传失败 (${res.status}): ${errText}`);
+    }
+
+    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/course-media/${storagePath}`;
+    console.log('✅ 图片成功上传至对象存储，公开 URL:', publicUrl);
+    return publicUrl;
   }
 
   // =========================================================================
@@ -294,19 +348,64 @@ class NativeSupabaseService {
   }
 
   // =========================================================================
-  // 3. 主题特展 (Thematic Exhibitions REST API)
+  // 3. 主题特展 (Thematic Exhibitions REST API - 轻量列表 + 按需详情)
   // =========================================================================
-  async getThematicExhibitions() {
+  /**
+   * 🌟 1. 列表轻量查询：严禁拉取 sections、curator_note 等大字段，彻底杜绝 statement timeout (HTTP 500)
+   */
+  async getThematicExhibitions(limit = 30) {
+    if (this._themesListPromise) return this._themesListPromise;
+
+    this._themesListPromise = (async () => {
+      try {
+        const fields = 'id,title,subtitle,tag,date,intro,is_in_hero,hero_order,created_at';
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?select=${fields}&order=hero_order.asc&limit=${limit}`, {
+          method: 'GET',
+          headers: REST_HEADERS
+        });
+        if (!res.ok) {
+          console.warn('获取特展列表响应异常:', res.status);
+          return [];
+        }
+        const data = await res.json();
+        const list = (data || []).map(item => this._fromDbTheme(item)).filter(Boolean);
+        try { localStorage.setItem('art_gallery_cache_themes', JSON.stringify(list)); } catch (e) {}
+        console.log('🎨 成功获取轻量特展列表 (排除大图):', list.length, '期');
+        return list;
+      } catch (e) {
+        console.error('getThematicExhibitions 异常:', e);
+        return [];
+      } finally {
+        setTimeout(() => { this._themesListPromise = null; }, 500);
+      }
+    })();
+
+    return this._themesListPromise;
+  }
+
+  /**
+   * 🌟 2. 详情按需查询：用户进入具体特展页面时，单独通过 ID 获取完整数据 (含 sections, curator_note, artwork_ids)
+   */
+  async getThematicExhibitionById(themeId) {
+    if (!themeId) return null;
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?select=*&order=hero_order.asc`, {
+      console.log(`🔍 正在按需拉取特展详情完整数据: ID = ${themeId}`);
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?select=*&id=eq.${encodeURIComponent(themeId)}&limit=1`, {
         method: 'GET',
         headers: REST_HEADERS
       });
-      if (!res.ok) return [];
+      if (!res.ok) {
+        console.error('❌ 获取特展详情失败:', res.status, await res.text());
+        return null;
+      }
       const data = await res.json();
-      return (data || []).map(item => this._fromDbTheme(item)).filter(Boolean);
+      if (Array.isArray(data) && data.length > 0) {
+        return this._fromDbTheme(data[0]);
+      }
+      return null;
     } catch (e) {
-      return [];
+      console.error(`getThematicExhibitionById [${themeId}] 异常:`, e);
+      return null;
     }
   }
 
@@ -353,7 +452,9 @@ class NativeSupabaseService {
       });
       if (!res.ok) return [];
       const data = await res.json();
-      return (data || []).map(item => this._fromDbNote(item)).filter(Boolean);
+      const list = (data || []).map(item => this._fromDbNote(item)).filter(Boolean);
+      try { localStorage.setItem('art_gallery_cache_notes', JSON.stringify(list)); } catch (e) {}
+      return list;
     } catch (e) {
       return [];
     }
@@ -419,6 +520,25 @@ class NativeSupabaseService {
     } catch (e) {}
 
     return typeof initialCourseAlbums !== 'undefined' ? initialCourseAlbums : [];
+  }
+
+  async getCourseAlbumById(albumId) {
+    if (!albumId) return null;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/course_albums?select=*&id=eq.${encodeURIComponent(albumId)}&limit=1`, {
+        method: 'GET',
+        headers: REST_HEADERS
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          return this._fromDbAlbum(data[0]);
+        }
+      }
+    } catch (e) {}
+
+    const albums = await this.getCourseAlbums();
+    return albums.find(a => String(a.id) === String(albumId)) || null;
   }
 
   async createCourseAlbum(albumData) {
