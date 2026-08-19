@@ -2767,11 +2767,7 @@
       const source = String(href || '').trim();
       if (!/^(?:data:image\/[a-z0-9.+-]+;base64,|https?:\/\/)/i.test(source)) return '';
       const safeSource = source.replace(/"/g, '&quot;');
-      return `
-        <figure class="my-8 sm:my-10">
-          <img src="${safeSource}" alt="" class="block w-full h-auto object-contain select-none" loading="lazy" />
-        </figure>
-      `.trim();
+      return `<img src="${safeSource}" alt="" class="block w-full h-auto object-contain select-none my-8 sm:my-10" loading="lazy" />`;
     }
     function parseRichCuratorArticle(statement) {
       if (!statement) return '<p class="text-stone-400 italic py-6 text-center">暂无策展手记内容...</p>';
@@ -2784,9 +2780,11 @@
           return compact && withoutLegacyUi !== '' && withoutLegacyUi !== '****';
         })
         .join('\n\n');
+      // Base64 图片地址较长，先转换为不带缩进的单行 <img>，避免 Marked 漏识别。
+      // 不再生成 <figure> 容器，防止内部缩进被误判为黑色代码块。
       const normalizedText = rawText.replace(
         /^!\[([^\]]*)\]\((data:image\/[^;]+;base64,[A-Za-z0-9+/=]+)\)$/gm,
-        (_, caption, href) => renderArticleImageFigure(href, caption)
+        (_, caption, href) => renderArticleImageFigure(href)
       );
 
       if (typeof marked !== 'undefined') {
@@ -2805,16 +2803,7 @@
 
         // 2. 图片排版：无边框、无图注，按正文宽度自然展示
         renderer.image = function({ href }) {
-          return `
-            <figure class="my-8 sm:my-10">
-              <img
-                src="${href}"
-                alt=""
-                class="block w-full h-auto object-contain select-none"
-                loading="lazy"
-              />
-            </figure>
-          `;
+          return renderArticleImageFigure(href);
         };
         // 3. 超链接排版 (带新窗口跳转与小箭头)
         renderer.link = function({ href, title, text }) {
