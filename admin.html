@@ -1898,9 +1898,9 @@ button:focus:not(:focus-visible),
       const id = document.getElementById('artFormId').value;
       const title = document.getElementById('artFormTitle').value.trim();
       const author = document.getElementById('artFormAuthor').value.trim();
-      const ageInput = document.getElementById('artFormAge');
-      const age = ageInput ? (ageInput.value.trim() || '5岁') : (ageGroup === '3-5' ? '4岁' : (ageGroup === '6-8' ? '7岁' : '10岁'));
       const ageGroup = document.getElementById('artFormAgeGroup').value;
+      const ageInput = document.getElementById('artFormAge');
+      const age = (ageInput && ageInput.value.trim()) ? ageInput.value.trim() : (ageGroup === '3-5' ? '4岁' : (ageGroup === '6-8' ? '7岁' : '10岁'));
       const catVal = document.getElementById('artFormCategory').value;
       const [category, categoryName] = catVal.split('|');
       const date = document.getElementById('artFormDate').value.trim() || '2026.08';
