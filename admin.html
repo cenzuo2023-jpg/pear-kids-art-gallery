@@ -1483,6 +1483,53 @@ button:focus:not(:focus-visible),
     function initializeAdminTheme() {}
     function initializeAdminSidebar() {}
 
+    
+    // =========================================================================
+    // 🔀 后台主导航 Tab 选项卡切换核心引擎
+    // =========================================================================
+    let currentActiveAdminTab = 'overview';
+
+    function switchAdminTab(tabName, updateUrl = true) {
+      currentActiveAdminTab = tabName;
+      const allTabs = ['overview', 'artworks', 'albums', 'album-studio', 'students', 'themes', 'notes', 'backup', 'theme-studio'];
+      
+      allTabs.forEach(t => {
+        const viewEl = document.getElementById('admin-view-' + t);
+        if (viewEl) {
+          if (t === tabName) {
+            viewEl.classList.remove('hidden');
+          } else {
+            viewEl.classList.add('hidden');
+          }
+        }
+
+        const btn = document.getElementById('tab-btn-' + t);
+        if (btn) {
+          if (t === tabName) {
+            btn.classList.add('active');
+            btn.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/30');
+            btn.classList.remove('border-transparent');
+          } else {
+            btn.classList.remove('active');
+            btn.classList.remove('bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/30');
+            btn.classList.add('border-transparent');
+          }
+        }
+      });
+
+      if (tabName === 'overview') renderOverviewStats();
+      if (tabName === 'artworks') renderAdminArtworksTable();
+      if (tabName === 'students') renderAdminStudentsGrid();
+      if (tabName === 'albums') renderAdminAlbumsGrid();
+      if (tabName === 'themes') renderAdminThemesGrid();
+      if (tabName === 'notes') renderAdminNotesGrid();
+
+      if (updateUrl && window.location.hash !== '#' + tabName) {
+        history.pushState(null, '', '#' + tabName);
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
     function applyAdminRouteFromUrl() {
       const hash = window.location.hash.replace(/^#\/?/, '');
       if (hash && typeof switchAdminTab === 'function') {

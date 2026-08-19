@@ -533,7 +533,7 @@ class NativeSupabaseService {
 
     this._themesListPromise = (async () => {
       try {
-        const fields = 'id,title,subtitle,tag,date,intro,is_in_hero,hero_order,created_at';
+        const fields = 'id,title,subtitle,tag,date,intro,cover_image,is_in_hero,hero_order,created_at';
         const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?select=${fields}&order=hero_order.asc&limit=${limit}`, {
           method: 'GET',
           headers: REST_HEADERS
