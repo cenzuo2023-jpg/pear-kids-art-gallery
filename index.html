@@ -1959,10 +1959,10 @@
         // 提取参与该堂课的小朋友花名册（前4位）
         const authors = Array.from(new Set(artworksList.map(a => a.author))).filter(Boolean);
         const authorChips = authors.slice(0, 4).map(name => `
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold cursor-pointer hover:bg-emerald-500/20 transition-colors" onclick="event.stopPropagation(); openStudentByName('${name}')">
             <span>🎨</span><span>${name}</span>
           </span>
-        `).join('') + (authors.length > 4 ? `<span class="text-[10px] text-stone-400 font-bold px-1">+${authors.length - 4}位</span>` : '');
+        `).join('') + (authors.length > 4 ? `<span class="text-[11px] text-stone-400 font-bold px-1">+${authors.length - 4}位</span>` : '');
 
         // 提取底层折页预览图
         const layer1Img = artworksList[1] ? artworksList[1].image : (artworksList[0] ? artworksList[0].image : cover);
@@ -1974,50 +1974,49 @@
             onclick="openCourseAlbumDetail('${album.id}')"
           >
             <div>
-              <!-- 顶部：手风琴折页立体封面区 (严格固定 16:10 比例) -->
+              <!-- 顶部：明亮纯净艺术封面区 (严格固定 16:10 比例，彻底去除黑色阴影与黑色遮罩) -->
               <div class="accordion-cover-wrapper mb-4 select-none">
-                <!-- 左侧风琴书脊折痕 -->
-                <div class="accordion-spine"></div>
-                
                 <!-- 底层折页 2 (后展) -->
-                <div class="accordion-layer accordion-layer-2 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-white/20">
-                  <img src="${layer2Img}" class="w-full h-full object-cover" loading="lazy" />
+                <div class="accordion-layer accordion-layer-2">
+                  <img src="${layer2Img}" class="w-full h-full object-cover opacity-90" loading="lazy" />
                 </div>
 
                 <!-- 中间折页 1 (中展) -->
-                <div class="accordion-layer accordion-layer-1 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-white/20">
-                  <img src="${layer1Img}" class="w-full h-full object-cover" loading="lazy" />
+                <div class="accordion-layer accordion-layer-1">
+                  <img src="${layer1Img}" class="w-full h-full object-cover opacity-95" loading="lazy" />
                 </div>
 
-                <!-- 主封面 (前盖) -->
-                <div class="accordion-main-cover border border-stone-200/80 dark:border-white/15 bg-stone-100 dark:bg-[#17261C]">
+                <!-- 主封面 (前盖，100% 原始画质清晰无遮挡呈现) -->
+                <div class="accordion-main-cover relative">
                   <img src="${cover}" alt="${album.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
                   
-                  <!-- 封面渐变遮罩与徽章 -->
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30 flex flex-col justify-between p-3.5 pl-6">
-                    <div class="flex items-center justify-between">
-                      <span class="px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-[10px] font-mono text-emerald-400 font-bold border border-white/15">
-                        📖 手风琴折页画册
-                      </span>
-                      <span class="px-2 py-0.5 rounded-md bg-[#10E57A] text-stone-950 text-[10px] font-black shadow-md">
-                        收录 ${artCount} 幅画作
-                      </span>
-                    </div>
+                  <!-- 顶部轻盈微磨砂浮动徽章 (极简晶莹，不挡画面) -->
+                  <div class="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
+                    <span class="px-2.5 py-1 rounded-full bg-white/90 dark:bg-stone-900/90 backdrop-blur-md text-stone-800 dark:text-stone-100 text-[11px] font-bold border border-black/5 dark:border-white/10 shadow-sm flex items-center gap-1">
+                      <span>📖</span><span>课程画册</span>
+                    </span>
+                    <span class="px-2.5 py-1 rounded-full bg-[#10E57A] text-stone-950 text-[11px] font-black shadow-sm">
+                      收录 ${artCount} 幅画作
+                    </span>
+                  </div>
 
-                    <div class="flex items-center justify-between text-white text-[11px] font-bold">
-                      <span class="px-2.5 py-0.5 rounded-full bg-black/70 backdrop-blur-md border border-white/15">
-                        ${album.className || '创想班'} · ${album.date || '2026'}
-                      </span>
-                      <span class="text-emerald-300 text-[10px] drop-shadow flex items-center gap-0.5">
-                        <span>展开画册</span><span>↗</span>
-                      </span>
-                    </div>
+                  <!-- 悬浮微提示 (轻盈呼吸感) -->
+                  <div class="absolute bottom-2.5 right-2.5 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span class="px-2.5 py-1 rounded-full bg-white/95 dark:bg-stone-900/95 backdrop-blur-md text-emerald-600 dark:text-[#10E57A] text-[10px] font-black border border-black/5 dark:border-white/10 shadow-sm flex items-center gap-0.5">
+                      <span>翻开画册</span><span>↗</span>
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <!-- 中间：课题标题与导语 (亮暗模式自适应) -->
+              <!-- 中间：班级与日期标头 + 课题标题与导语 -->
               <div class="space-y-2">
+                <div class="flex items-center gap-2 text-xs font-bold text-stone-500 dark:text-stone-400">
+                  <span class="text-emerald-700 dark:text-emerald-400 font-black">${album.className || '创想班'}</span>
+                  <span>·</span>
+                  <span class="font-mono">${album.date || '2026'}</span>
+                </div>
+
                 <h3 class="text-base sm:text-lg font-black text-stone-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-snug line-clamp-1">
                   ${album.title}
                 </h3>
@@ -2026,17 +2025,17 @@
                 </p>
 
                 <!-- 学员共创花名册 -->
-                <div class="flex flex-wrap items-center gap-1 pt-1 min-h-[26px]">
+                <div class="flex flex-wrap items-center gap-1.5 pt-1 min-h-[28px]">
                   ${authorChips}
                 </div>
               </div>
             </div>
 
-            <!-- 底部操作按钮 -->
+            <!-- 底部操作栏 -->
             <div class="pt-3.5 mt-3 border-t border-stone-100 dark:border-white/[0.08] flex items-center justify-between text-xs">
               <span class="text-stone-400 dark:text-stone-400 font-mono text-[11px]">${album.tag || '🎨 主题创作工坊'}</span>
               <span class="font-black text-emerald-600 dark:text-[#10E57A] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                <span>翻阅风琴画卷</span><span>→</span>
+                <span>翻阅全部画作</span><span>→</span>
               </span>
             </div>
           </article>
