@@ -1019,14 +1019,39 @@ function compareByCreationDateDesc(a, b) {
             <input type="text" id="artFormTitle" required placeholder="如：夏日海滩上的冰淇淋怪兽" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-[#10E57A]">
           </div>
 
-          <!-- 小作者 -->
-          <div class="space-y-1.5">
-            <label class="font-bold text-stone-300">小作者姓名 <span class="text-emerald-400">*</span></label>
-            <div class="flex gap-2">
-              <input type="text" id="artFormAuthor" required placeholder="如：林雨桐" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-[#10E57A]">
-              <select id="artAuthorQuickSelect" onchange="handleArtAuthorQuickSelect(this)" class="px-2 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-stone-300 focus:outline-none text-[11px]">
-                <option value="">选已有</option>
-              </select>
+          <!-- 小作者智能搜索选择器 (Searchable Grouped Combobox) -->
+          <div class="space-y-1.5 relative">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-stone-300">小作者姓名 <span class="text-emerald-400">*</span></label>
+              <span class="text-[10px] text-emerald-400 font-normal">✨ 支持打字即搜 / 分组速选</span>
+            </div>
+            <div class="relative">
+              <input 
+                type="text" 
+                id="artFormAuthor" 
+                required 
+                autocomplete="off"
+                placeholder="输入名字搜索学员，或直接点右侧选择..." 
+                class="w-full pl-3.5 pr-9 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-[#10E57A] text-xs font-bold transition-all"
+                oninput="handleArtAuthorSearch(this.value)"
+                onfocus="openArtAuthorDropdown(this.value)"
+              >
+              <button 
+                type="button" 
+                onclick="toggleArtAuthorDropdown()" 
+                class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-[#10E57A] transition-colors cursor-pointer"
+                title="展开按班级分组学员清单"
+              >
+                <i data-lucide="chevrons-up-down" class="w-4 h-4"></i>
+              </button>
+
+              <!-- 智能悬浮检索面板 (带班级分组与头像) -->
+              <div 
+                id="artAuthorDropdownPanel" 
+                class="hidden absolute left-0 right-0 top-full mt-1.5 z-50 bg-[#14231A] border border-emerald-500/40 rounded-2xl shadow-2xl overflow-hidden max-h-72 overflow-y-auto backdrop-blur-2xl text-xs custom-scrollbar"
+              >
+                <!-- 动态分组与学员卡片 -->
+              </div>
             </div>
           </div>
         </div>
@@ -1501,6 +1526,233 @@ button:focus:not(:focus-visible),
         </div>
       `).join('');
     }
+
+    
+    // =========================================================================
+    // 🌟 智能小艺术家即时拼音/汉字搜索与班级分组选择器核心引擎 (Smart Student Combobox)
+    // =========================================================================
+    function getGroupedStudentsList(filterText = '') {
+      const query = (filterText || '').toLowerCase().trim();
+      const all = (Array.isArray(adminStudents) && adminStudents.length > 0) 
+        ? adminStudents 
+        : (typeof getAdminCache === 'function' ? getAdminCache('students', typeof initialStudents !== 'undefined' ? initialStudents : []) : []);
+
+      const filtered = all.filter(s => {
+        if (!query) return true;
+        const name = (s.name || '').toLowerCase();
+        const className = (s.className || '').toLowerCase();
+        const ageGroup = (s.ageGroup || s.age_group || '').toLowerCase();
+        const bio = (s.bio || '').toLowerCase();
+        return name.includes(query) || className.includes(query) || ageGroup.includes(query) || bio.includes(query);
+      });
+
+      // 按班级/年龄组分为 3 组
+      const groups = {
+        '3-5': { title: '🐣 启蒙探索组 (3-5岁 · 启蒙班)', badgeClass: 'bg-amber-500/15 text-amber-300 border-amber-500/30', list: [] },
+        '6-8': { title: '🚀 创想实验组 (6-8岁 · 创想班)', badgeClass: 'bg-emerald-500/15 text-[#10E57A] border-emerald-500/30', list: [] },
+        '9-12': { title: '🎨 创作研究组 (9-12岁 · 创作班)', badgeClass: 'bg-teal-500/15 text-teal-300 border-teal-500/30', list: [] },
+        'other': { title: '🌟 其他小艺术家', badgeClass: 'bg-stone-500/15 text-stone-300 border-stone-500/30', list: [] }
+      };
+
+      filtered.forEach(s => {
+        const ag = String(s.ageGroup || s.age_group || s.age || '');
+        if (ag.includes('3-5') || ag.includes('3') || ag.includes('4') || ag.includes('5') || (s.className || '').includes('启蒙')) {
+          groups['3-5'].list.push(s);
+        } else if (ag.includes('6-8') || ag.includes('6') || ag.includes('7') || ag.includes('8') || (s.className || '').includes('创想')) {
+          groups['6-8'].list.push(s);
+        } else if (ag.includes('9-12') || ag.includes('9') || ag.includes('10') || ag.includes('11') || ag.includes('12') || (s.className || '').includes('创作') || (s.className || '').includes('研究')) {
+          groups['9-12'].list.push(s);
+        } else {
+          groups['other'].list.push(s);
+        }
+      });
+
+      return { total: filtered.length, groups };
+    }
+
+    function renderGroupedDropdownHtml(query = '', onSelectCallbackName) {
+      const { total, groups } = getGroupedStudentsList(query);
+
+      if (total === 0) {
+        if (!query) {
+          return `
+            <div class="p-4 text-center text-stone-400 space-y-1">
+              <div class="text-xs">⏳ 正在从云端同步学员列表...</div>
+            </div>
+          `;
+        }
+        return `
+          <div class="p-4 text-center text-stone-400 space-y-1">
+            <div class="text-xs">🔍 未找到名为 “<span class="text-emerald-400 font-bold">${query}</span>” 的小艺术家</div>
+            <div class="text-[11px] text-stone-500">可直接保留输入内容作为新学员名字保存</div>
+          </div>
+        `;
+      }
+
+      let html = '';
+      if (query) {
+        html += `<div class="px-3 py-1.5 bg-black/40 text-[10px] text-emerald-400 font-mono border-b border-white/5">🎯 找到 ${total} 位匹配的小艺术家</div>`;
+      }
+
+      for (const [key, group] of Object.entries(groups)) {
+        if (group.list.length === 0) continue;
+        html += `
+          <div class="divide-y divide-white/5">
+            <div class="sticky top-0 z-10 px-3 py-1.5 bg-[#0C1510]/95 backdrop-blur-md text-[10px] font-black tracking-wider flex items-center justify-between border-b border-white/5">
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border ${group.badgeClass}">
+                ${group.title}
+              </span>
+              <span class="text-stone-500 font-mono">${group.list.length} 人</span>
+            </div>
+            ${group.list.map(s => {
+              const ageDisplay = s.age ? (String(s.age).includes('岁') ? s.age : s.age + '岁') : '5岁';
+              const avatar = s.avatar || 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=100';
+              const sJson = JSON.stringify({
+                id: s.id,
+                name: s.name,
+                age: s.age || '5',
+                ageGroup: s.ageGroup || s.age_group || '6-8',
+                className: s.className || '创想班'
+              }).replace(/"/g, '&quot;');
+
+              return `
+                <div 
+                  class="px-3 py-2.5 hover:bg-emerald-500/20 cursor-pointer flex items-center justify-between gap-3 transition-colors group"
+                  onclick="${onSelectCallbackName}(${sJson})"
+                >
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <img src="${avatar}" class="w-6 h-6 rounded-full object-cover border border-white/10 bg-stone-900 flex-shrink-0">
+                    <div class="truncate">
+                      <span class="font-black text-white group-hover:text-[#10E57A] transition-colors">${s.name}</span>
+                      <span class="text-[10px] text-stone-400 ml-1.5 font-normal">${ageDisplay} · ${s.className || '创想班'}</span>
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-emerald-400/0 group-hover:text-emerald-400 font-bold transition-all flex-shrink-0">
+                    选择 ↵
+                  </span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      return html;
+    }
+
+    // --- 1. 画作模态框中的学员搜索 ---
+    function openArtAuthorDropdown(query = '') {
+      const panel = document.getElementById('artAuthorDropdownPanel');
+      if (!panel) return;
+      panel.innerHTML = renderGroupedDropdownHtml(query, 'selectArtModalStudent');
+      panel.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function toggleArtAuthorDropdown() {
+      const panel = document.getElementById('artAuthorDropdownPanel');
+      if (!panel) return;
+      if (panel.classList.contains('hidden')) {
+        const val = document.getElementById('artFormAuthor')?.value || '';
+        openArtAuthorDropdown(val);
+      } else {
+        panel.classList.add('hidden');
+      }
+    }
+
+    function handleArtAuthorSearch(val) {
+      openArtAuthorDropdown(val);
+    }
+
+    function selectArtModalStudent(student) {
+      if (!student) return;
+      const authorInput = document.getElementById('artFormAuthor');
+      if (authorInput) authorInput.value = student.name;
+
+      const ageField = document.getElementById('artFormAge');
+      if (ageField && student.age) ageField.value = student.age;
+
+      const ageGroupSelect = document.getElementById('artFormAgeGroup');
+      if (ageGroupSelect && student.ageGroup) ageGroupSelect.value = student.ageGroup;
+
+      const panel = document.getElementById('artAuthorDropdownPanel');
+      if (panel) panel.classList.add('hidden');
+      showToast(`✨ 已选择小作者：${student.name} (${student.className || '创想班'})`);
+    }
+
+    // --- 2. 课程作品集批量工作台中的每行学员搜索 ---
+    function openStudioArtworkAuthorDropdown(idx, query = '') {
+      const panel = document.getElementById(`albumRowAuthorDropdown_${idx}`);
+      if (!panel) return;
+      panel.innerHTML = renderGroupedDropdownHtml(query, `selectStudioArtworkStudent_${idx}`);
+      panel.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function toggleStudioArtworkAuthorDropdown(idx) {
+      const panel = document.getElementById(`albumRowAuthorDropdown_${idx}`);
+      if (!panel) return;
+      if (panel.classList.contains('hidden')) {
+        const val = document.getElementById(`albumRowAuthorInput_${idx}`)?.value || '';
+        openStudioArtworkAuthorDropdown(idx, val);
+      } else {
+        panel.classList.add('hidden');
+      }
+    }
+
+    function handleStudioArtworkAuthorInput(idx, val) {
+      if (albumStudioArtworks[idx]) {
+        albumStudioArtworks[idx].author = val;
+      }
+      openStudioArtworkAuthorDropdown(idx, val);
+    }
+
+    // 动态挂载每行的选择回调
+    window.selectStudioArtworkStudent = function(idx, student) {
+      if (!albumStudioArtworks[idx] || !student) return;
+      albumStudioArtworks[idx].studentId = student.id;
+      albumStudioArtworks[idx].author = student.name;
+      albumStudioArtworks[idx].age = student.age;
+
+      const input = document.getElementById(`albumRowAuthorInput_${idx}`);
+      if (input) input.value = student.name;
+
+      const panel = document.getElementById(`albumRowAuthorDropdown_${idx}`);
+      if (panel) panel.classList.add('hidden');
+      showToast(`✨ 画作 #${idx + 1} 已关联小作者：${student.name}`);
+    };
+
+    // 全局每行独立选择中转
+    for (let i = 0; i < 200; i++) {
+      window[`selectStudioArtworkStudent_${i}`] = (function(index) {
+        return function(student) {
+          window.selectStudioArtworkStudent(index, student);
+        };
+      })(i);
+    }
+
+    // 点击页面任意外部区域自动关闭所有浮动的学员建议下拉面板
+    document.addEventListener('click', (e) => {
+      // 1. 关闭画作模态框下拉
+      const artPanel = document.getElementById('artAuthorDropdownPanel');
+      const artInput = document.getElementById('artFormAuthor');
+      if (artPanel && !artPanel.classList.contains('hidden')) {
+        if (!artPanel.contains(e.target) && e.target !== artInput && !e.target.closest('button[onclick*="toggleArtAuthorDropdown"]')) {
+          artPanel.classList.add('hidden');
+        }
+      }
+
+      // 2. 关闭作品集批量工作台各行下拉
+      document.querySelectorAll('[id^="albumRowAuthorDropdown_"]').forEach(panel => {
+        if (!panel.classList.contains('hidden')) {
+          const idx = panel.id.replace('albumRowAuthorDropdown_', '');
+          const rowInput = document.getElementById(`albumRowAuthorInput_${idx}`);
+          if (!panel.contains(e.target) && e.target !== rowInput && !e.target.closest(`button[onclick*="toggleStudioArtworkAuthorDropdown(${idx})"]`)) {
+            panel.classList.add('hidden');
+          }
+        }
+      });
+    });
 
     function syncAdminToLocalCache() {
       try {
@@ -2255,12 +2507,36 @@ button:focus:not(:focus-visible),
                 <input type="text" value="${art.title || ''}" oninput="updateStudioArtworkField(${idx}, 'title', this.value)" placeholder="如：我的奇幻城堡" class="w-full px-2.5 py-1.5 bg-stone-950 border border-stone-700 rounded-lg text-xs text-white focus:outline-none focus:border-teal-400">
               </div>
 
-              <div>
-                <label class="block text-[10px] text-stone-400 mb-0.5 font-bold">小艺术家作者 (关联学员)</label>
-                <select onchange="updateStudioArtworkStudent(${idx}, this.value)" class="w-full px-2.5 py-1.5 bg-stone-950 border border-stone-700 rounded-lg text-xs text-white focus:outline-none focus:border-teal-400 cursor-pointer">
-                  <option value="">-- 手动输入或选择学员 --</option>
-                  ${(adminStudents || []).map(s => `<option value="${s.id}" ${(art.studentId === s.id || art.author === s.name) ? 'selected' : ''}>${s.name} (${s.age || '5岁'} · ${s.className || '创想班'})</option>`).join('')}
-                </select>
+              <div class="relative">
+                <label class="block text-[10px] text-stone-400 mb-0.5 font-bold flex items-center justify-between">
+                  <span>小艺术家作者 (关联学员)</span>
+                  <span class="text-[9px] text-teal-400 font-normal">打字即搜</span>
+                </label>
+                <div class="relative">
+                  <input 
+                    type="text" 
+                    id="albumRowAuthorInput_${idx}"
+                    value="${art.author || ''}" 
+                    autocomplete="off"
+                    placeholder="输入搜学员或选已有..." 
+                    class="w-full pl-2.5 pr-7 py-1.5 bg-stone-950 border border-stone-700 rounded-lg text-xs text-white focus:outline-none focus:border-teal-400 font-bold"
+                    oninput="handleStudioArtworkAuthorInput(${idx}, this.value)"
+                    onfocus="openStudioArtworkAuthorDropdown(${idx}, this.value)"
+                  >
+                  <button 
+                    type="button" 
+                    onclick="toggleStudioArtworkAuthorDropdown(${idx})" 
+                    class="absolute right-1.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-teal-300 p-0.5"
+                  >
+                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                  </button>
+
+                  <div 
+                    id="albumRowAuthorDropdown_${idx}" 
+                    class="hidden absolute left-0 right-0 top-full mt-1 z-50 bg-[#14231A] border border-teal-500/40 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto backdrop-blur-2xl text-xs custom-scrollbar"
+                  >
+                  </div>
+                </div>
               </div>
 
               <div>
