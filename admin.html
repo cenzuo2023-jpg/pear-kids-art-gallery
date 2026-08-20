@@ -590,14 +590,14 @@ function compareByCreationDateDesc(a, b) {
                   <span>⚡</span><span>2. 批量上传整堂课共创画作</span>
                   <span id="albumBatchCountBadge" class="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] font-bold">已添加 0 幅</span>
                 </div>
-                <button type="button" onclick="document.getElementById('albumBatchImagesInput').click()" class="px-3 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-stone-950 font-black text-xs transition-all cursor-pointer shadow-md flex items-center gap-1">
+                <button type="button" onclick="document.getElementById('albumBatchImagesInput').click()" ondragover="event.preventDefault()" ondrop="handleAlbumBatchDrop(event)" class="px-3 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-stone-950 font-black text-xs transition-all cursor-pointer shadow-md flex items-center gap-1">
                   <span>+ 选择多张画作照片</span>
                 </button>
               </div>
 
               <!-- 拖拽上传区域 -->
               <div 
-                onclick="document.getElementById('albumBatchImagesInput').click()"
+                onclick="document.getElementById('albumBatchImagesInput').click()" ondragover="event.preventDefault()" ondrop="handleAlbumBatchDrop(event)"
                 ondragover="event.preventDefault(); this.classList.add('border-teal-400', 'bg-teal-500/10')"
                 ondragleave="this.classList.remove('border-teal-400', 'bg-teal-500/10')"
                 ondrop="handleAlbumBatchDrop(event)"
@@ -1024,7 +1024,7 @@ function compareByCreationDateDesc(a, b) {
             <label class="font-bold text-stone-300">小作者姓名 <span class="text-emerald-400">*</span></label>
             <div class="flex gap-2">
               <input type="text" id="artFormAuthor" required placeholder="如：林雨桐" class="w-full px-3.5 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-white focus:outline-none focus:border-[#10E57A]">
-              <select id="artAuthorQuickSelect" onchange="if(this.value){document.getElementById('artFormAuthor').value=this.value;}" class="px-2 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-stone-300 focus:outline-none text-[11px]">
+              <select id="artAuthorQuickSelect" onchange="handleArtAuthorQuickSelect(this)" class="px-2 py-2.5 bg-stone-900 border border-stone-700/80 rounded-xl text-stone-300 focus:outline-none text-[11px]">
                 <option value="">选已有</option>
               </select>
             </div>
@@ -1502,13 +1502,48 @@ button:focus:not(:focus-visible),
       `).join('');
     }
 
+    function syncAdminToLocalCache() {
+      try {
+        if (adminArtworks) localStorage.setItem('art_gallery_cache_artworks', JSON.stringify(adminArtworks));
+        if (adminThemes) localStorage.setItem('art_gallery_cache_themes', JSON.stringify(adminThemes));
+        if (adminStudents) localStorage.setItem('art_gallery_cache_students', JSON.stringify(adminStudents));
+        if (adminNotes) localStorage.setItem('art_gallery_cache_notes', JSON.stringify(adminNotes));
+        if (adminAlbums) localStorage.setItem('art_gallery_cache_albums', JSON.stringify(adminAlbums));
+      } catch (e) {
+        console.warn('缓存到 localStorage 失败:', e);
+      }
+    }
+
     function updateAuthorDropdowns() {
-      const artAuthorSelect = document.getElementById('artFormAuthorSelect');
-      if (artAuthorSelect && Array.isArray(adminStudents) && adminStudents.length > 0) {
-        const currentVal = artAuthorSelect.value;
-        artAuthorSelect.innerHTML = '<option value="">-- 选择已有小艺术家或手动输入 --</option>' + 
-          adminStudents.map(s => `<option value="${s.name}">${s.name} (${s.age || '5岁'} · ${s.className || '创想班'})</option>`).join('');
-        if (currentVal) artAuthorSelect.value = currentVal;
+      const selects = [
+        document.getElementById('artAuthorQuickSelect'),
+        document.getElementById('artFormAuthorSelect')
+      ].filter(Boolean);
+
+      selects.forEach(sel => {
+        const currentVal = sel.value;
+        sel.innerHTML = '<option value="">-- 选已有学员 --</option>' + 
+          (adminStudents || []).map(s => {
+            const ageDisplay = s.age ? (String(s.age).includes('岁') ? s.age : s.age + '岁') : '';
+            return `<option value="${s.name}" data-age="${s.age || ''}" data-age-group="${s.ageGroup || s.age_group || '6-8'}">${s.name} (${ageDisplay ? ageDisplay + ' · ' : ''}${s.className || '创想班'})</option>`;
+          }).join('');
+        if (currentVal) sel.value = currentVal;
+      });
+    }
+
+    function handleArtAuthorQuickSelect(sel) {
+      if (!sel || !sel.value) return;
+      const authorInput = document.getElementById('artFormAuthor');
+      if (authorInput) authorInput.value = sel.value;
+
+      const opt = sel.options[sel.selectedIndex];
+      if (opt) {
+        const age = opt.getAttribute('data-age');
+        const ageGroup = opt.getAttribute('data-age-group');
+        const ageInput = document.getElementById('artFormAge');
+        if (ageInput && age) ageInput.value = age;
+        const ageGroupSel = document.getElementById('artFormAgeGroup');
+        if (ageGroupSel && ageGroup) ageGroupSel.value = ageGroup;
       }
     }
 
@@ -2279,6 +2314,68 @@ button:focus:not(:focus-visible),
     function removeStudioArtwork(idx) {
       albumStudioArtworks.splice(idx, 1);
       renderAlbumStudioArtworks();
+    }
+
+    
+    async function handleAlbumBatchImagesSelected(e) {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        await processBatchAlbumImageFiles(Array.from(files));
+      }
+      e.target.value = '';
+    }
+
+    async function handleAlbumBatchDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        await processBatchAlbumImageFiles(Array.from(files));
+      }
+    }
+
+    async function processBatchAlbumImageFiles(files) {
+      if (!files || files.length === 0) return;
+      showToast(`⏳ 正在处理并极速上传 ${files.length} 张画作照片...`);
+      const albumId = document.getElementById('albumFormId').value || ('album-' + Date.now());
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        let imgSrc = null;
+        try {
+          if (window.galleryCloud && window.galleryCloud.uploadCourseMedia) {
+            imgSrc = await window.galleryCloud.uploadCourseMedia(file, `albums/${albumId}`);
+          }
+        } catch (err) {
+          console.warn('Storage 批量上传失败，降级本地压缩:', err);
+        }
+        if (!imgSrc) {
+          imgSrc = await compressImageFile(file, 1400, 0.85);
+        }
+
+        const titleFromName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
+        albumStudioArtworks.push({
+          id: 'sec-' + Date.now() + '-' + i + '-' + Math.random().toString(36).substring(2, 6),
+          title: titleFromName || `学员画作 ${albumStudioArtworks.length + 1}`,
+          author: '',
+          studentId: '',
+          age: '',
+          image: imgSrc,
+          date: document.getElementById('albumFormDate').value || '2026.08',
+          notes: ''
+        });
+      }
+
+      // 如果当前封面还是默认占位图，自动使用第一张画作作为封面
+      const currentCover = document.getElementById('albumFormCover').value;
+      if ((!currentCover || currentCover.includes('unsplash.com')) && albumStudioArtworks.length > 0) {
+        const firstArtImg = albumStudioArtworks[0].image;
+        document.getElementById('albumFormCover').value = firstArtImg;
+        document.getElementById('albumCoverPreview').src = firstArtImg;
+      }
+
+      renderAlbumStudioArtworks();
+      showToast(`🎉 成功录入 ${files.length} 幅画作！`);
     }
 
     async function handleAlbumCoverSelected(e) {
