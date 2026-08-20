@@ -13,6 +13,25 @@
   <script>
 
 // =========================================================================
+// 🔤 中文学员姓名拼音排序引擎 (Surname Pinyin Collation Engine)
+// 按姓氏拼音首字母正序 (A-Z) 排列，支持生僻字与多音字标准拼音校准
+// =========================================================================
+function compareBySurnamePinyin(a, b) {
+  const nameA = String(a?.name || '').trim();
+  const nameB = String(b?.name || '').trim();
+
+  // 纯符号或特殊名字排在最后
+  const isSpecialA = /^[\s*#@_\-—]+$/.test(nameA) || !nameA;
+  const isSpecialB = /^[\s*#@_\-—]+$/.test(nameB) || !nameB;
+  if (isSpecialA && !isSpecialB) return 1;
+  if (!isSpecialA && isSpecialB) return -1;
+
+  return nameA.localeCompare(nameB, 'zh-Hans-CN-u-co-pinyin', { numeric: true, sensitivity: 'base' });
+}
+
+
+
+// =========================================================================
 // 📅 全局创作日期智能解析与降序排序引擎 (Creation Date Comparator)
 // 确保所有作品展、作品集、个人展厅一律按作品上方标注的真实“创作日期”排序
 // =========================================================================
@@ -1567,6 +1586,9 @@ button:focus:not(:focus-visible),
         }
       });
 
+      for (const k in groups) {
+        groups[k].list.sort(compareBySurnamePinyin);
+      }
       return { total: filtered.length, groups };
     }
 
@@ -2164,7 +2186,8 @@ button:focus:not(:focus-visible),
         return;
       }
 
-      grid.innerHTML = adminStudents.map(student => `
+      const sortedStudents = [...adminStudents].sort(compareBySurnamePinyin);
+      grid.innerHTML = sortedStudents.map(student => `
         <div class="p-4 rounded-2xl bg-[#111C15] border border-white/[0.08] flex flex-col justify-between space-y-3 hover:border-amber-500/30 transition-all">
           <div class="flex items-start gap-3.5">
             <img src="${student.avatar}" class="w-14 h-14 rounded-full object-cover border border-white/10 flex-shrink-0 bg-stone-900">

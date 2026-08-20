@@ -1,5 +1,23 @@
 
 // =========================================================================
+// 🔤 中文学员姓名拼音排序引擎 (Surname Pinyin Collation Engine)
+// 按姓氏拼音首字母正序 (A-Z) 排列，支持生僻字与多音字标准拼音校准
+// =========================================================================
+function compareBySurnamePinyin(a, b) {
+  const nameA = String(a?.name || '').trim();
+  const nameB = String(b?.name || '').trim();
+
+  // 纯符号或特殊名字排在最后
+  const isSpecialA = /^[\s*#@_\-—]+$/.test(nameA) || !nameA;
+  const isSpecialB = /^[\s*#@_\-—]+$/.test(nameB) || !nameB;
+  if (isSpecialA && !isSpecialB) return 1;
+  if (!isSpecialA && isSpecialB) return -1;
+
+  return nameA.localeCompare(nameB, 'zh-Hans-CN-u-co-pinyin', { numeric: true, sensitivity: 'base' });
+}
+
+
+// =========================================================================
 // 📅 全局创作日期智能解析与降序排序引擎 (Creation Date Comparator)
 // 确保所有作品展、作品集、个人展厅一律按作品上方标注的真实“创作日期”排序
 // =========================================================================
@@ -105,10 +123,8 @@ class NativeSupabaseService {
     if (key === 'students') {
       return source.map(item => ({
         ...item,
-        avatar: String(item.avatar || '').startsWith('data:image/')
-          ? 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&auto=format&fit=crop&q=80'
-          : item.avatar,
-        avatarLoaded: false
+        avatar: item.avatar || '',
+        avatarLoaded: true
       }));
     }
     if (key === 'themes') {
@@ -466,7 +482,7 @@ class NativeSupabaseService {
       { method: 'GET' },
       '读取小艺术家'
     );
-    const list = (data || []).map(item => this._fromDbStudent(item)).filter(Boolean);
+    const list = (data || []).map(item => this._fromDbStudent(item)).filter(Boolean).sort(compareBySurnamePinyin);
     this._writeCache('students', list);
     console.log('👑 成功直连 Supabase 拉取小艺术家:', list.length, '位');
     return list;
@@ -476,11 +492,13 @@ class NativeSupabaseService {
   // Avatars are hydrated separately; the admin still uses getStudents().
   async getStudentSummaries() {
     const data = await this._request(
-      '/rest/v1/students?select=id,name,age,age_group,class_name,bio,featured_art_count,created_at&order=created_at.desc',
+      '/rest/v1/students?select=id,name,age,age_group,class_name,bio,avatar,featured_art_count,created_at&order=created_at.desc',
       { method: 'GET' },
       'Load student summaries'
     );
-    return (data || []).map(item => this._fromDbStudent(item)).filter(Boolean);
+    const list = (data || []).map(item => this._fromDbStudent(item)).filter(Boolean).sort(compareBySurnamePinyin);
+    this._writeCache('students', list);
+    return list;
   }
 
   async getStudentAvatars() {
