@@ -2162,7 +2162,9 @@ function compareByCreationDateDesc(a, b) {
 
       const filtered = allAlbums.filter(album => {
         if (currentAlbumAgeFilter === 'all') return true;
-        return album.ageGroup === currentAlbumAgeFilter;
+        const ag = String(album.ageGroup || '');
+        const tag = String(album.tag || '');
+        return ag === currentAlbumAgeFilter || ag.includes(currentAlbumAgeFilter) || tag.includes(currentAlbumAgeFilter);
       });
 
       const generateCardHtml = (album) => {
@@ -4041,6 +4043,49 @@ function compareByCreationDateDesc(a, b) {
     // ==========================================
     // 🏛️ 视图一：主展厅逻辑 (Playful Artwork Cards)
     // ==========================================
+    
+    // =========================================================================
+    // 🎛️ 画作展厅年龄段胶囊筛选器 (Gallery Age Group Filter)
+    // =========================================================================
+    function setAgeFilter(ageKey) {
+      currentAgeFilter = ageKey;
+      
+      const tabs = document.querySelectorAll('.age-tab');
+      tabs.forEach(tab => {
+        const tabAge = tab.getAttribute('data-age');
+        if (tabAge === ageKey) {
+          tab.classList.add('active');
+          tab.className = 'age-tab active h-9 flex items-center justify-center gap-1.5 px-3 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap font-extrabold text-xs focus:outline-none w-full sm:w-auto';
+        } else {
+          tab.classList.remove('active');
+          tab.className = 'age-tab h-9 flex items-center justify-center gap-1.5 px-3 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-xs focus:outline-none w-full sm:w-auto';
+        }
+      });
+
+      renderGallery();
+    }
+
+    // =========================================================================
+    // 📚 课程作品集年龄段胶囊筛选器 (Albums Age Group Filter)
+    // =========================================================================
+    function setAlbumAgeFilter(ageKey) {
+      currentAlbumAgeFilter = ageKey;
+
+      const tabs = document.querySelectorAll('.album-age-tab');
+      tabs.forEach(tab => {
+        const tabAge = tab.getAttribute('data-age');
+        if (tabAge === ageKey) {
+          tab.classList.add('active');
+          tab.className = 'album-age-tab active h-9 flex items-center justify-center gap-1.5 px-3 sm:px-4 rounded-full bg-gradient-to-r from-emerald-500 to-[#10E57A] text-stone-950 shadow-sm transition-all whitespace-nowrap font-extrabold text-xs focus:outline-none w-full sm:w-auto';
+        } else {
+          tab.classList.remove('active');
+          tab.className = 'album-age-tab h-9 flex items-center justify-center gap-1.5 px-3 sm:px-4 rounded-full bg-white dark:bg-[#15241B] hover:bg-emerald-50 dark:hover:bg-[#1C3024] text-stone-700 dark:text-emerald-100/90 shadow-sm border border-black/[0.04] dark:border-emerald-500/20 transition-all whitespace-nowrap font-bold text-xs focus:outline-none w-full sm:w-auto';
+        }
+      });
+
+      renderAlbums();
+    }
+
     function handleSearch(val) {
       currentSearchTerm = val.trim();
       renderGallery();
