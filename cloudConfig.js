@@ -564,7 +564,7 @@ class NativeSupabaseService {
     this._themesListPromise = (async () => {
       try {
         const fields = 'id,title,subtitle,tag,date,intro,cover_image,is_in_hero,hero_order,created_at';
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?select=${fields}&order=hero_order.asc&limit=${limit}`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?select=${fields}&id=not.like.album-*&tag=not.like.album:*&order=hero_order.asc&limit=${limit}`, {
           method: 'GET',
           headers: REST_HEADERS
         });
@@ -573,9 +573,14 @@ class NativeSupabaseService {
           return [];
         }
         const data = await res.json();
-        const list = (data || []).map(item => this._fromDbTheme(item)).filter(Boolean);
+        // 严格排除所有属于课程作品集 (album) 的记录，确保专栏与作品集彻底隔离
+        const list = (data || [])
+          .filter(item => !String(item.id).startsWith('album-') && !String(item.tag || '').startsWith('album:'))
+          .map(item => this._fromDbTheme(item))
+          .filter(Boolean)
+          .sort(compareByCreationDateDesc);
         try { localStorage.setItem('art_gallery_cache_themes', JSON.stringify(list)); } catch (e) {}
-        console.log('🎨 成功获取轻量特展列表 (排除大图):', list.length, '期');
+        console.log('🎨 成功获取美育专栏列表 (已严格隔离作品集):', list.length, '期');
         return list;
       } catch (e) {
         console.error('getThematicExhibitions 异常:', e);
@@ -729,28 +734,32 @@ class NativeSupabaseService {
   }
 
   // =========================================================================
-  // 5. 课程作品集 (Course Albums / Portfolios REST API + 本地优先双重持久化)
+  // 5. 课程作品集 (Course Albums / Portfolios - 独立独立数据集引擎)
   // =========================================================================
   async getCourseAlbums() {
-    // 1. 尝试从 Supabase 云数据库拉取
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/course_albums?select=*&order=created_at.desc`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?select=*&id=like.album-*&order=created_at.desc`, {
         method: 'GET',
         headers: REST_HEADERS
       });
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          const list = data.map(item => this._fromDbAlbum(item)).filter(Boolean).sort(compareByCreationDateDesc);
-          try { localStorage.setItem('pear_course_albums', JSON.stringify(list)); } catch (e) {}
-          return list;
-        }
-      }
-    } catch (e) {}
+        const list = (data || [])
+          .filter(item => String(item.id).startsWith('album-') || String(item.tag || '').startsWith('album:'))
+          .map(item => this._fromDbAlbum(item))
+          .filter(Boolean)
+          .sort(compareByCreationDateDesc);
 
-    // 2. 本地持久化缓存兜底（确保后台录入后前台 100% 立即秒级可见）
+        this._writeCache('albums', list);
+        console.log('📚 成功直连 Supabase 拉取课程作品集:', list.length, '套');
+        return list;
+      }
+    } catch (e) {
+      console.warn('拉取课程作品集异常:', e);
+    }
+
     try {
-      const cached = localStorage.getItem('pear_course_albums');
+      const cached = localStorage.getItem('art_gallery_cache_albums') || localStorage.getItem('pear_course_albums');
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -763,7 +772,7 @@ class NativeSupabaseService {
   async getCourseAlbumById(albumId) {
     if (!albumId) return null;
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/course_albums?select=*&id=eq.${encodeURIComponent(albumId)}&limit=1`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/thematic_exhibitions?select=*&id=eq.${encodeURIComponent(albumId)}&limit=1`, {
         method: 'GET',
         headers: REST_HEADERS
       });
@@ -780,76 +789,10 @@ class NativeSupabaseService {
   }
 
   async createCourseAlbum(albumData) {
-    // 1. 本地存储立即写入
-    try {
-      const cached = localStorage.getItem('pear_course_albums');
-      let list = cached ? JSON.parse(cached) : (typeof initialCourseAlbums !== 'undefined' ? [...initialCourseAlbums] : []);
-      list = list.filter(a => String(a.id) !== String(albumData.id));
-      list.unshift(albumData);
-      localStorage.setItem('pear_course_albums', JSON.stringify(list));
-    } catch (e) {}
-
-    // 2. 异步同步至 Supabase
-    try {
-      const payload = this._toDbAlbum(albumData);
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/course_albums`, {
-        method: 'POST',
-        headers: REST_HEADERS,
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return this._fromDbAlbum(Array.isArray(data) ? data[0] : data);
-      }
-    } catch (e) {}
-
-    return albumData;
-  }
-
-  async updateCourseAlbum(albumData) {
-    try {
-      const cached = localStorage.getItem('pear_course_albums');
-      let list = cached ? JSON.parse(cached) : (typeof initialCourseAlbums !== 'undefined' ? [...initialCourseAlbums] : []);
-      const idx = list.findIndex(a => String(a.id) === String(albumData.id));
-      if (idx !== -1) list[idx] = albumData;
-      else list.unshift(albumData);
-      localStorage.setItem('pear_course_albums', JSON.stringify(list));
-    } catch (e) {}
-
-    try {
-      const cached = localStorage.getItem('art_gallery_cache_notes');
-      if (cached) {
-        let list = JSON.parse(cached);
-        list = list.filter(n => String(n.id) !== String(noteId));
-        localStorage.setItem('art_gallery_cache_notes', JSON.stringify(list));
-      }
-    } catch (e) {}
-
-    return true;
-  }
-
-  // =========================================================================
-  // 5. 课程作品集 (Course Albums / Portfolios - Supabase 云端为唯一数据源)
-  // =========================================================================
-  async getCourseAlbums() {
-    const data = await this._request(
-      '/rest/v1/thematic_exhibitions?select=*&id=like.album-*&order=created_at.desc',
-      { method: 'GET' },
-      '读取课程作品集'
-    );
-    const list = (data || [])
-      .filter(item => String(item.id).startsWith('album-') || String(item.tag || '').startsWith('album:'))
-      .map(item => this._fromDbAlbum(item))
-      .filter(Boolean);
-
-    this._writeCache('albums', list);
-    try { localStorage.removeItem('pear_course_albums'); } catch (e) {}
-    console.log('📚 成功直连 Supabase 拉取课程作品集:', list.length, '套');
-    return list;
-  }
-
-  async createCourseAlbum(albumData) {
     const payload = this._toDbAlbum(albumData);
+    if (!payload.id.startsWith('album-')) {
+      payload.id = 'album-' + Date.now();
+    }
     const data = await this._request(
       '/rest/v1/thematic_exhibitions',
       { method: 'POST', body: JSON.stringify(payload) },
@@ -890,5 +833,4 @@ class NativeSupabaseService {
 // 导出全局单例
 if (typeof window !== 'undefined') {
   window.galleryCloud = new NativeSupabaseService();
-  console.log('⚡ 全局云端直连服务 window.galleryCloud 已注入');
 }

@@ -2116,11 +2116,318 @@ button:focus:not(:focus-visible),
       }
     }
 
+    
+    // =========================================================================
+    // 📚 课程作品集批量录入与画册工作台核心引擎 (Album Batch Studio Engine)
+    // =========================================================================
+    let albumStudioArtworks = [];
+
+    function openAlbumModal(albumId = null) {
+      openAlbumStudio(albumId);
+    }
+
+    async function openAlbumStudio(albumId = null, updateUrl = true) {
+      const form = document.getElementById('albumForm');
+      if (form) form.reset();
+      albumStudioArtworks = [];
+
+      if (albumId) {
+        let album = (adminAlbums || []).find(a => String(a.id) === String(albumId));
+        if (window.galleryCloud && window.galleryCloud.getCourseAlbumById) {
+          showToast('⏳ 正在加载课程作品集完整数据...');
+          const fullAlbum = await window.galleryCloud.getCourseAlbumById(albumId);
+          if (fullAlbum) album = fullAlbum;
+        }
+
+        if (album) {
+          document.getElementById('albumStudioTitle').textContent = `编辑课程作品集 · 《${album.title}》`;
+          document.getElementById('albumFormId').value = album.id;
+          document.getElementById('albumFormTitle').value = album.title || '';
+          document.getElementById('albumFormSubTitle').value = album.subTitle || album.subtitle || '';
+          document.getElementById('albumFormTag').value = album.tag || '🎨 创想班 · 周末主题工坊';
+          document.getElementById('albumFormDate').value = album.date || '2026.08';
+          document.getElementById('albumFormAgeGroup').value = album.ageGroup || '6-8';
+          document.getElementById('albumFormClassName').value = album.className || '创想班';
+          
+          const cover = album.coverImage || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80';
+          document.getElementById('albumFormCover').value = cover;
+          document.getElementById('albumCoverPreview').src = cover;
+          document.getElementById('albumFormIntro').value = album.introSummary || album.intro || '';
+          document.getElementById('albumFormNotes').value = album.teacherNotes || album.teacherNote || '';
+
+          if (Array.isArray(album.artworks)) {
+            albumStudioArtworks = album.artworks.map((art, idx) => ({
+              id: art.id || ('sec-' + Date.now() + '-' + idx),
+              title: art.title || `作品 ${idx + 1}`,
+              author: art.author || '',
+              studentId: art.studentId || '',
+              age: art.age || '',
+              image: art.image || '',
+              date: art.date || album.date || '2026.08',
+              notes: art.notes || art.story || ''
+            }));
+          }
+        }
+      } else {
+        document.getElementById('albumStudioTitle').textContent = '批量录入课程作品集';
+        document.getElementById('albumFormId').value = '';
+        document.getElementById('albumFormTitle').value = '';
+        document.getElementById('albumFormSubTitle').value = '';
+        document.getElementById('albumFormTag').value = '🎨 创想班 · 周末主题工坊';
+        document.getElementById('albumFormDate').value = '2026.08';
+        document.getElementById('albumFormAgeGroup').value = '6-8';
+        document.getElementById('albumFormClassName').value = '创想班';
+        
+        const defaultCover = 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80';
+        document.getElementById('albumFormCover').value = defaultCover;
+        document.getElementById('albumCoverPreview').src = defaultCover;
+        document.getElementById('albumFormIntro').value = '';
+        document.getElementById('albumFormNotes').value = '';
+      }
+
+      renderAlbumStudioArtworks();
+      switchAdminTab('album-studio', updateUrl);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function renderAlbumStudioArtworks() {
+      const container = document.getElementById('albumStudioArtworksList');
+      const badge = document.getElementById('albumBatchCountBadge');
+      if (badge) badge.textContent = `已添加 ${albumStudioArtworks.length} 幅`;
+      if (!container) return;
+
+      if (albumStudioArtworks.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center border-2 border-dashed border-white/10 rounded-2xl text-stone-500 space-y-2">
+            <span class="text-3xl">🖼️</span>
+            <p class="text-xs">暂无画作，点击上方“选择多张画作照片”或将图片拖拽至此即可批量录入</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = albumStudioArtworks.map((art, idx) => `
+        <div class="p-4 rounded-2xl bg-stone-900/90 border border-white/10 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between group">
+          <div class="flex items-center gap-3.5 flex-1 min-w-0">
+            <div class="w-16 h-16 rounded-xl overflow-hidden bg-stone-950 border border-white/10 flex-shrink-0 relative">
+              <img src="${art.image}" class="w-full h-full object-cover">
+              <span class="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/70 text-[9px] font-mono text-emerald-400">#${idx + 1}</span>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 flex-1">
+              <div>
+                <label class="block text-[10px] text-stone-400 mb-0.5 font-bold">作品标题</label>
+                <input type="text" value="${art.title || ''}" oninput="updateStudioArtworkField(${idx}, 'title', this.value)" placeholder="如：我的奇幻城堡" class="w-full px-2.5 py-1.5 bg-stone-950 border border-stone-700 rounded-lg text-xs text-white focus:outline-none focus:border-teal-400">
+              </div>
+
+              <div>
+                <label class="block text-[10px] text-stone-400 mb-0.5 font-bold">小艺术家作者 (关联学员)</label>
+                <select onchange="updateStudioArtworkStudent(${idx}, this.value)" class="w-full px-2.5 py-1.5 bg-stone-950 border border-stone-700 rounded-lg text-xs text-white focus:outline-none focus:border-teal-400 cursor-pointer">
+                  <option value="">-- 手动输入或选择学员 --</option>
+                  ${(adminStudents || []).map(s => `<option value="${s.id}" ${(art.studentId === s.id || art.author === s.name) ? 'selected' : ''}>${s.name} (${s.age || '5岁'} · ${s.className || '创想班'})</option>`).join('')}
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[10px] text-stone-400 mb-0.5 font-bold">创作手记 / 老师评语</label>
+                <input type="text" value="${art.notes || ''}" oninput="updateStudioArtworkField(${idx}, 'notes', this.value)" placeholder="作品亮点或教学点评" class="w-full px-2.5 py-1.5 bg-stone-950 border border-stone-700 rounded-lg text-xs text-stone-300 focus:outline-none focus:border-teal-400">
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 self-end md:self-center">
+            <button type="button" onclick="setAsAlbumCover(${idx})" class="px-2.5 py-1.5 rounded-lg bg-teal-500/15 hover:bg-teal-500 text-teal-300 hover:text-stone-950 text-xs font-bold transition-all" title="设为作品集封面">
+              设为封面
+            </button>
+            <button type="button" onclick="removeStudioArtwork(${idx})" class="px-2.5 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500 text-rose-400 hover:text-white text-xs font-bold transition-all">
+              删除
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateStudioArtworkField(idx, field, value) {
+      if (albumStudioArtworks[idx]) {
+        albumStudioArtworks[idx][field] = value;
+      }
+    }
+
+    function updateStudioArtworkStudent(idx, studentId) {
+      if (!albumStudioArtworks[idx]) return;
+      if (studentId) {
+        const student = (adminStudents || []).find(s => String(s.id) === String(studentId));
+        if (student) {
+          albumStudioArtworks[idx].studentId = student.id;
+          albumStudioArtworks[idx].author = student.name;
+          albumStudioArtworks[idx].age = student.age;
+        }
+      } else {
+        albumStudioArtworks[idx].studentId = '';
+      }
+    }
+
+    function setAsAlbumCover(idx) {
+      if (albumStudioArtworks[idx] && albumStudioArtworks[idx].image) {
+        const imgSrc = albumStudioArtworks[idx].image;
+        document.getElementById('albumFormCover').value = imgSrc;
+        document.getElementById('albumCoverPreview').src = imgSrc;
+        showToast(`✨ 已将画作 #${idx + 1} 设为作品集封面！`);
+      }
+    }
+
+    function removeStudioArtwork(idx) {
+      albumStudioArtworks.splice(idx, 1);
+      renderAlbumStudioArtworks();
+    }
+
+    async function handleAlbumCoverSelected(e) {
+      const file = e.target.files[0];
+      if (file) {
+        showToast('📸 正在上传作品集封面...');
+        const albumId = document.getElementById('albumFormId').value || ('album-' + Date.now());
+        let finalSrc = null;
+        try {
+          if (window.galleryCloud && window.galleryCloud.uploadCourseMedia) {
+            finalSrc = await window.galleryCloud.uploadCourseMedia(file, `albums/${albumId}`);
+          }
+        } catch (err) {
+          console.warn('对象存储上传未就绪，使用本地压缩:', err);
+        }
+        if (!finalSrc) {
+          finalSrc = await compressImageFile(file, 1600, 0.85);
+        }
+        if (finalSrc) {
+          document.getElementById('albumFormCover').value = finalSrc;
+          document.getElementById('albumCoverPreview').src = finalSrc;
+          showToast('✨ 封面图已更新！');
+        }
+      }
+      e.target.value = '';
+    }
+
+    async function processBatchImageFiles(files) {
+      if (!files || files.length === 0) return;
+      showToast(`⏳ 正在处理并极速上传 ${files.length} 张画作照片...`);
+      const albumId = document.getElementById('albumFormId').value || ('album-' + Date.now());
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        let imgSrc = null;
+        try {
+          if (window.galleryCloud && window.galleryCloud.uploadCourseMedia) {
+            imgSrc = await window.galleryCloud.uploadCourseMedia(file, `albums/${albumId}`);
+          }
+        } catch (err) {
+          console.warn('Storage 批量上传失败，降级本地压缩:', err);
+        }
+        if (!imgSrc) {
+          imgSrc = await compressImageFile(file, 1400, 0.85);
+        }
+
+        const titleFromName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
+        albumStudioArtworks.push({
+          id: 'sec-' + Date.now() + '-' + i,
+          title: titleFromName || `学员画作 ${albumStudioArtworks.length + 1}`,
+          author: '',
+          studentId: '',
+          age: '',
+          image: imgSrc,
+          date: document.getElementById('albumFormDate').value || '2026.08',
+          notes: ''
+        });
+      }
+
+      // 如果当前封面还是默认占位图，自动使用第一张画作作为封面
+      const currentCover = document.getElementById('albumFormCover').value;
+      if ((!currentCover || currentCover.includes('unsplash.com')) && albumStudioArtworks.length > 0) {
+        const firstArtImg = albumStudioArtworks[0].image;
+        document.getElementById('albumFormCover').value = firstArtImg;
+        document.getElementById('albumCoverPreview').src = firstArtImg;
+      }
+
+      renderAlbumStudioArtworks();
+      showToast(`🎉 成功批量录入 ${files.length} 幅画作！`);
+    }
+
+    async function handleSaveAlbum(e) {
+      e.preventDefault();
+      try {
+        if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+
+        const id = document.getElementById('albumFormId').value;
+        const title = document.getElementById('albumFormTitle').value.trim();
+        const subTitle = document.getElementById('albumFormSubTitle').value.trim();
+        const tag = (document.getElementById('albumFormTag').value || '🎨 创想班 · 周末主题工坊').trim();
+        const date = (document.getElementById('albumFormDate').value || '2026.08').trim();
+        const ageGroup = document.getElementById('albumFormAgeGroup').value;
+        const className = document.getElementById('albumFormClassName').value.trim();
+        const coverImage = document.getElementById('albumFormCover').value.trim() || (albumStudioArtworks[0] ? albumStudioArtworks[0].image : 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800');
+        const introSummary = document.getElementById('albumFormIntro').value.trim();
+        const teacherNotes = document.getElementById('albumFormNotes').value.trim();
+
+        const albumData = {
+          id: id || ('album-' + Date.now()),
+          title,
+          subTitle,
+          subtitle: className || subTitle,
+          className,
+          tag,
+          date,
+          ageGroup,
+          coverImage,
+          introSummary,
+          intro: introSummary,
+          teacherNotes,
+          teacher_notes: teacherNotes,
+          artworks: albumStudioArtworks
+        };
+
+        showToast('⏳ 正在保存课程作品集...');
+        let savedAlbum;
+        if (id) {
+          savedAlbum = await window.galleryCloud.updateCourseAlbum(albumData);
+        } else {
+          savedAlbum = await window.galleryCloud.createCourseAlbum(albumData);
+        }
+
+        const idx = adminAlbums.findIndex(a => String(a.id) === String(savedAlbum.id));
+        if (idx !== -1) adminAlbums[idx] = savedAlbum;
+        else adminAlbums.unshift(savedAlbum);
+
+        renderAdminAlbumsGrid();
+        renderOverviewStats();
+        switchAdminTab('albums');
+        showToast(`🎉 课程作品集《${savedAlbum.title}》已成功发布！`);
+      } catch (err) {
+        console.error('保存作品集失败:', err);
+        showToast('❌ 保存作品集失败: ' + (err.message || '请稍后重试'));
+      }
+    }
+
+    async function adminDeleteAlbum(albumId) {
+      const album = adminAlbums.find(a => String(a.id) === String(albumId));
+      if (!album) return;
+      if (confirm(`确定要永久删除课程作品集《${album.title}》吗？`)) {
+        try {
+          if (!window.galleryCloud) throw new Error('云端数据服务尚未加载');
+          await window.galleryCloud.deleteCourseAlbum(albumId);
+          adminAlbums = adminAlbums.filter(a => String(a.id) !== String(albumId));
+          renderAdminAlbumsGrid();
+          renderOverviewStats();
+          showToast(`🗑️ 已成功删除作品集《${album.title}》`);
+        } catch (err) {
+          console.error('删除作品集失败:', err);
+          showToast('❌ 删除作品集失败: ' + (err.message || '请稍后重试'));
+        }
+      }
+    }
+
     function openThemeCreateModal(themeId = null) {
       openThemeStudio(themeId);
     }
 
-    async function openThemeStudio(themeId = null) {
+    async function openThemeStudio(themeId = null, updateUrl = true) {
       const form = document.getElementById('themeForm');
       if (form) form.reset();
 
